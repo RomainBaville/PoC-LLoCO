@@ -5,37 +5,48 @@
 from ortools.sat.python import cp_model
 from solvers.base import Solver
 
+
 class ORToolsAssignmentSolver(Solver):
-    def solve(self, problem):
+    """
+    Generic OR-Tools solver for AssignmentStructure
+    """
+
+    def solve(self, structure):
+        structure.validate()
+
         model = cp_model.CpModel()
 
         x = {
-            (i, j): model.NewBoolVar(f"x_{i}_{j}")
-            for i in problem.employees
-            for j in problem.projects
+            (l, r): model.NewBoolVar(f"x_{l}_{r}")
+            for l in structure.left_entities
+            for r in structure.right_entities
         }
 
-        # One project per employee
-        for i in problem.employees:
-            model.Add(sum(x[i, j] for j in problem.projects) <= 1)
+        # Capacity constraint
+        for l in structure.left_entities:
+            model.Add(
+                sum(x[l, r] for r in structure.right_entities)
+                <= structure.max_left_assignments
+            )
 
-        # Skill requirements
-        for j in problem.projects:
-            for k in problem.skills:
+        # Requirements
+        for r in structure.right_entities:
+            for a in structure.attributes:
                 model.Add(
                     sum(
-                        problem.skill_matrix[i, k] * x[i, j]
-                        for i in problem.employees
-                    ) >= problem.requirements[j, k]
+                        structure.left_attributes[l, a] * x[l, r]
+                        for l in structure.left_entities
+                    )
+                    >= structure.right_requirements[r, a]
                 )
 
-        # Objective: maximize total skill contribution
+        # Objective
         model.Maximize(
             sum(
-                problem.skill_matrix[i, k] * x[i, j]
-                for i in problem.employees
-                for j in problem.projects
-                for k in problem.skills
+                structure.left_attributes[l, a] * x[l, r]
+                for l in structure.left_entities
+                for r in structure.right_entities
+                for a in structure.attributes
             )
         )
 
@@ -46,8 +57,7 @@ class ORToolsAssignmentSolver(Solver):
             raise RuntimeError("No feasible assignment")
 
         return {
-            i: j
-            for i in problem.employees
-            for j in problem.projects
-            if solver.Value(x[i, j]) == 1
+            l: r
+            for (l, r) in x
+            if solver.Value(x[l, r]) == 1
         }

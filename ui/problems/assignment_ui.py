@@ -1,195 +1,185 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
+
 import os
 import streamlit as st
 
-from infrastructure.generic_csv import load_csv
-from domain.assignment_problem import AssignmentProblem
-from solvers.assignment_ortools import ORToolsAssignmentSolver
-
+from infrastructure.csv_loader import CSVLoader
+from domain.assignment_structure import AssignmentStructure
+from solvers.registry import SOLVER_REGISTRY
 from ui.utils import navigation_buttons
 from llm.summary import build_summary_prompt
 from llm.client import ask_llm_request
 
-
 DATA_DIR = "data"
+
+# --------------------------------------------------
+# Data loader (infrastructure)
+# --------------------------------------------------
+loader = CSVLoader()
 
 
 def render_assignment_step(step: int):
-    """
-    Render the Assignment problem UI for the given step.
-    Steps handled here: 1 -> 4
-    """
 
-    # ==================================================
-    # STEP 1 – Name the entities
-    # ==================================================
+    # --------------------------------------------------
+    # STEP 1 — Naming
+    # --------------------------------------------------
     if step == 1:
         st.header("1. Define what you want to associate")
 
-        st.session_state.left_entity = st.text_input(
-            "Left entity name",
-            value=st.session_state.get("left_entity", "Employees"),
+        st.session_state.left_label = st.text_input(
+            "Left entity label",
+            value=st.session_state.get("left_label", "Employees"),
         )
-
-        st.session_state.right_entity = st.text_input(
-            "Right entity name",
-            value=st.session_state.get("right_entity", "Projects"),
+        st.session_state.right_label = st.text_input(
+            "Right entity label",
+            value=st.session_state.get("right_label", "Projects"),
+        )
+        st.session_state.attribute_label = st.text_input(
+            "Attribute label",
+            value=st.session_state.get("attribute_label", "Skills"),
         )
 
         navigation_buttons()
         st.stop()
 
-    # ==================================================
-    # STEP 2 – Select CSV files (from disk)
-    # ==================================================
+    # --------------------------------------------------
+    # STEP 2 — CSV selection
+    # --------------------------------------------------
     if step == 2:
         st.header("2. Select data files")
 
-        if not os.path.exists(DATA_DIR):
-            st.error(f"Data directory '{DATA_DIR}' does not exist.")
-            st.stop()
-
         csv_files = [f for f in os.listdir(DATA_DIR) if f.endswith(".csv")]
 
-        if not csv_files:
-            st.error(f"No CSV files found in '{DATA_DIR}'.")
-            st.stop()
-
         st.session_state.left_csv = st.selectbox(
-            f"{st.session_state.left_entity} CSV file",
+            f"{st.session_state.left_label} CSV",
             csv_files,
-            index=0,
         )
-
         st.session_state.right_csv = st.selectbox(
-            f"{st.session_state.right_entity} CSV file",
+            f"{st.session_state.right_label} CSV",
             csv_files,
-            index=1 if len(csv_files) > 1 else 0,
         )
 
         navigation_buttons()
         st.stop()
 
-    # ==================================================
-    # STEP 3 – Define schemas
-    # ==================================================
+    # --------------------------------------------------
+    # STEP 3 — Schema mapping
+    # --------------------------------------------------
     if step == 3:
         st.header("3. Define data schemas")
 
-        left_path = os.path.join(DATA_DIR, st.session_state.left_csv)
-        right_path = os.path.join(DATA_DIR, st.session_state.right_csv)
-
-        left_columns, left_rows = load_csv(left_path)
-        right_columns, right_rows = load_csv(right_path)
-
-        st.subheader(f"{st.session_state.left_entity} schema")
+        left_cols, _ = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
+        right_cols, _ = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
 
         st.session_state.left_id_cols = st.multiselect(
-            "Identifier columns",
-            left_columns,
-            default=st.session_state.get("left_id_cols", left_columns[:1]),
+            "Left identifiers",
+            left_cols,
+            default=left_cols[:1],
         )
 
-        st.session_state.left_skill_cols = st.multiselect(
-            "Skill columns",
-            [c for c in left_columns if c not in st.session_state.left_id_cols],
-            default=st.session_state.get("left_skill_cols", []),
+        st.session_state.attribute_cols = st.multiselect(
+            f"{st.session_state.attribute_label} columns",
+            [c for c in left_cols if c not in st.session_state.left_id_cols],
         )
-
-        st.subheader(f"{st.session_state.right_entity} schema")
 
         st.session_state.right_id_col = st.selectbox(
-            "Identifier column",
-            right_columns,
-            index=right_columns.index(
-                st.session_state.get("right_id_col", right_columns[0])
-            ),
+            "Right identifier column",
+            right_cols,
         )
 
         navigation_buttons()
         st.stop()
 
-    # ==================================================
-    # STEP 4 – Solve & results
-    # ==================================================
+    # --------------------------------------------------
+    # STEP 4 — Solver selection
+    # --------------------------------------------------
     if step == 4:
-        st.header("4. Solve assignment")
+        st.header("4. Choose a solver")
 
-        left_path = os.path.join(DATA_DIR, st.session_state.left_csv)
-        right_path = os.path.join(DATA_DIR, st.session_state.right_csv)
+        solver_defs = SOLVER_REGISTRY["assignment"]
 
-        left_columns, left_rows = load_csv(left_path)
-        right_columns, right_rows = load_csv(right_path)
-
-        # Normalize left entities
-        left_entities = []
-        skill_matrix = {}
-
-        for row in left_rows:
-            entity = " ".join(row[c] for c in st.session_state.left_id_cols)
-            left_entities.append(entity)
-
-            for skill in st.session_state.left_skill_cols:
-                skill_matrix[(entity, skill)] = int(row[skill])
-
-        # Normalize right entities
-        right_entities = []
-        requirements = {}
-
-        for row in right_rows:
-            entity = row[st.session_state.right_id_col]
-            right_entities.append(entity)
-
-            for skill in st.session_state.left_skill_cols:
-                requirements[(entity, skill)] = int(row.get(skill, 0))
-
-        problem = AssignmentProblem(
-            employees=left_entities,
-            projects=right_entities,
-            skills=st.session_state.left_skill_cols,
-            skill_matrix=skill_matrix,
-            requirements=requirements,
+        st.session_state.solver_key = st.selectbox(
+            "Solver",
+            list(solver_defs.keys()),
+            format_func=lambda k: solver_defs[k].label,
         )
 
-        solver = ORToolsAssignmentSolver()
+        solver_info = solver_defs[st.session_state.solver_key]
+        st.info(f"Selected solver: **{solver_info.label}**")
+
+        navigation_buttons()
+        st.stop()
+
+    # --------------------------------------------------
+    # STEP 5 — Solve & results
+    # --------------------------------------------------
+    if step == 5:
+        st.header("5. Solve and view results")
+
+        SolverClass = SOLVER_REGISTRY["assignment"][
+            st.session_state.solver_key
+        ].solver_class
+
+        # ----------------------------
+        # Load & normalize data
+        # ----------------------------
+        _, left_rows = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
+        _, right_rows = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
+
+        left_entities = []
+        right_entities = []
+        left_attributes = {}
+        right_requirements = {}
+
+        for row in left_rows:
+            l = " ".join(row[c] for c in st.session_state.left_id_cols)
+            left_entities.append(l)
+            for a in st.session_state.attribute_cols:
+                left_attributes[(l, a)] = int(row.get(a, 0))
+
+        for row in right_rows:
+            r = row[st.session_state.right_id_col]
+            right_entities.append(r)
+            for a in st.session_state.attribute_cols:
+                right_requirements[(r, a)] = int(row.get(a, 0))
+
+        structure = AssignmentStructure(
+            left_entities=left_entities,
+            right_entities=right_entities,
+            attributes=st.session_state.attribute_cols,
+            left_attributes=left_attributes,
+            right_requirements=right_requirements,
+        )
+
+        solver = SolverClass()
 
         with st.spinner("Solving optimization problem..."):
-            problem.validate()
-            solution = solver.solve(problem)
+            solution = solver.solve(structure)
 
         st.success("Solution found")
 
-        result = []
-        for left, right in solution.items():
-            result.append(
-                {
-                    st.session_state.left_entity: left,
-                    st.session_state.right_entity: right,
-                }
-            )
+        st.table([
+            {
+                st.session_state.left_label: l,
+                st.session_state.right_label: r,
+            }
+            for l, r in solution.items()
+        ])
 
-        st.table(result)
-
-        # -------------------------------
+        # ----------------------------
         # AI summary
-        # -------------------------------
+        # ----------------------------
         st.divider()
-        st.subheader("AI summary")
+        if st.button("Generate AI summary"):
+            prompt = build_summary_prompt(
+                left_entity_name=st.session_state.left_label,
+                right_entity_name=st.session_state.right_label,
+                assignments=solution,
+                skills=st.session_state.attribute_cols,
+            )
+            st.markdown(ask_llm_request(prompt))
 
-        if st.button("🤖 Generate AI summary"):
-            with st.spinner("Generating summary..."):
-                prompt = build_summary_prompt(
-                    left_entity_name=st.session_state.left_entity,
-                    right_entity_name=st.session_state.right_entity,
-                    assignments=solution,
-                    skills=st.session_state.left_skill_cols,
-                )
-
-                summary = ask_llm_request(prompt)
-
-            st.markdown(summary)
-
-        navigation_buttons( show_next=False )
+        navigation_buttons(show_next=False)
         st.stop()

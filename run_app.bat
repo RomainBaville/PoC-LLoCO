@@ -1,6 +1,6 @@
-REM SPDX-License-Identifier: Apache-2.0
-REM SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
-REM SPDX-FileContributor: Romain Baville
+@REM SPDX-License-Identifier: Apache-2.0
+@REM SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
+@REM SPDX-FileContributor: Romain Baville
 
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
@@ -39,7 +39,6 @@ curl --fail -s -X POST %HEALTH_URL% ^
  > nul
 
 if errorlevel 1 (
-    echo   server not ready yet...
     timeout /t 3 > nul
     goto wait_llama
 )
