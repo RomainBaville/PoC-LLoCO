@@ -71,7 +71,7 @@ This separation allows:
 
 ---
 
-## 🗂 Project Structure
+## Project Structure
 PoC-LLoCO/
 │
 ├── README.md
