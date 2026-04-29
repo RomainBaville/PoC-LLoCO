@@ -72,40 +72,87 @@ This separation allows:
 ---
 
 ## Project Structure
+```
 PoC-LLoCO/
 │
 ├── README.md
-├── data/                        # Folder with the data to use to solve the problem
+│
+├── data/                         # Input datasets used to define and solve optimization problems (CSV only for now)
 │   └── ...
 │
-├── ui/
-│   ├── app.py                   # Main Streamlit entry point
-│   ├── registry.py              # Problem registry
-│   ├── utils.py                 # Navigation & shared UI helpers
+├── models/                       # LLM models in GGUF format (e.g. Qwen)
+│   └── ...
+│
+├── llama_cpp/                    # llama.cpp binaries and runtime files used to run the local LLM
+│   └── ...
+│
+├── ui/                           # Streamlit user interface
+│   ├── app.py                    # Main Streamlit entry point
+│   ├── registry.py               # Problem registry
+│   ├── utils.py                  # Navigation and shared UI helpers
 │   │
-│   └── problems/
-│       ├── assignment_ui.py     # Assignment problem wizard
-│       ├── base.py              # (Optional) base UI contract
-│       └── __init__.py
+│   └── problems/                 # Problem-specific UI wizards
+│       ├── assignment_ui.py      # Assignment problem wizard
+│       ├── base.py               # (Optional) base UI contract
+│       └── init.py
 │
-├── domain/
-│   ├── assignment_structure.py  # Generic assignment structure
-│   └── __init__.py
+├── domain/                       # Solver-agnostic problem structures (pure math modeling)
+│   ├── assignment_structure.py   # Generic assignment structure
+│   └── init.py
 │
-├── solvers/
-│   ├── base.py                  # Solver interface
-│   ├── assignment_ortools.py    # OR-Tools CP-SAT solver
-│   ├── registry.py              # Solver registry per problem
-│   └── __init__.py
+├── solvers/                      # Optimization solvers and solver interfaces
+│   ├── base.py                   # Solver interface
+│   ├── assignment_ortools.py     # OR-Tools CP-SAT assignment solver
+│   ├── registry.py               # Solver registry per problem
+│   └── init.py
 │
-├── infrastructure/
-│   ├── base_loader.py
-│   ├── csv_loader.py         # generic CSV loader
-│   └── __init__.py
+├── infrastructure/               # Data access and loading layer
+│   ├── base_loader.py            # Abstract data loader interface
+│   ├── csv_loader.py             # Generic CSV loader implementation
+│   └── init.py
 │
-├── llm/
-│   ├── client.py                # LLM API client
-│   ├── summary.py               # Prompt builders (onboarding & summary)
-│   └── __init__.py
+├── llm/                          # LLM integration layer
+│   ├── client.py                 # LLM client (llama.cpp)
+│   ├── summary.py                # Prompt builders (onboarding and result summary)
+│   └── init.py
 │
-└── requirements.txt
+└── requirements.txt              # Python dependencies
+```
+
+---
+
+## Running the Application
+
+This project has been developed and tested on **Windows**.
+
+To run the application, follow these steps:
+
+1. **Prepare the data**
+   - Place your input files in the `data/` directory
+   - Only **CSV files** are supported for now
+
+2. **Prepare the LLM model**
+   - Place a `.gguf` **Qwen model** in the `models/` directory
+   - Models can be downloaded from: https://huggingface.co/Qwen
+
+3. **Prepare llama.cpp**
+   - Place the `llama.cpp` binaries and required files in the `llama_cpp/` directory
+   - Precompiled releases are available here: https://github.com/ggml-org/llama.cpp/releases
+
+4. **Run the application**
+   - Execute `run_app.bat` from a terminal
+
+   This will:
+   - Open **two terminal windows**:
+     - one running the **llama.cpp server**
+     - one running the **Streamlit application**
+   - Automatically open the application in your web browser
+
+5. **Shut down**
+   - Close the browser window when finished
+   - Press **`e`** in the terminal used to execute the bat file to terminate all running processes
+
+### Notes
+- The LLM is used only for **onboarding guidance** and **solution summarization**
+- All optimization computations are performed by deterministic solvers
+- Once the models are downloaded, **no internet connection is required**
