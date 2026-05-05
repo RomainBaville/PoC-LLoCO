@@ -32,6 +32,8 @@ if "step" not in st.session_state:
 if "problem_type" not in st.session_state:
     st.session_state.problem_type = None
 
+if "assignment_variant" not in st.session_state:
+    st.session_state.assignment_variant = None
 
 # ==================================================
 # STEP -1 — LLM onboarding
