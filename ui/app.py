@@ -44,6 +44,9 @@ if "data_source" not in st.session_state:
 if "journey" not in st.session_state:
     st.session_state.journey = []
 
+if "solver_key" not in st.session_state:
+    st.session_state.solver_key = None
+
 
 # ==================================================
 # STEP -1 — LLM onboarding

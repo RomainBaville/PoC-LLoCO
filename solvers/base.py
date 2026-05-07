@@ -6,15 +6,6 @@ from abc import ABC, abstractmethod
 
 
 class Solver(ABC):
-    """
-    Abstract solver interface.
-    """
-
     @abstractmethod
     def solve(self, problem):
-        """
-        Solve a domain problem / structure.
-        Must return a serializable solution.
-        """
         ...
-

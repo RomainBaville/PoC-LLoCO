@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 from typing import Type, Dict
 from solvers.base import Solver
-from solvers.assignment.ortools_skills import ORToolsSkillAssignmentSolver
+from solvers.assignment.skills.ortools_cp_sat import ORToolsSkillAssignmentSolver
 
 
 @dataclass
