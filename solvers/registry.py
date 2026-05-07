@@ -1,4 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
+# SPDX-FileContributor: Romain Baville
+
 from dataclasses import dataclass
 from typing import Type, Dict
 from solvers.base import Solver
@@ -12,14 +15,35 @@ class SolverDefinition:
     solver_class: Type[Solver]
 
 
-SOLVER_REGISTRY: Dict[str, Dict[str, Dict[str, SolverDefinition]]] = {
+SOLVER_REGISTRY = {
     "assignment": {
-        "skills": {
+        "skills_coverage": {
             "ortools": SolverDefinition(
                 key="ortools",
-                label="OR‑Tools CP‑SAT (skills)",
+                label="OR-Tools CP-SAT",
                 solver_class=ORToolsSkillAssignmentSolver,
-            )
-        }
+            ),
+        },
+        "skills_best_fit": {
+            "ortools": SolverDefinition(
+                key="ortools",
+                label="OR-Tools CP-SAT",
+                solver_class=ORToolsSkillAssignmentSolver,
+            ),
+        },
+        "skills_team": {
+            "ortools": SolverDefinition(
+                key="ortools",
+                label="OR-Tools CP-SAT",
+                solver_class=ORToolsSkillAssignmentSolver,
+            ),
+        },
+        "skills_portfolio": {
+            "ortools": SolverDefinition(
+                key="ortools",
+                label="OR-Tools CP-SAT",
+                solver_class=ORToolsSkillAssignmentSolver,
+            ),
+        },
     }
 }

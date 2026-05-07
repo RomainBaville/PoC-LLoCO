@@ -32,6 +32,9 @@ if "step" not in st.session_state:
 if "problem_type" not in st.session_state:
     st.session_state.problem_type = None
 
+if "assignment_type" not in st.session_state:
+    st.session_state.assignment_type = None
+
 if "assignment_variant" not in st.session_state:
     st.session_state.assignment_variant = None
 
@@ -72,7 +75,7 @@ if st.session_state.step == -1:
 
 
 # ==================================================
-# STEP 0 — Problem selection (registry-driven)
+# STEP 0 — Problem selection
 # ==================================================
 if st.session_state.step == 0:
     st.header("Choose a problem type")

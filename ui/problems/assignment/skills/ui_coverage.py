@@ -23,10 +23,11 @@ DATA_DIR = "data"
 
 def render(step: int):
 
+
     # ==================================================
-    # STEP 3 — Naming
+    # STEP 4 — Naming
     # ==================================================
-    if step == 3:
+    if step == 4:
         st.header("Define entities and skills")
 
         st.session_state.left_label = st.text_input(
@@ -52,9 +53,9 @@ def render(step: int):
         st.stop()
 
     # ==================================================
-    # STEP 4 — CSV selection
+    # STEP 5 — CSV selection
     # ==================================================
-    if step == 4:
+    if step == 5:
         csv_files = sorted(
             f for f in os.listdir(DATA_DIR) if f.endswith(".csv")
         )
@@ -79,9 +80,9 @@ def render(step: int):
         st.stop()
 
     # ==================================================
-    # STEP 5 — Schema mapping + validation
+    # STEP 6 — Schema mapping + validation
     # ==================================================
-    if step == 5:
+    if step == 6:
         loader = DATA_SOURCE_REGISTRY[
             st.session_state.data_source
         ].loader_factory()
@@ -94,7 +95,7 @@ def render(step: int):
         )
 
         st.session_state.left_id_cols = st.multiselect(
-            "Columns that uniquely identify ONE left entity",
+            "Columns that uniquely identify left entity",
             left_cols,
             default=st.session_state.get("left_id_cols", left_cols[:1]),
         )
@@ -132,9 +133,9 @@ def render(step: int):
         st.stop()
 
     # ==================================================
-    # STEP 6 — Solve
+    # STEP 7 — Solve
     # ==================================================
-    if step == 6:
+    if step == 7:
         loader = DATA_SOURCE_REGISTRY[
             st.session_state.data_source
         ].loader_factory()
@@ -152,7 +153,7 @@ def render(step: int):
             right_rows,
         )
 
-        solver_def = SOLVER_REGISTRY["assignment"]["skills"]["ortools"]
+        solver_def = SOLVER_REGISTRY["assignment"]["skills_coverage"]["ortools"]
         solver = solver_def.solver_class()
 
         with st.spinner("Solving optimization problem..."):
@@ -175,13 +176,9 @@ def render(step: int):
         st.success("Solution found")
         st.table(st.session_state.solution_rows)
 
-        navigation_buttons(show_next=True)
-        st.stop()
-
     # ==================================================
-    # STEP 7 — AI summary & download
+    # STEP 7 bis — AI summary & download
     # ==================================================
-    if step == 7:
         st.header("AI-generated explanation")
 
         if st.button("Generate AI summary"):

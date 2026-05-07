@@ -6,21 +6,47 @@ import streamlit as st
 from importlib import import_module
 
 from ui.utils import navigation_buttons
-from ui.problems.assignment.registry import ASSIGNMENT_VARIANTS
+from ui.problems.assignment.registry import ASSIGNMENT_TYPES
 from infrastructure.registry import DATA_SOURCE_REGISTRY
 
 
 def render_assignment(step: int):
 
     # ==================================================
-    # STEP 1 — Assignment variant selection
+    # STEP 1 — Assignment TYPE
     # ==================================================
     if step == 1:
-        st.header("Choose assignment type")
+        st.header("Choose assignment problem type")
 
-        for variant in ASSIGNMENT_VARIANTS.values():
+        for atype in ASSIGNMENT_TYPES.values():
+            if st.button(atype.label):
+                st.session_state.assignment_type = atype.key
+                st.session_state.step += 1
+
+            st.caption(atype.description)
+
+        navigation_buttons(show_next=False)
+        st.stop()
+
+    # ==================================================
+    # STEP 2 — Assignment VARIANT
+    # ==================================================
+    if step == 2:
+        atype = ASSIGNMENT_TYPES.get(st.session_state.assignment_type)
+        if not atype:
+            st.error("Unknown assignment type")
+            st.stop()
+
+        registry = import_module(atype.registry_module)
+        variants = registry.VARIANTS
+
+        st.header(f"{atype.label} — Choose formulation")
+
+        for variant in variants.values():
             if st.button(variant.label):
-                st.session_state.assignment_variant = variant.key
+                st.session_state.assignment_variant = (
+                    f"{atype.key}_{variant.key}"
+                )
                 st.session_state.step += 1
 
             st.caption(variant.description)
@@ -29,9 +55,9 @@ def render_assignment(step: int):
         st.stop()
 
     # ==================================================
-    # STEP 2 — Data source selection
+    # STEP 3 — Data source
     # ==================================================
-    if step == 2:
+    if step == 3:
         st.header("Choose your data format")
 
         for ds in DATA_SOURCE_REGISTRY.values():
@@ -45,17 +71,27 @@ def render_assignment(step: int):
         st.stop()
 
     # ==================================================
-    # Delegate to variant-specific UI
+    # Delegate to VARIANT UI
     # ==================================================
-    variant_key = st.session_state.assignment_variant
-    variant = ASSIGNMENT_VARIANTS.get(variant_key)
+    atype = ASSIGNMENT_TYPES.get(st.session_state.assignment_type)
+    if not atype:
+        st.error("Invalid assignment type")
+        st.stop()
 
+    registry = import_module(atype.registry_module)
+    variants = registry.VARIANTS
+
+    try:
+        _, variant_key = st.session_state.assignment_variant.split("_", 1)
+    except Exception:
+        st.error("Invalid assignment variant")
+        st.stop()
+
+    variant = variants.get(variant_key)
     if not variant:
         st.error("Unknown assignment variant")
         st.stop()
 
     module_path, fn_name = variant.render_fn.rsplit(".", 1)
     module = import_module(module_path)
-    render_fn = getattr(module, fn_name)
-
-    render_fn(step)
+    getattr(module, fn_name)(step)
