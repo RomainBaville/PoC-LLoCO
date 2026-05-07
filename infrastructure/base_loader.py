@@ -8,5 +8,5 @@ from typing import List, Dict, Tuple
 
 class DataLoader(ABC):
     @abstractmethod
-    def load(self, path: str) -> Tuple[List[str], List[Dict[str, str]]]:
+    def load(self, source) -> Tuple[List[str], List[Dict[str, str]]]:
         ...

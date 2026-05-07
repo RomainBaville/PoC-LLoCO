@@ -12,7 +12,7 @@ sys.path.append(str(ROOT_DIR))
 import streamlit as st
 from ui.utils import navigation_buttons
 from ui.registry import PROBLEM_REGISTRY
-from llm.summary import build_onboarding_prompt
+from llm.onboarding_prompt import build_onboarding_prompt
 from llm.client import ask_llm_request
 
 
@@ -34,6 +34,13 @@ if "problem_type" not in st.session_state:
 
 if "assignment_variant" not in st.session_state:
     st.session_state.assignment_variant = None
+
+if "data_source" not in st.session_state:
+    st.session_state.data_source = None
+
+if "journey" not in st.session_state:
+    st.session_state.journey = []
+
 
 # ==================================================
 # STEP -1 — LLM onboarding
