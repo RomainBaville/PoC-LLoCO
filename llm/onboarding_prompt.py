@@ -2,68 +2,67 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+"""
+LLM onboarding prompt builder.
+
+Explains how the optimization platform works based entirely on registries
+(problem families, assignment types, variants, and solvers).
+"""
+
 from llm.onboarding_context import build_onboarding_context
 
 
 def build_onboarding_prompt(user_description: str) -> str:
     """
-    Build a generic, registry-driven onboarding prompt.
+    Build a generic AI onboarding explanation aligned with platform registries.
     """
 
     context = build_onboarding_context()
 
-    problem_list = "\n".join(
-        f"- {p['label']}"
-        for p in context["problems"]
+    # -------------------------------
+    # Assignment types & variants
+    # -------------------------------
+    assignment_text = "\n".join(
+        f"- {t['label']}: {', '.join(t['variants'])}"
+        for t in context.get("assignment_types", [])
     )
 
-    data_source_list = "\n".join(
-        f"- {ds['label']}: {ds['description']}"
-        for ds in context["data_sources"]
+    # -------------------------------
+    # Solvers
+    # -------------------------------
+    solver_text = "\n".join(
+        f"- {t['label']}: {', '.join(t['solvers'])}"
+        for t in context.get("assignment_types", [])
+        if t.get("solvers")
     )
-
-    solver_text = []
-    for problem_type, variants in context["solvers"].items():
-        for variant, solvers in variants.items():
-            solver_text.append(
-                f"- {problem_type} / {variant}: {', '.join(solvers)}"
-            )
-
-    solver_list = "\n".join(solver_text)
 
     return f"""
-You are an intelligent assistant guiding a user through an optimization platform.
+You are an AI assistant helping a user understand how to use
+an optimization platform.
 
 The user describes their problem as follows:
+
 \"\"\"
 {user_description}
 \"\"\"
 
-The platform supports the following types of optimization problems:
-{problem_list}
+The platform supports structured optimization problems, including
+assignment problems with different semantic types and formulations.
 
-Depending on the problem type, the platform may ask the user to:
-- choose a specific formulation or variant
-- describe entities and constraints
-- provide data using one of the supported data formats
-- select an appropriate solver
-- review and export results with an AI-generated explanation
+Assignment types and available formulations:
+{assignment_text}
 
-Supported data input formats include:
-{data_source_list}
+Available solvers:
+{solver_text}
 
-Available solvers (by problem type and formulation):
-{solver_list}
+Explain clearly:
+- how the platform can model such problems
+- how the user will progressively choose the problem type,
+  formulation, data, and solver
+- why choosing an appropriate solver matters
 
-Your task:
-- Explain how this platform can help solve the user's problem
-- Describe the general workflow WITHOUT listing exact UI step numbers
-- Emphasize that the interface adapts dynamically based on user choices
-- Encourage the user to proceed step by step
-
-Rules:
-- Do NOT invent features
-- Do NOT mention implementation details
-- Do NOT generate code
-- Be clear, concise, and reassuring
+Guidelines:
+- Do NOT invent capabilities
+- Do NOT mention internal code or implementation details
+- Use clear, professional, user-facing language
 """

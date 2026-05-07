@@ -1,43 +1,50 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
+# SPDX-License-Identifier: Apache-2.0
+
+from importlib import import_module
 
 from ui.registry import PROBLEM_REGISTRY
-from infrastructure.registry import DATA_SOURCE_REGISTRY
-from solvers.registry import SOLVER_REGISTRY
+from ui.problems.assignment.registry import ASSIGNMENT_TYPES
+from solvers.assignment.registry import ASSIGNMENT_SOLVER_GROUPS
 
 
 def build_onboarding_context() -> dict:
     """
-    Build a structured description of the platform capabilities
+    Build a structured description of platform capabilities
     based on registries.
     """
 
-    problems = []
-    for p in PROBLEM_REGISTRY.values():
-        problems.append({
-            "key": p.key,
-            "label": p.label,
-        })
+    problems = [
+        {"key": p.key, "label": p.label}
+        for p in PROBLEM_REGISTRY.values()
+    ]
 
-    data_sources = []
-    for ds in DATA_SOURCE_REGISTRY.values():
-        data_sources.append({
-            "key": ds.key,
-            "label": ds.label,
-            "description": ds.description,
-        })
+    assignment_types = []
+    for atype in ASSIGNMENT_TYPES.values():
+        type_registry = import_module(atype.registry_module)
+        variants = [
+            v.label for v in type_registry.VARIANTS.values()
+        ]
 
-    solvers = {}
-    for problem_type, variants in SOLVER_REGISTRY.items():
-        solvers[problem_type] = {}
-        for variant, solver_defs in variants.items():
-            solvers[problem_type][variant] = [
-                solver.label for solver in solver_defs.values()
-            ]
+        solver_group = ASSIGNMENT_SOLVER_GROUPS.get(atype.key)
+
+        assignment_types.append({
+            "label": atype.label,
+            "description": atype.description,
+            "variants": variants,
+            "solvers": (
+                list(
+                    import_module(solver_group.registry_module)
+                    .SOLVERS
+                    .keys()
+                )
+                if solver_group else []
+            ),
+        })
 
     return {
         "problems": problems,
-        "data_sources": data_sources,
-        "solvers": solvers,
+        "assignment_types": assignment_types,
     }
