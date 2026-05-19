@@ -12,7 +12,7 @@ sys.path.append(str(ROOT_DIR))
 import streamlit as st
 from ui.utils import navigation_buttons
 from ui.registry import PROBLEM_REGISTRY
-from llm.summary import build_onboarding_prompt
+from llm.onboarding_prompt import build_onboarding_prompt
 from llm.client import ask_llm_request
 
 
@@ -31,6 +31,21 @@ if "step" not in st.session_state:
 
 if "problem_type" not in st.session_state:
     st.session_state.problem_type = None
+
+if "assignment_type" not in st.session_state:
+    st.session_state.assignment_type = None
+
+if "assignment_variant" not in st.session_state:
+    st.session_state.assignment_variant = None
+
+if "data_source" not in st.session_state:
+    st.session_state.data_source = None
+
+if "journey" not in st.session_state:
+    st.session_state.journey = []
+
+if "solver_key" not in st.session_state:
+    st.session_state.solver_key = None
 
 
 # ==================================================
@@ -63,7 +78,7 @@ if st.session_state.step == -1:
 
 
 # ==================================================
-# STEP 0 — Problem selection (registry-driven)
+# STEP 0 — Problem selection
 # ==================================================
 if st.session_state.step == 0:
     st.header("Choose a problem type")

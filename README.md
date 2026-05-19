@@ -77,46 +77,72 @@ PoC-LLoCO/
 │
 ├── README.md
 │
-├── data/                         # Input datasets used to define and solve optimization problems (CSV only for now)
+├── data/                             # Input datasets (CSV for now)
 │   └── ...
 │
-├── models/                       # LLM models in GGUF format (e.g. Qwen)
+├── models/                           # Local LLM models (GGUF)
 │   └── ...
 │
-├── llama_cpp/                    # llama.cpp binaries and runtime files used to run the local LLM
+├── llama_cpp/                        # llama.cpp runtime & binaries
 │   └── ...
 │
-├── ui/                           # Streamlit user interface
-│   ├── app.py                    # Main Streamlit entry point
-│   ├── registry.py               # Problem registry
-│   ├── utils.py                  # Navigation and shared UI helpers
+├── ui/                               # Streamlit UI layer
+│   ├── app.py                        # Main Streamlit entry point
+│   ├── registry.py                   # Problem FAMILY registry (Assignment, etc.)
+│   ├── utils.py                      # Navigation, journey logging, AI helpers
 │   │
-│   └── problems/                 # Problem-specific UI wizards
-│       ├── assignment_ui.py      # Assignment problem wizard
-│       ├── base.py               # (Optional) base UI contract
-│       └── init.py
+│   └── problems/
+│       ├── assignment/               # Assignment problem family
+│       │   ├── registry.py            # Assignment TYPES registry (skills, cost, …)
+│       │   ├── ui_router.py           # Assignment workflow router
+│       │   │
+│       │   ├── skills/                # Skill-based assignment TYPE
+│       │   │   ├── registry.py        # Skill VARIANTS registry (coverage, best_fit…)
+│       │   │   ├── builder.py         # Generic skills builder (registry-driven)
+│       │   │   ├── ui_coverage.py     # Coverage variant UI
+│       │   │   ├── ui_best_fit.py     # Best-fit variant UI
+│       │   │   ├── ui_team.py         # Team variant UI
+│       │   │   └── ui_portfolio.py    # Portfolio variant UI
+│       │
+│       └── base.py                    # (Optional) base UI contracts
 │
-├── domain/                       # Solver-agnostic problem structures (pure math modeling)
-│   ├── assignment_structure.py   # Generic assignment structure
-│   └── init.py
+├── domain/                           # Solver-agnostic mathematical models
+│   ├── base.py                       # Base DomainProblem
+│   ├── entity_registry.py            # Entity identity & uniqueness handling
+│   │
+│   └── assignment/                   # Assignment family (math side)
+│       ├── base.py                   # AssignmentBaseProblem
+│       │
+│       └── skills/                   # Skill-based assignment models
+│           ├── base.py               # SkillAssignmentProblem (dataclass!)
+│           ├── coverage.py           # SkillCoverageAssignment
+│           ├── best_fit.py           # SkillBestFitAssignment
+│           ├── team.py               # SkillTeamAssignment
+│           └── portfolio.py          # SkillPortfolioSelection
 │
-├── solvers/                      # Optimization solvers and solver interfaces
-│   ├── base.py                   # Solver interface
-│   ├── assignment_ortools.py     # OR-Tools CP-SAT assignment solver
-│   ├── registry.py               # Solver registry per problem
-│   └── init.py
+├── solvers/                          # Solver layer (execution)
+│   ├── base.py                       # Solver interface
+│   │
+│   └── assignment/                   # Assignment solvers
+│       ├── registry.py               # Assignment solver GROUPS (skills, cost…)
+│       │
+│       └── skills/                   # Skill-based solvers
+│           ├── registry.py           # Skill solver registry (OR-Tools, etc.)
+│           └── ortools_cp_sat.py     # OR-Tools CP-SAT solver (variant-aware)
 │
-├── infrastructure/               # Data access and loading layer
-│   ├── base_loader.py            # Abstract data loader interface
-│   ├── csv_loader.py             # Generic CSV loader implementation
-│   └── init.py
+├── infrastructure/                   # Data access layer
+│   ├── base_loader.py                # Abstract data loader
+│   ├── csv_loader.py                 # CSV loader
+│   └── registry.py                   # Data source registry
 │
-├── llm/                          # LLM integration layer
-│   ├── client.py                 # LLM client (llama.cpp)
-│   ├── summary.py                # Prompt builders (onboarding and result summary)
-│   └── init.py
+├── llm/                              # LLM integration layer
+│   ├── client.py                     # LLM client (llama.cpp)
+│   ├── session_model.py              # OptimizationSession dataclass
+│   ├── session_prompt.py             # Solver-aware summary prompt
+│   ├── onboarding_context.py         # Registry-driven onboarding context
+│   └── onboarding_prompt.py          # Onboarding prompt builder
 │
-└── requirements.txt              # Python dependencies
+└── requirements.txt                  # Python dependencies
 ```
 
 ---

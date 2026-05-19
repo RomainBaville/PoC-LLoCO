@@ -3,10 +3,13 @@
 # SPDX-FileContributor: Romain Baville
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Tuple
 
 
-class DataLoader(ABC):
+class DomainProblem(ABC):
+    """
+    Base class for any structured optimization problem.
+    """
+
     @abstractmethod
-    def load(self, source) -> Tuple[List[str], List[Dict[str, str]]]:
+    def validate(self):
         ...
