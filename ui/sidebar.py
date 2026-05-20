@@ -97,6 +97,35 @@ def render() -> bool:
         full_variant = f"{assignment_type}_{variant_local}"
         st.session_state.assignment_variant = full_variant
 
+        # ── Modèle IA ─────────────────────────────────────────────
+        theme.divider()
+        theme.section_label("Modèle IA")
+
+        available_models = discover_models()
+        if available_models:
+            model_options = {m.key: m for m in available_models}
+            selected_key = st.selectbox(
+                "Modèle",
+                options=["none"] + list(model_options.keys()),
+                format_func=lambda k: "— Aucun —" if k == "none" else model_options[k].label,
+                label_visibility="collapsed",
+                key="llm_model_key",
+            )
+            if selected_key != "none":
+                m = model_options[selected_key]
+                st.session_state.llm_url = m.api_url
+                st.session_state.llm_model_name = m.model_name
+            else:
+                st.session_state.llm_url = None
+                st.session_state.llm_model_name = None
+        else:
+            st.markdown(
+                '<p class="ui-hint">Aucun modèle détecté (Ollama ou llama-server).</p>',
+                unsafe_allow_html=True,
+            )
+            st.session_state.llm_url = None
+            st.session_state.llm_model_name = None
+
         # ── Données ───────────────────────────────────────────────
         theme.divider()
         theme.section_label("Données")
@@ -184,35 +213,6 @@ def render() -> bool:
             label_visibility="collapsed",
             key="solver_key",
         )
-
-        # ── Modèle IA ─────────────────────────────────────────────
-        theme.divider()
-        theme.section_label("Modèle IA")
-
-        available_models = discover_models()
-        if available_models:
-            model_options = {m.key: m for m in available_models}
-            selected_key = st.selectbox(
-                "Modèle",
-                options=["none"] + list(model_options.keys()),
-                format_func=lambda k: "— Aucun (pas de résumé IA) —" if k == "none" else model_options[k].label,
-                label_visibility="collapsed",
-                key="llm_model_key",
-            )
-            if selected_key != "none":
-                m = model_options[selected_key]
-                st.session_state.llm_url = m.api_url
-                st.session_state.llm_model_name = m.model_name
-            else:
-                st.session_state.llm_url = None
-                st.session_state.llm_model_name = None
-        else:
-            st.markdown(
-                '<p class="ui-hint">Aucun modèle détecté (Ollama ou llama-server).</p>',
-                unsafe_allow_html=True,
-            )
-            st.session_state.llm_url = None
-            st.session_state.llm_model_name = None
 
         st.markdown("")
         solve_clicked = st.button(
