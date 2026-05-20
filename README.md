@@ -39,9 +39,10 @@ The LLM **never replaces the solver**: it acts as a **guidance and explanation l
 
 ## Features
 
-- Streamlit-based interactive UI
-- Wizard-style problem configuration
-- LLM-assisted onboarding and result explanation
+- Streamlit-based interactive UI — single-page dashboard layout
+- Sidebar-driven configuration with progressive disclosure
+- Local LLM model picker (Ollama and llama-server auto-detected)
+- LLM-assisted onboarding and result summarization
 - Generic domain modeling (solver-agnostic)
 - Registry-based problem and solver selection
 - Support for multiple solvers per problem
@@ -49,6 +50,7 @@ The LLM **never replaces the solver**: it acts as a **guidance and explanation l
 
 Currently implemented:
 - **Generic Assignment Problem** (bipartite assignment with requirements)
+  - Skill coverage · Best-fit matching · Team formation · Portfolio selection
 
 ---
 
@@ -87,24 +89,26 @@ PoC-LLoCO/
 │   └── ...
 │
 ├── ui/                               # Streamlit UI layer
-│   ├── app.py                        # Main Streamlit entry point
+│   ├── app.py                        # Main entry point — dashboard orchestrator
 │   ├── registry.py                   # Problem FAMILY registry (Assignment, etc.)
-│   ├── utils.py                      # Navigation, journey logging, AI helpers
+│   ├── sidebar.py                    # Sidebar — progressive configuration panel
+│   ├── theme.py                      # CSS design system and render helpers
+│   ├── model_picker.py               # Local LLM model discovery (Ollama, llama-server)
+│   ├── utils.py                      # Journey logging, AI summary, ZIP export
 │   │
 │   └── problems/
 │       ├── assignment/               # Assignment problem family
-│       │   ├── registry.py            # Assignment TYPES registry (skills, cost, …)
-│       │   ├── ui_router.py           # Assignment workflow router
+│       │   ├── registry.py           # Assignment TYPES registry (skills, cost, …)
 │       │   │
-│       │   ├── skills/                # Skill-based assignment TYPE
-│       │   │   ├── registry.py        # Skill VARIANTS registry (coverage, best_fit…)
-│       │   │   ├── builder.py         # Generic skills builder (registry-driven)
-│       │   │   ├── ui_coverage.py     # Coverage variant UI
-│       │   │   ├── ui_best_fit.py     # Best-fit variant UI
-│       │   │   ├── ui_team.py         # Team variant UI
-│       │   │   └── ui_portfolio.py    # Portfolio variant UI
+│       │   └── skills/               # Skill-based assignment TYPE
+│       │       ├── registry.py       # Skill VARIANTS registry (coverage, best_fit…)
+│       │       ├── builder.py        # Generic skills builder (registry-driven)
+│       │       ├── ui_coverage.py    # Coverage variant — render_results
+│       │       ├── ui_best_fit.py    # Best-fit variant — render_results
+│       │       ├── ui_team.py        # Team variant — render_results
+│       │       └── ui_portfolio.py   # Portfolio variant — render_results
 │       │
-│       └── base.py                    # (Optional) base UI contracts
+│       └── base.py                   # Base UI contracts
 │
 ├── domain/                           # Solver-agnostic mathematical models
 │   ├── base.py                       # Base DomainProblem
@@ -149,36 +153,117 @@ PoC-LLoCO/
 
 ## Running the Application
 
-This project has been developed and tested on **Windows**.
+### Prerequisites (all platforms)
 
-To run the application, follow these steps:
+- **Python 3.10+**
+- CSV input files placed in the `data/` directory
 
-1. **Prepare the data**
-   - Place your input files in the `data/` directory
-   - Only **CSV files** are supported for now
+Install Python dependencies (do this once, inside a virtual environment):
 
-2. **Prepare the LLM model**
-   - Place a `.gguf` **Qwen model** in the `models/` directory
-   - Models can be downloaded from: https://huggingface.co/Qwen
+```bash
+python -m venv .venv
+```
 
-3. **Prepare llama.cpp**
-   - Place the `llama.cpp` binaries and required files in the `llama_cpp/` directory
-   - Precompiled releases are available here: https://github.com/ggml-org/llama.cpp/releases
+| Platform | Activate venv | Install deps |
+|----------|---------------|--------------|
+| Windows  | `.venv\Scripts\activate` | `pip install -r requirements.txt` |
+| macOS / Linux | `source .venv/bin/activate` | `pip install -r requirements.txt` |
 
-4. **Run the application**
-   - Execute `run_app.bat` from a terminal
+---
 
-   This will:
-   - Open **two terminal windows**:
-     - one running the **llama.cpp server**
-     - one running the **Streamlit application**
-   - Automatically open the application in your web browser
+### LLM Backend (optional)
 
-5. **Shut down**
-   - Close the browser window when finished
-   - Press **`e`** in the terminal used to execute the bat file to terminate all running processes
+The LLM is used for two optional features: problem onboarding guidance and solution summarization.
+**The optimizer works fully without a LLM** — simply leave the model selector set to "Aucun".
+
+Two backends are supported and auto-detected by the application:
+
+#### Option A — Ollama (recommended, all platforms)
+
+1. Install Ollama: https://ollama.com/download
+2. Pull a model:
+   ```bash
+   ollama pull qwen3:8b
+   # or
+   ollama pull deepseek-r1:7b
+   ```
+3. Ollama starts automatically at boot. If not running, start it:
+
+   | Platform | Command |
+   |----------|---------|
+   | Windows  | Launch the **Ollama** desktop app |
+   | macOS    | `ollama serve` or launch the **Ollama** menu-bar app |
+   | Linux    | `ollama serve` |
+
+   The application detects available models automatically — no configuration needed.
+
+#### Option B — llama-server + GGUF (Windows, original setup)
+
+1. Download a Qwen GGUF model from https://huggingface.co/Qwen and place it in `models/`
+2. Download llama.cpp binaries from https://github.com/ggml-org/llama.cpp/releases and place them in `llama_cpp/`
+3. Start the server manually before launching the app:
+   ```bat
+   llama_cpp\llama-server.exe -m models\<model-name>.gguf --port 8080
+   ```
+
+---
+
+### Launching the UI
+
+#### Windows
+
+```bat
+REM activate venv first
+.venv\Scripts\activate
+
+REM launch Streamlit
+streamlit run ui\app.py
+```
+
+Or use the provided script which also starts llama-server (Option B only):
+```bat
+run_app.bat
+```
+
+#### macOS
+
+```bash
+# activate venv first
+source .venv/bin/activate
+
+# launch Streamlit
+streamlit run ui/app.py
+```
+
+#### Linux
+
+```bash
+# activate venv first
+source .venv/bin/activate
+
+# launch Streamlit
+streamlit run ui/app.py
+```
+
+The application opens automatically at **http://localhost:8501**.
+To use a different port: `streamlit run ui/app.py --server.port 8502`
+
+---
+
+### Using the Application
+
+1. **Sidebar** — configure your problem step by step:
+   - Select a problem type and formulation
+   - Choose your CSV files and map the columns
+   - Select a solver
+   - *(Optional)* Select a local LLM model for AI features
+2. Click **▶ Résoudre** to run the optimizer
+3. **Results** appear in the main area: metrics, assignment table, AI summary, and ZIP export
+
+---
 
 ### Notes
-- The LLM is used only for **onboarding guidance** and **solution summarization**
-- All optimization computations are performed by deterministic solvers
-- Once the models are downloaded, **no internet connection is required**
+
+- All optimization computations are performed by **deterministic solvers** — the LLM never affects the result
+- The model picker auto-detects Ollama models and GGUF files in `models/` at each page load
+- Once dependencies and models are installed, **no internet connection is required**
