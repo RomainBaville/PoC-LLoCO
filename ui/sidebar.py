@@ -9,6 +9,7 @@ import streamlit as st
 import ui.theme as theme
 from ui.registry import PROBLEM_REGISTRY
 from ui.problems.assignment.registry import ASSIGNMENT_TYPES
+from ui.model_picker import discover as discover_models
 from infrastructure.registry import DATA_SOURCE_REGISTRY
 
 _DATA_DIR = "data"
@@ -183,6 +184,35 @@ def render() -> bool:
             label_visibility="collapsed",
             key="solver_key",
         )
+
+        # ── Modèle IA ─────────────────────────────────────────────
+        theme.divider()
+        theme.section_label("Modèle IA")
+
+        available_models = discover_models()
+        if available_models:
+            model_options = {m.key: m for m in available_models}
+            selected_key = st.selectbox(
+                "Modèle",
+                options=["none"] + list(model_options.keys()),
+                format_func=lambda k: "— Aucun (pas de résumé IA) —" if k == "none" else model_options[k].label,
+                label_visibility="collapsed",
+                key="llm_model_key",
+            )
+            if selected_key != "none":
+                m = model_options[selected_key]
+                st.session_state.llm_url = m.api_url
+                st.session_state.llm_model_name = m.model_name
+            else:
+                st.session_state.llm_url = None
+                st.session_state.llm_model_name = None
+        else:
+            st.markdown(
+                '<p class="ui-hint">Aucun modèle détecté (Ollama ou llama-server).</p>',
+                unsafe_allow_html=True,
+            )
+            st.session_state.llm_url = None
+            st.session_state.llm_model_name = None
 
         st.markdown("")
         solve_clicked = st.button(

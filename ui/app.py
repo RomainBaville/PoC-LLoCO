@@ -95,8 +95,17 @@ if solve_triggered:
                 f"{len(solution)} {st.session_state.left_label.lower()} assigné(s)."
             ),
         )
-        with st.spinner("Analyse IA en cours…"):
-            st.session_state.ai_summary = generate_ai_summary(session)
+        if st.session_state.get("llm_url") and st.session_state.get("llm_model_name"):
+            import llm.client as _llm
+            _llm.LLM_SERVER_URL = st.session_state.llm_url
+            _llm.LLM_MODEL_NAME = st.session_state.llm_model_name
+            try:
+                with st.spinner("Analyse IA en cours…"):
+                    st.session_state.ai_summary = generate_ai_summary(session)
+            except Exception:
+                st.session_state.ai_summary = "_Résumé IA indisponible (erreur lors de l'appel au modèle)._"
+        else:
+            st.session_state.ai_summary = "_Aucun modèle IA sélectionné._"
 
     except NotImplementedError:
         st.session_state.solve_error = (
@@ -134,10 +143,18 @@ def _render_onboarding():
     if st.button("Analyser", type="primary"):
         if not user_desc.strip():
             st.warning("Saisissez une description avant d'analyser.")
+        elif not st.session_state.get("llm_url"):
+            st.warning("Sélectionnez un modèle IA dans la barre latérale.")
         else:
-            with st.spinner("Analyse en cours…"):
-                prompt = build_onboarding_prompt(user_desc)
-                st.session_state.onboarding_result = ask_llm_request(prompt)
+            import llm.client as _llm
+            _llm.LLM_SERVER_URL = st.session_state.llm_url
+            _llm.LLM_MODEL_NAME = st.session_state.llm_model_name
+            try:
+                with st.spinner("Analyse en cours…"):
+                    prompt = build_onboarding_prompt(user_desc)
+                    st.session_state.onboarding_result = ask_llm_request(prompt)
+            except Exception:
+                st.error("Erreur lors de l'appel au modèle IA.")
 
     if st.session_state.get("onboarding_result"):
         st.markdown("**Guidage IA**")
