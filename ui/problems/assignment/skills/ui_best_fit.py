@@ -1,18 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
-# SPDX-FileContributor: Romain Baville
 
 import streamlit as st
-from ui.utils import navigation_buttons
 
 
-def render(step: int):
-    st.header("Best-fit skill matching")
+def render_results(solution: dict, state) -> None:
+    left_lbl = state.left_label
+    right_lbl = state.right_label
 
-    st.info(
-        "This variant matches people to projects by maximizing "
-        "overall skill compatibility instead of enforcing hard requirements."
+    st.markdown("### Résultats — Meilleure correspondance")
+    st.caption(
+        f"Chaque {left_lbl.lower()} est apparié au {right_lbl.lower()} "
+        "maximisant la compatibilité globale de compétences."
     )
-
-    navigation_buttons(show_next=False)
-    st.stop()
+    st.dataframe(
+        state.solution_rows,
+        use_container_width=True,
+        hide_index=True,
+    )
