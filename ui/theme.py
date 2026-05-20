@@ -103,6 +103,33 @@ _CSS = """
     font-style: italic;
     margin-top: 1.5rem;
 }
+
+/* ── Model picker banner ─────────────────────────────────────────── */
+.ui-model-banner {
+    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+    border-radius: 10px;
+    padding: 0.75rem 0.9rem;
+    margin-bottom: 0.5rem;
+}
+.ui-model-banner-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #93C5FD;
+    margin: 0 0 0.3rem 0;
+    display: block;
+}
+.ui-model-banner-value {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #FFFFFF;
+}
+.ui-model-banner-none {
+    font-size: 0.8rem;
+    color: #BFDBFE;
+    font-style: italic;
+}
 </style>
 """
 

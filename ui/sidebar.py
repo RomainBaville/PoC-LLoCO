@@ -60,6 +60,51 @@ def render() -> bool:
     Returns True when the user clicks the Résoudre button.
     """
     with st.sidebar:
+        # ── Modèle IA (bannière en haut) ──────────────────────────
+        available_models = discover_models()
+        model_options = {m.key: m for m in available_models}
+
+        if available_models:
+            selected_key = st.selectbox(
+                "Modèle IA",
+                options=["none"] + list(model_options.keys()),
+                format_func=lambda k: "— Aucun —" if k == "none" else model_options[k].label,
+                label_visibility="visible",
+                key="llm_model_key",
+            )
+            if selected_key != "none":
+                m = model_options[selected_key]
+                st.session_state.llm_url = m.api_url
+                st.session_state.llm_model_name = m.model_name
+                active_label = m.label
+            else:
+                st.session_state.llm_url = None
+                st.session_state.llm_model_name = None
+                active_label = None
+        else:
+            st.session_state.llm_url = None
+            st.session_state.llm_model_name = None
+            active_label = None
+
+        # Bannière d'état du modèle sélectionné
+        if active_label:
+            st.markdown(
+                f'<div class="ui-model-banner">'
+                f'<span class="ui-model-banner-label">Modèle actif</span>'
+                f'<span class="ui-model-banner-value">⬤ {active_label}</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+        elif not available_models:
+            st.markdown(
+                '<div class="ui-model-banner">'
+                '<span class="ui-model-banner-label">Modèle IA</span>'
+                '<span class="ui-model-banner-none">Aucun modèle détecté</span>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+
+        theme.divider()
         st.markdown("## Configuration")
 
         # ── Problem ───────────────────────────────────────────────
@@ -96,35 +141,6 @@ def render() -> bool:
         )
         full_variant = f"{assignment_type}_{variant_local}"
         st.session_state.assignment_variant = full_variant
-
-        # ── Modèle IA ─────────────────────────────────────────────
-        theme.divider()
-        theme.section_label("Modèle IA")
-
-        available_models = discover_models()
-        if available_models:
-            model_options = {m.key: m for m in available_models}
-            selected_key = st.selectbox(
-                "Modèle",
-                options=["none"] + list(model_options.keys()),
-                format_func=lambda k: "— Aucun —" if k == "none" else model_options[k].label,
-                label_visibility="collapsed",
-                key="llm_model_key",
-            )
-            if selected_key != "none":
-                m = model_options[selected_key]
-                st.session_state.llm_url = m.api_url
-                st.session_state.llm_model_name = m.model_name
-            else:
-                st.session_state.llm_url = None
-                st.session_state.llm_model_name = None
-        else:
-            st.markdown(
-                '<p class="ui-hint">Aucun modèle détecté (Ollama ou llama-server).</p>',
-                unsafe_allow_html=True,
-            )
-            st.session_state.llm_url = None
-            st.session_state.llm_model_name = None
 
         # ── Données ───────────────────────────────────────────────
         theme.divider()
