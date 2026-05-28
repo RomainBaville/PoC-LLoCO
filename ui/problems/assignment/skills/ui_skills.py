@@ -23,155 +23,157 @@ DATA_DIR = "data"
 
 
 def render(step: int):
-    st.session_state.setdefault("left_label", "Employees")
-    st.session_state.setdefault("right_label", "Projects")
+
+    # --------------------------------------------------
+    # Defaults
+    # --------------------------------------------------
+    st.session_state.setdefault("left_label", "Candidates")
+    st.session_state.setdefault("right_label", "Targets")
     st.session_state.setdefault("skill_label", "Skills")
+
+    st.session_state.setdefault("objective_mode", "Maximize matching quality")
     st.session_state.setdefault("max_left", 1)
     st.session_state.setdefault("max_right", 1)
-    st.session_state.setdefault("use_weights", False)
-    st.session_state.setdefault("skill_weights", {})
+    st.session_state.setdefault("force_all", False)
+
+    st.session_state.setdefault("reward_mode", "min")
+    st.session_state.setdefault("penalty_mode", None)
+    st.session_state.setdefault("penalty_weight", 1.0)
 
     # ==================================================
-    # STEP 4 — Naming
+    # STEP 3 — Naming
     # ==================================================
-    if step == 4:
+    if step == 3:
         st.header("Define entities and skills")
 
         st.session_state.left_label = st.text_input(
-            "Left entities (e.g. Employees)", st.session_state.left_label
+            "Left entities", st.session_state.left_label
         )
         st.session_state.right_label = st.text_input(
-            "Right entities (e.g. Projects)", st.session_state.right_label
+            "Right entities", st.session_state.right_label
         )
         st.session_state.skill_label = st.text_input(
             "Skill label", st.session_state.skill_label
         )
 
-        log_step(
-            f"Configured best-fit assignment between "
-            f"'{st.session_state.left_label}' and "
-            f"'{st.session_state.right_label}' based on skill matching."
-        )
-
         navigation_buttons()
         st.stop()
 
     # ==================================================
-    # STEP 5 — CSV selection
+    # STEP 4 — CSV
     # ==================================================
-    if step == 5:
+    if step == 4:
         csv_files = sorted(f for f in os.listdir(DATA_DIR) if f.endswith(".csv"))
 
-        st.session_state.left_csv = st.selectbox(
-            f"{st.session_state.left_label} CSV", csv_files
-        )
-        st.session_state.right_csv = st.selectbox(
-            f"{st.session_state.right_label} CSV", csv_files
-        )
-
-        log_step(
-            f"Selected CSV files '{st.session_state.left_csv}' "
-            f"and '{st.session_state.right_csv}'."
-        )
+        st.session_state.left_csv = st.selectbox("Left CSV", csv_files)
+        st.session_state.right_csv = st.selectbox("Right CSV", csv_files)
 
         navigation_buttons()
         st.stop()
 
     # ==================================================
-    # STEP 6 — Schema mapping
+    # STEP 5 — Mapping
     # ==================================================
-    if step == 6:
+    if step == 5:
         loader = DATA_SOURCE_REGISTRY[st.session_state.data_source].loader_factory()
 
         left_cols, _ = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
         right_cols, _ = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
 
-        st.session_state.left_id_cols = st.multiselect(
-            "Left identifier columns", left_cols
-        )
+        st.session_state.left_id_cols = st.multiselect("Left IDs", left_cols)
+
         st.session_state.skill_cols = st.multiselect(
             "Skill columns",
             [c for c in left_cols if c not in st.session_state.left_id_cols],
         )
-        st.session_state.right_id_col = st.selectbox(
-            "Right identifier column", right_cols
-        )
+
+        st.session_state.right_id_col = st.selectbox("Right ID", right_cols)
 
         navigation_buttons()
         st.stop()
 
     # ==================================================
-    # STEP 7 — Configuration
+    # STEP 6 — CONFIGURATION
     # ==================================================
-    if step == 7:
-        st.header("Configure best-fit matching")
+    if step == 6:
+        st.header("Configure assignment model")
+
+        st.subheader("Objective")
+
+        st.session_state.objective_mode = st.radio(
+            "What is your goal?",
+            [
+                "Maximize matching quality",
+                "Ensure all requirements are satisfied",
+                "Balance both (recommended)",
+            ]
+        )
+
+        st.subheader("Assignment rules")
 
         st.session_state.max_left = st.number_input(
             "Max assignments per left entity",
             min_value=1,
-            value="min",
+            value=st.session_state.max_left,
         )
 
         st.session_state.max_right = st.number_input(
             "Max assignments per right entity",
             min_value=1,
-            value="min",
+            value=st.session_state.max_right,
         )
+
+        st.session_state.force_all = st.checkbox(
+            "Assign all left entities",
+            value=st.session_state.force_all,
+        )
+
+        st.subheader("Matching behavior")
 
         st.session_state.reward_mode = st.selectbox(
-            "Reward scoring",
-            ["min", "product", "ratio", "threshold", "sqrt_product", "log_product", "soft_min"]
+            "Reward function",
+            ["min", "product", "sqrt_product", "ratio"],
         )
+
         st.session_state.penalty_mode = st.selectbox(
-            "Penalty scoring (optional)",
-            [None, "shortfall", "absdiff", "relative_shortfall", "squared_diff", "shortfall_squared", "overqualification", "log_shortfall"]
-        )
-        st.session_state.penalty_weight = st.number_input(
-            "Penalty weight",
-            value=1.0
+            "Penalty function",
+            [None, "shortfall", "relative_shortfall", "absdiff"],
         )
 
-        st.session_state.use_weights = st.checkbox("Use skill weights")
-
-        if st.session_state.use_weights:
-            weights = {}
-            for s in st.session_state.get("skill_cols", []):
-                weights[s] = st.number_input(f"Weight for {s}", value=1.0)
-            st.session_state.skill_weights = weights
+        if st.session_state.penalty_mode:
+            st.session_state.penalty_weight = st.slider(
+                "Penalty weight",
+                0.0,
+                5.0,
+                st.session_state.penalty_weight,
+            )
 
         navigation_buttons()
         st.stop()
 
     # ==================================================
-    # STEP 8 — Solver selection
+    # STEP 7 — Solver selection
     # ==================================================
-    if step == 8:
+    if step == 7:
         st.header("Choose solver")
 
-        assignment_type, _ = st.session_state.assignment_variant.split("_", 1)
+        assignment_type = "skills"
+
         solver_group = ASSIGNMENT_SOLVER_GROUPS[assignment_type]
         solver_registry = import_module(solver_group.registry_module)
 
-        compatible_solvers = {
-            k: s
-            for k, s in solver_registry.SOLVERS.items()
-            if st.session_state.assignment_variant in s.supported_variants
-        }
-
-        for key, solver in compatible_solvers.items():
+        for _, solver in solver_registry.SOLVERS.items():
             if st.button(solver.label):
-                st.session_state.solver_key = key
+                st.session_state.solver = solver
                 st.session_state.step += 1
-
-            st.caption(solver.description)
 
         navigation_buttons(show_next=False)
         st.stop()
 
     # ==================================================
-    # STEP 9 — Solve
+    # STEP 8 — Solve
     # ==================================================
-    if step == 9:
+    if step == 8:
         loader = DATA_SOURCE_REGISTRY[st.session_state.data_source].loader_factory()
         _, left_rows = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
         _, right_rows = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
@@ -181,37 +183,34 @@ def render(step: int):
             st.session_state, left_rows, right_rows
         )
 
-        # Apply config
         cfg = problem.config
+
         cfg.max_assignments_per_left = st.session_state.max_left
         cfg.max_assignments_per_right = st.session_state.max_right
+        cfg.force_all_left_assigned = st.session_state.force_all
+
         cfg.reward_mode = st.session_state.reward_mode
         cfg.penalty_mode = st.session_state.penalty_mode
         cfg.penalty_weight = st.session_state.penalty_weight
 
-        if st.session_state.use_weights:
-            cfg.skill_weights = st.session_state.skill_weights
+        if st.session_state.objective_mode == "Ensure all requirements are satisfied":
+            cfg.enforce_full_coverage = True
+        elif st.session_state.objective_mode == "Balance both (recommended)":
+            cfg.enforce_full_coverage = False
+            cfg.penalty_mode = "shortfall"
+            cfg.penalty_weight = 2.0
         else:
-            cfg.skill_weights = {s: 1 for s in problem.skills}
+            cfg.enforce_full_coverage = False
 
-        assignment_type, _ = st.session_state.assignment_variant.split("_", 1)
-        solver_group = ASSIGNMENT_SOLVER_GROUPS[assignment_type]
-        solver_registry = import_module(solver_group.registry_module)
+        with st.spinner("Optimizing..."):
+            solution = st.session_state.solver.solver_class().solve(problem)
 
-        solver_def = solver_registry.SOLVERS[st.session_state.solver_key]
-        solver = solver_def.solver_class()
-
-        with st.spinner("Optimizing best-fit matching..."):
-            solution = solver.solve(problem)
-
-        # Score computation
         engine = ScoringEngine(cfg)
 
         def compute_score(l, r):
             return engine.compute(problem, l, r)
 
         st.session_state.solution = solution
-        st.session_state.left_labels = left_labels
 
         st.session_state.solution_rows = [
             {
@@ -222,15 +221,11 @@ def render(step: int):
             for l, r in solution.items()
         ]
 
-        st.session_state.solver_label = solver_def.label
-
-        log_step(f"Solved using solver '{solver_def.label}'.")
-
-        st.success("Best-fit matching computed")
+        st.success("Solution computed")
         st.table(st.session_state.solution_rows)
 
         # ==================================================
-        # AI summary
+        # AI summary + ZIP
         # ==================================================
         st.divider()
         st.subheader("AI-generated explanation")
@@ -239,28 +234,20 @@ def render(step: int):
             session = OptimizationSession(
                 problem_family="Assignment",
                 problem_type=st.session_state.assignment_type,
-                problem_variant=st.session_state.assignment_variant,
+                problem_variant="generic_assignment",
                 steps=st.session_state.journey,
-                data_description=(
-                    f"Data source: {describe_data_source(st.session_state.data_source)}"
-                ),
-                solver_name=st.session_state.solver_label,
+                data_description=describe_data_source(st.session_state.data_source),
+                solver_name=st.session_state.solver.label,
+                result_summary=f"{len(st.session_state.solution)} assignments.",
                 config_summary=(
+                    f"Objective: {st.session_state.objective_mode}, "
                     f"Reward: {cfg.reward_mode}, "
-                    f"Penalty: {cfg.penalty_mode}, "
-                    f"Penalty weight: {cfg.penalty_weight}, "
-                    f"Max per left: {cfg.max_assignments_per_left}, "
-                    f"Max per right: {cfg.max_assignments_per_right}"
-                ),
-                result_summary=(
-                    f"{len(st.session_state.solution)} "
-                    f"{st.session_state.left_label.lower()} optimally matched."
+                    f"Penalty: {cfg.penalty_mode}"
                 ),
             )
 
-            ai_summary = generate_ai_summary(session)
-            st.session_state.ai_summary = ai_summary
-            st.markdown(ai_summary)
+            st.session_state.ai_summary = generate_ai_summary(session)
+            st.markdown(st.session_state.ai_summary)
 
         if "ai_summary" in st.session_state:
             zip_bytes = build_results_zip(
@@ -268,14 +255,14 @@ def render(step: int):
                 ai_summary=st.session_state.ai_summary,
                 metadata={
                     "solver": st.session_state.solver_label,
-                    "variant": st.session_state.assignment_variant,
+                    "variant": "generic_assignment",
                 },
             )
 
             st.download_button(
                 "Download results",
                 data=zip_bytes,
-                file_name="best_fit_results.zip",
+                file_name="assignment_results.zip",
                 mime="application/zip",
             )
 

@@ -3,7 +3,7 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from typing import Type, List
+from typing import Type
 
 from solvers.base import Solver
 from solvers.assignment.skills.ortools_cp_sat import ORToolsSkillAssignmentSolver
@@ -15,7 +15,6 @@ class SolverDefinition:
     label: str
     description: str
     solver_class: Type[Solver]
-    supported_variants: List[str]
 
 
 SOLVERS = {
@@ -23,18 +22,10 @@ SOLVERS = {
         key="ortools_cp_sat",
         label="OR-Tools CP-SAT",
         description=(
-            "Constraint Programming solver suitable for combinatorial "
-            "skill-based assignment problems."
+            "Constraint Programming solver suitable for "
+            "skill-based assignment problems with configurable behavior "
+            "(matching, coverage, hybrid, constraints)."
         ),
         solver_class=ORToolsSkillAssignmentSolver,
-        supported_variants=[
-            "skills_coverage",
-            "skills_best_fit",
-            "skills_team",
-            "skills_portfolio",
-        ],
     ),
-
-    # Later:
-    # "gurobi_mip": SolverDefinition(...)
 }

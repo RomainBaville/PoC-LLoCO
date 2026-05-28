@@ -6,96 +6,32 @@ from ortools.sat.python import cp_model
 
 from solvers.base import Solver
 from domain.assignment.skills.scoring import ScoringEngine
-from domain.assignment.skills.coverage import SkillCoverageAssignment
-from domain.assignment.skills.best_fit import SkillBestFitAssignment
-from domain.assignment.skills.team import SkillTeamAssignment
-from domain.assignment.skills.portfolio import SkillPortfolioSelection
+
+from solvers.assignment.skills.constraints import (
+    apply_left_constraints,
+    apply_right_constraints,
+)
+
+from solvers.assignment.skills.coverage_constraints import (
+    apply_coverage_constraints,
+)
 
 
 class ORToolsSkillAssignmentSolver(Solver):
     """
-    OR-Tools CP-SAT solver for all skill-based assignment variants.
+    Generic OR-Tools CP-SAT solver for skill-based assignment problems.
+
+    Behavior (coverage, best-fit, hybrid, constraints) is controlled
+    entirely via problem.config.
     """
 
     def solve(self, problem):
-        if isinstance(problem, SkillCoverageAssignment):
-            return self._solve_coverage(problem)
-
-        if isinstance(problem, SkillBestFitAssignment):
-            return self._solve_best_fit(problem)
-
-        if isinstance(problem, SkillTeamAssignment):
-            raise NotImplementedError(
-                "Team-based skill assignment not implemented yet"
-            )
-
-        if isinstance(problem, SkillPortfolioSelection):
-            raise NotImplementedError(
-                "Skill portfolio selection not implemented yet"
-            )
-
-        raise TypeError(
-            f"Unsupported problem type: {type(problem).__name__}"
-        )
-
-    # --------------------------------------------------
-    # Coverage variant
-    # --------------------------------------------------
-    def _solve_coverage(self, problem: SkillCoverageAssignment):
         problem.validate()
+
         model = cp_model.CpModel()
-
-        x = {
-            (l, r): model.NewBoolVar(f"x_{l}_{r}")
-            for l in problem.left_entities
-            for r in problem.right_entities
-        }
-
-        for l in problem.left_entities:
-            model.Add(
-                sum(x[l, r] for r in problem.right_entities)
-                <= problem.max_assignments_per_left
-            )
-
-        for r in problem.right_entities:
-            for s in problem.skills:
-                model.Add(
-                    sum(
-                        problem.left_skills[(l, s)] * x[l, r]
-                        for l in problem.left_entities
-                    )
-                    >= problem.right_requirements[(r, s)]
-                )
-
-        model.Maximize(
-            sum(
-                problem.left_skills[(l, s)] * x[l, r]
-                for l, r in x
-                for s in problem.skills
-            )
-        )
-
-        solver = cp_model.CpSolver()
-        status = solver.Solve(model)
-
-        if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-            raise RuntimeError("No feasible assignment found")
-
-        return {
-            l: r for (l, r) in x if solver.Value(x[l, r]) == 1
-        }
-
-    # --------------------------------------------------
-    # Best-fit variant
-    # --------------------------------------------------
-    def _solve_best_fit(self, problem: SkillBestFitAssignment):
-        problem.validate()
-        model = cp_model.CpModel()
-
-        cfg = problem.config
 
         # --------------------------------------------------
-        # Decision variables
+        # Variables
         # --------------------------------------------------
         x = {
             (l, r): model.NewBoolVar(f"x_{l}_{r}")
@@ -104,34 +40,21 @@ class ORToolsSkillAssignmentSolver(Solver):
         }
 
         # --------------------------------------------------
-        # LEFT constraints
+        # Constraints (modular)
         # --------------------------------------------------
-        for l in problem.left_entities:
-            model.Add(
-                sum(x[l, r] for r in problem.right_entities)
-                <= cfg.max_assignments_per_left
-            )
+        apply_left_constraints(model, x, problem)
+        apply_right_constraints(model, x, problem)
+        apply_coverage_constraints(model, x, problem)
 
         # --------------------------------------------------
-        # RIGHT constraints
+        # Objective (scoring engine)
         # --------------------------------------------------
-        if cfg.max_assignments_per_right is not None:
-            for r in problem.right_entities:
-                model.Add(
-                    sum(x[l, r] for l in problem.left_entities)
-                    <= cfg.max_assignments_per_right
-                )
-
-        # --------------------------------------------------
-        # Objective
-        # --------------------------------------------------
-        engine = ScoringEngine(cfg)
+        engine = ScoringEngine(problem.config)
 
         model.Maximize(
             sum(
                 engine.compute(problem, l, r) * x[l, r]
-                for l in problem.left_entities
-                for r in problem.right_entities
+                for (l, r) in x
             )
         )
 
@@ -144,6 +67,9 @@ class ORToolsSkillAssignmentSolver(Solver):
         if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             raise RuntimeError("No feasible assignment found")
 
+        # --------------------------------------------------
+        # Extract solution
+        # --------------------------------------------------
         return {
             l: r for (l, r) in x if solver.Value(x[l, r]) == 1
         }

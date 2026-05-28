@@ -5,14 +5,18 @@
 from dataclasses import dataclass
 from typing import Callable, Type
 
-from domain.assignment.skills.coverage import SkillCoverageAssignment
-from domain.assignment.skills.best_fit import ( SkillBestFitAssignment, BestFitConfig )
-from domain.assignment.skills.team import SkillTeamAssignment
-from domain.assignment.skills.portfolio import SkillPortfolioSelection
+from domain.assignment.skills.generic import SkillAssignmentProblem
+from domain.assignment.config import AssignmentModelConfig
 
 
 @dataclass
-class AssignmentVariant:
+class AssignmentModel:
+    """
+    Definition of a configurable assignment model.
+
+    There is only ONE model per assignment type.
+    All behavior is controlled through config.
+    """
     key: str
     label: str
     description: str
@@ -22,98 +26,44 @@ class AssignmentVariant:
 
 
 # --------------------------------------------------
-# Builder functions (kept close to variant metadata)
+# GENERIC ASSIGNMENT BUILDER
 # --------------------------------------------------
 
-def build_skills_coverage(data):
-    return SkillCoverageAssignment(
-        **data,
-        max_assignments_per_left=1,
-    )
+def build_assignment(data):
+    """
+    Build a generic skill-based assignment problem.
 
+    Behavior (coverage, best-fit, hybrid, constraints)
+    is configured later via UI → config.
+    """
+    config = AssignmentModelConfig()
 
-
-def build_skills_best_fit(data):
-    config = BestFitConfig(
-        max_assignments_per_left=1,
-        max_assignments_per_right=1,
-        reward_mode="min",
-        penalty_mode=None,
-        penalty_weight=1.0,
-    )
-
-    return SkillBestFitAssignment(
+    problem = SkillAssignmentProblem(
         left_entities=data["left_entities"],
         right_entities=data["right_entities"],
         skills=data["skills"],
         left_skills=data["left_skills"],
-        target_preferences=data["right_requirements"],
+        right_requirements=data["right_requirements"],
         config=config,
     )
 
+    problem.validate()
 
-
-def build_skills_team(data):
-    return SkillTeamAssignment(
-        **data,
-        team_requirements=data["right_requirements"],
-        min_team_size={r: 1 for r in data["right_entities"]},
-        max_team_size={r: len(data["left_entities"]) for r in data["right_entities"]},
-    )
-
-
-def build_skills_portfolio(data):
-    skill_requirements = {
-        s: max(
-            data["right_requirements"].get((r, s), 0)
-            for r in data["right_entities"]
-        )
-        for s in data["skills"]
-    }
-
-    return SkillPortfolioSelection(
-        left_entities=data["left_entities"],
-        skills=data["skills"],
-        left_skills=data["left_skills"],
-        skill_requirements=skill_requirements,
-    )
+    return problem
 
 
 # --------------------------------------------------
-# Variant registry
+# SINGLE MODEL ENTRY POINT
 # --------------------------------------------------
 
-VARIANTS = {
-    "coverage": AssignmentVariant(
-        key="coverage",
-        label="Skill coverage",
-        description="Assign entities so that all required skills are fully covered",
-        render_fn="ui.problems.assignment.skills.ui_coverage.render",
-        domain_class=SkillCoverageAssignment,
-        builder_fn=build_skills_coverage,
+ASSIGNMENT_MODEL = AssignmentModel(
+    key="skills_assignment",
+    label="Skill-based assignment",
+    description=(
+        "Assign entities based on skills with configurable behavior: "
+        "matching quality, requirement satisfaction, and constraints."
     ),
-    "best_fit": AssignmentVariant(
-        key="best_fit",
-        label="Best-fit matching",
-        description="Match entities to maximize skill compatibility",
-        render_fn="ui.problems.assignment.skills.ui_best_fit.render",
-        domain_class=SkillBestFitAssignment,
-        builder_fn=build_skills_best_fit,
-    ),
-    "team": AssignmentVariant(
-        key="team",
-        label="Team formation",
-        description="Form multi-person teams that jointly cover skills",
-        render_fn="ui.problems.assignment.skills.ui_team.render",
-        domain_class=SkillTeamAssignment,
-        builder_fn=build_skills_team,
-    ),
-    "portfolio": AssignmentVariant(
-        key="portfolio",
-        label="Skill portfolio selection",
-        description="Select a subset of entities whose skills cover requirements",
-        render_fn="ui.problems.assignment.skills.ui_portfolio.render",
-        domain_class=SkillPortfolioSelection,
-        builder_fn=build_skills_portfolio,
-    ),
-}
+    render_fn="ui.problems.assignment.skills.ui_skills.render",
+    domain_class=SkillAssignmentProblem,
+    builder_fn=build_assignment,
+)

@@ -101,7 +101,7 @@ class ScoringEngine:
 
         for s in problem.skills:
             left_val = problem.left_skills[(l, s)]
-            target_val = problem.target_preferences[(r, s)]
+            target_val = problem.right_requirements[(r, s)]
 
             # reward
             reward_fn = SCORING_FUNCTIONS[self.config.reward_mode]

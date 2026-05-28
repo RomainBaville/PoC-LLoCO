@@ -8,8 +8,10 @@ from domain.entity_registry import EntityRegistry
 
 def build_problem(state, left_rows, right_rows):
     """
-    Generic builder for skill-based assignment problems.
-    Completely registry-driven.
+    Build a generic assignment problem from raw CSV data.
+
+    This function is type-driven (skills, cost, etc.),
+    not variant-driven anymore.
     """
 
     # ---------------------------------------------
@@ -42,21 +44,16 @@ def build_problem(state, left_rows, right_rows):
             right_requirements[(right_id, skill)] = int(row.get(skill, 0))
 
     # ---------------------------------------------
-    # Resolve variant registry dynamically
+    # Build domain problem via TYPE registry
     # ---------------------------------------------
-    assignment_type, variant_key = state.assignment_variant.split("_", 1)
+    assignment_type = state.assignment_type  # ✅ ONLY TYPE
 
     type_registry = import_module(
         f"ui.problems.assignment.{assignment_type}.registry"
     )
-    variant = type_registry.VARIANTS.get(variant_key)
 
-    if not variant:
-        raise ValueError(f"Unknown assignment variant: {state.assignment_variant}")
+    model = type_registry.ASSIGNMENT_MODEL
 
-    # ---------------------------------------------
-    # Build domain problem via variant builder
-    # ---------------------------------------------
     problem_data = {
         "left_entities": left_entities,
         "right_entities": right_entities,
@@ -65,6 +62,6 @@ def build_problem(state, left_rows, right_rows):
         "right_requirements": right_requirements,
     }
 
-    problem = variant.builder_fn(problem_data)
+    problem = model.builder_fn(problem_data)
 
     return problem, left_registry.labels
