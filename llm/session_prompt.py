@@ -25,6 +25,10 @@ def build_session_summary_prompt(session: OptimizationSession) -> str:
             f"- {k}: {v}" for k, v in session.result_details.items()
         )
 
+    config_text = ""
+    if session.config_summary:
+        config_text = f"\n\nConfiguration:\n{session.config_summary}"
+
     return f"""
 You are an expert optimization analyst.
 
@@ -51,6 +55,7 @@ Solver:
 
 Result summary:
 {session.result_summary}
+{config_text}
 {details_text}
 
 Guidelines:

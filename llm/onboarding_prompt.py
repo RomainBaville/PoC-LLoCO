@@ -18,6 +18,7 @@ def build_onboarding_prompt(user_description: str) -> str:
     """
 
     context = build_onboarding_context()
+    scoring_text = ", ".join(context.get("scoring_functions", []))
 
     # -------------------------------
     # Assignment types & variants
@@ -55,11 +56,24 @@ Assignment types and available formulations:
 Available solvers:
 {solver_text}
 
+Scoring functions available for advanced matching:
+{scoring_text}
+
+Important concept:
+For best-fit assignment, the platform allows configuring how matches are evaluated:
+- a reward function (what makes a match valuable)
+- an optional penalty function (what should be avoided)
+- weights and configuration for fine-tuning behavior
+
 Explain clearly:
 - how the platform can model such problems
-- how the user will progressively choose the problem type,
-  formulation, data, and solver
-- why choosing an appropriate solver matters
+- how the user will progressively choose:
+  1. problem type
+  2. formulation
+  3. data
+  4. configuration (matching behavior)
+  5. solver
+- why configuration and scoring choices impact the result
 
 Guidelines:
 - Do NOT invent capabilities

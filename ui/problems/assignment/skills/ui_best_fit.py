@@ -245,6 +245,13 @@ def render(step: int):
                     f"Data source: {describe_data_source(st.session_state.data_source)}"
                 ),
                 solver_name=st.session_state.solver_label,
+                config_summary=(
+                    f"Reward: {cfg.reward_mode}, "
+                    f"Penalty: {cfg.penalty_mode}, "
+                    f"Penalty weight: {cfg.penalty_weight}, "
+                    f"Max per left: {cfg.max_assignments_per_left}, "
+                    f"Max per right: {cfg.max_assignments_per_right}"
+                ),
                 result_summary=(
                     f"{len(st.session_state.solution)} "
                     f"{st.session_state.left_label.lower()} optimally matched."

@@ -31,6 +31,7 @@ class OptimizationSession:
     result_summary: str
 
     # Optional
+    config_summary: Optional[str] = None
     solver_family: Optional[str] = None
     solver_description: Optional[str] = None
     result_details: Dict[str, str] = field(default_factory=dict)
