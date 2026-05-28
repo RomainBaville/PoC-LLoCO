@@ -34,7 +34,10 @@ def build_skills_coverage(data):
 
 def build_skills_best_fit(data):
     return SkillBestFitAssignment(
-        **data,
+        left_entities=data["left_entities"],
+        right_entities=data["right_entities"],
+        skills=data["skills"],
+        left_skills=data["left_skills"],
         target_preferences=data["right_requirements"],
         max_assignments_per_left=1,
     )

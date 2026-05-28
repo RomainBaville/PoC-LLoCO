@@ -20,3 +20,7 @@ class SkillBestFitAssignment(SkillAssignmentProblem):
         for l in self.left_entities:
             for s in self.skills:
                 self.left_skills.setdefault((l, s), 0)
+
+        for r in self.right_entities:
+            for s in self.skills:
+                self.target_preferences.setdefault((r, s), 0)

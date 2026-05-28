@@ -132,32 +132,34 @@ def render(step: int):
         _, left_rows = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
         _, right_rows = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
 
-        problem, left_labels = build_problem(
-            st.session_state, left_rows, right_rows
-        )
+        if "solution" not in st.session_state:
 
-        assignment_type, _ = st.session_state.assignment_variant.split("_", 1)
-        solver_group = ASSIGNMENT_SOLVER_GROUPS[assignment_type]
-        solver_registry = import_module(solver_group.registry_module)
+            problem, left_labels = build_problem(
+                st.session_state, left_rows, right_rows
+            )
 
-        solver_def = solver_registry.SOLVERS[st.session_state.solver_key]
-        solver = solver_def.solver_class()
+            assignment_type, _ = st.session_state.assignment_variant.split("_", 1)
+            solver_group = ASSIGNMENT_SOLVER_GROUPS[assignment_type]
+            solver_registry = import_module(solver_group.registry_module)
 
-        with st.spinner("Solving optimization problem..."):
-            solution = solver.solve(problem)
+            solver_def = solver_registry.SOLVERS[st.session_state.solver_key]
+            solver = solver_def.solver_class()
 
-        st.session_state.solution = solution
-        st.session_state.left_labels = left_labels
-        st.session_state.solution_rows = [
-            {
-                st.session_state.left_label: left_labels[l],
-                st.session_state.right_label: r,
-            }
-            for l, r in solution.items()
-        ]
-        st.session_state.solver_label = solver_def.label
+            with st.spinner("Solving optimization problem..."):
+                solution = solver.solve(problem)
 
-        log_step(f"Solved using solver '{solver_def.label}'.")
+            st.session_state.solution = solution
+            st.session_state.left_labels = left_labels
+            st.session_state.solution_rows = [
+                {
+                    st.session_state.left_label: left_labels[l],
+                    st.session_state.right_label: r,
+                }
+                for l, r in solution.items()
+            ]
+            st.session_state.solver_label = solver_def.label
+
+            log_step(f"Solved using solver '{solver_def.label}'.")
 
         st.success("Solution found")
         st.table(st.session_state.solution_rows)
@@ -165,18 +167,20 @@ def render(step: int):
         # ==================================================
         # AI summary & download
         # ==================================================
-        st.header("AI-generated explanation")
+
+        st.divider()
+        st.subheader("AI-generated explanation")
 
         if st.button("Generate AI summary"):
             session = OptimizationSession(
                 problem_family="Assignment",
+                problem_type=st.session_state.assignment_type,
                 problem_variant=st.session_state.assignment_variant,
                 steps=st.session_state.journey,
                 data_description=(
                     f"Data source: {describe_data_source(st.session_state.data_source)}"
                 ),
                 solver_name=st.session_state.solver_label,
-                solver_type="Constraint Programming",
                 result_summary=(
                     f"{len(st.session_state.solution)} "
                     f"{st.session_state.left_label.lower()} assigned."
