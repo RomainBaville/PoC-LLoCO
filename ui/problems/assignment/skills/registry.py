@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Callable, Type
 
 from domain.assignment.skills.coverage import SkillCoverageAssignment
-from domain.assignment.skills.best_fit import SkillBestFitAssignment
+from domain.assignment.skills.best_fit import ( SkillBestFitAssignment, BestFitConfig )
 from domain.assignment.skills.team import SkillTeamAssignment
 from domain.assignment.skills.portfolio import SkillPortfolioSelection
 
@@ -32,15 +32,25 @@ def build_skills_coverage(data):
     )
 
 
+
 def build_skills_best_fit(data):
+    config = BestFitConfig(
+        max_assignments_per_left=1,
+        max_assignments_per_right=1,
+        reward_mode="min",
+        penalty_mode=None,
+        penalty_weight=1.0,
+    )
+
     return SkillBestFitAssignment(
         left_entities=data["left_entities"],
         right_entities=data["right_entities"],
         skills=data["skills"],
         left_skills=data["left_skills"],
         target_preferences=data["right_requirements"],
-        max_assignments_per_left=1,
+        config=config,
     )
+
 
 
 def build_skills_team(data):

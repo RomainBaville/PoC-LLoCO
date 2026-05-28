@@ -5,6 +5,7 @@
 from ortools.sat.python import cp_model
 
 from solvers.base import Solver
+from domain.assignment.skills.scoring import ScoringEngine
 from domain.assignment.skills.coverage import SkillCoverageAssignment
 from domain.assignment.skills.best_fit import SkillBestFitAssignment
 from domain.assignment.skills.team import SkillTeamAssignment
@@ -91,29 +92,52 @@ class ORToolsSkillAssignmentSolver(Solver):
         problem.validate()
         model = cp_model.CpModel()
 
+        cfg = problem.config
+
+        # --------------------------------------------------
+        # Decision variables
+        # --------------------------------------------------
         x = {
             (l, r): model.NewBoolVar(f"x_{l}_{r}")
             for l in problem.left_entities
             for r in problem.right_entities
         }
 
+        # --------------------------------------------------
+        # LEFT constraints
+        # --------------------------------------------------
         for l in problem.left_entities:
             model.Add(
                 sum(x[l, r] for r in problem.right_entities)
-                <= problem.max_assignments_per_left
+                <= cfg.max_assignments_per_left
             )
+
+        # --------------------------------------------------
+        # RIGHT constraints
+        # --------------------------------------------------
+        if cfg.max_assignments_per_right is not None:
+            for r in problem.right_entities:
+                model.Add(
+                    sum(x[l, r] for l in problem.left_entities)
+                    <= cfg.max_assignments_per_right
+                )
+
+        # --------------------------------------------------
+        # Objective
+        # --------------------------------------------------
+        engine = ScoringEngine(cfg)
 
         model.Maximize(
             sum(
-                min(
-                    problem.left_skills[(l, s)],
-                    problem.target_preferences.get((r, s), 0),
-                ) * x[l, r]
-                for l, r in x
-                for s in problem.skills
+                engine.compute(problem, l, r) * x[l, r]
+                for l in problem.left_entities
+                for r in problem.right_entities
             )
         )
 
+        # --------------------------------------------------
+        # Solve
+        # --------------------------------------------------
         solver = cp_model.CpSolver()
         status = solver.Solve(model)
 

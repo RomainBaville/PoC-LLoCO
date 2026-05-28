@@ -17,18 +17,19 @@ from infrastructure.registry import DATA_SOURCE_REGISTRY
 from ui.problems.assignment.skills.builder import build_problem
 from llm.session_model import OptimizationSession
 from solvers.assignment.registry import ASSIGNMENT_SOLVER_GROUPS
+from domain.assignment.skills.scoring import ScoringEngine
 
 DATA_DIR = "data"
 
 
 def render(step: int):
-
-    # --------------------------------------------------
-    # Defensive defaults
-    # --------------------------------------------------
-    st.session_state.setdefault("left_label", "Candidates")
-    st.session_state.setdefault("right_label", "Targets")
+    st.session_state.setdefault("left_label", "Employees")
+    st.session_state.setdefault("right_label", "Projects")
     st.session_state.setdefault("skill_label", "Skills")
+    st.session_state.setdefault("max_left", 1)
+    st.session_state.setdefault("max_right", 1)
+    st.session_state.setdefault("use_weights", False)
+    st.session_state.setdefault("skill_weights", {})
 
     # ==================================================
     # STEP 4 — Naming
@@ -100,9 +101,51 @@ def render(step: int):
         st.stop()
 
     # ==================================================
-    # STEP 7 — Solver selection
+    # STEP 7 — Configuration
     # ==================================================
     if step == 7:
+        st.header("Configure best-fit matching")
+
+        st.session_state.max_left = st.number_input(
+            "Max assignments per left entity",
+            min_value=1,
+            value="min",
+        )
+
+        st.session_state.max_right = st.number_input(
+            "Max assignments per right entity",
+            min_value=1,
+            value="min",
+        )
+
+        st.session_state.reward_mode = st.selectbox(
+            "Reward scoring",
+            ["min", "product", "ratio", "threshold", "sqrt_product", "log_product", "soft_min"]
+        )
+        st.session_state.penalty_mode = st.selectbox(
+            "Penalty scoring (optional)",
+            [None, "shortfall", "absdiff", "relative_shortfall", "squared_diff", "shortfall_squared", "overqualification", "log_shortfall"]
+        )
+        st.session_state.penalty_weight = st.number_input(
+            "Penalty weight",
+            value=1.0
+        )
+
+        st.session_state.use_weights = st.checkbox("Use skill weights")
+
+        if st.session_state.use_weights:
+            weights = {}
+            for s in st.session_state.get("skill_cols", []):
+                weights[s] = st.number_input(f"Weight for {s}", value=1.0)
+            st.session_state.skill_weights = weights
+
+        navigation_buttons()
+        st.stop()
+
+    # ==================================================
+    # STEP 8 — Solver selection
+    # ==================================================
+    if step == 8:
         st.header("Choose solver")
 
         assignment_type, _ = st.session_state.assignment_variant.split("_", 1)
@@ -126,43 +169,62 @@ def render(step: int):
         st.stop()
 
     # ==================================================
-    # STEP 8 — Solve
+    # STEP 9 — Solve
     # ==================================================
-    if step == 8:
+    if step == 9:
         loader = DATA_SOURCE_REGISTRY[st.session_state.data_source].loader_factory()
         _, left_rows = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
         _, right_rows = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
 
-        if "solution" not in st.session_state:
 
-            problem, left_labels = build_problem(
-                st.session_state, left_rows, right_rows
-            )
+        problem, left_labels = build_problem(
+            st.session_state, left_rows, right_rows
+        )
 
-            assignment_type, _ = st.session_state.assignment_variant.split("_", 1)
-            solver_group = ASSIGNMENT_SOLVER_GROUPS[assignment_type]
-            solver_registry = import_module(solver_group.registry_module)
+        # Apply config
+        cfg = problem.config
+        cfg.max_assignments_per_left = st.session_state.max_left
+        cfg.max_assignments_per_right = st.session_state.max_right
+        cfg.reward_mode = st.session_state.reward_mode
+        cfg.penalty_mode = st.session_state.penalty_mode
+        cfg.penalty_weight = st.session_state.penalty_weight
 
-            solver_def = solver_registry.SOLVERS[st.session_state.solver_key]
-            solver = solver_def.solver_class()
+        if st.session_state.use_weights:
+            cfg.skill_weights = st.session_state.skill_weights
+        else:
+            cfg.skill_weights = {s: 1 for s in problem.skills}
 
-            with st.spinner("Optimizing best-fit matching..."):
-                solution = solver.solve(problem)
+        assignment_type, _ = st.session_state.assignment_variant.split("_", 1)
+        solver_group = ASSIGNMENT_SOLVER_GROUPS[assignment_type]
+        solver_registry = import_module(solver_group.registry_module)
 
-            st.session_state.solution = solution
-            st.session_state.left_labels = left_labels
+        solver_def = solver_registry.SOLVERS[st.session_state.solver_key]
+        solver = solver_def.solver_class()
 
-            st.session_state.solution_rows = [
-                {
-                    st.session_state.left_label: left_labels[l],
-                    st.session_state.right_label: r,
-                }
-                for l, r in solution.items()
-            ]
+        with st.spinner("Optimizing best-fit matching..."):
+            solution = solver.solve(problem)
 
-            st.session_state.solver_label = solver_def.label
+        # Score computation
+        engine = ScoringEngine(cfg)
 
-            log_step(f"Solved using solver '{solver_def.label}'.")
+        def compute_score(l, r):
+            return engine.compute(problem, l, r)
+
+        st.session_state.solution = solution
+        st.session_state.left_labels = left_labels
+
+        st.session_state.solution_rows = [
+            {
+                st.session_state.left_label: left_labels[l],
+                st.session_state.right_label: r,
+                "Score": compute_score(l, r),
+            }
+            for l, r in solution.items()
+        ]
+
+        st.session_state.solver_label = solver_def.label
+
+        log_step(f"Solved using solver '{solver_def.label}'.")
 
         st.success("Best-fit matching computed")
         st.table(st.session_state.solution_rows)
