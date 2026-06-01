@@ -31,11 +31,12 @@ class AssignmentModel:
 
 def build_assignment(data):
     """
-    Build a generic skill-based assignment problem.
-
-    Behavior (coverage, best-fit, hybrid, constraints)
-    is configured later via UI → config.
+    Generic assignment builder supporting:
+    - skills
+    - cost
+    - preferences
     """
+
     config = AssignmentModelConfig()
 
     problem = SkillAssignmentProblem(
@@ -44,6 +45,8 @@ def build_assignment(data):
         skills=data["skills"],
         left_skills=data["left_skills"],
         right_requirements=data["right_requirements"],
+        costs=data.get("costs"),
+        preferences=data.get("preferences"),
         config=config,
     )
 

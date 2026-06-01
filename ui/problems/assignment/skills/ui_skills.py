@@ -9,7 +9,6 @@ from importlib import import_module
 from ui.utils import (
     navigation_buttons,
     generate_ai_summary,
-    log_step,
     describe_data_source,
     build_results_zip,
 )
@@ -31,7 +30,8 @@ def render(step: int):
     st.session_state.setdefault("right_label", "Targets")
     st.session_state.setdefault("skill_label", "Skills")
 
-    st.session_state.setdefault("objective_mode", "Maximize matching quality")
+    st.session_state.setdefault("objective", "maximize")
+
     st.session_state.setdefault("max_left", 1)
     st.session_state.setdefault("max_right", 1)
     st.session_state.setdefault("force_all", False)
@@ -40,33 +40,52 @@ def render(step: int):
     st.session_state.setdefault("penalty_mode", None)
     st.session_state.setdefault("penalty_weight", 1.0)
 
+    st.session_state.setdefault("use_skills", True)
+    st.session_state.setdefault("use_cost", False)
+    st.session_state.setdefault("use_preferences", False)
+
+    st.session_state.setdefault("cost_weight", 1.0)
+    st.session_state.setdefault("preference_weight", 1.0)
+
     # ==================================================
     # STEP 3 — Naming
     # ==================================================
     if step == 3:
-        st.header("Define entities and skills")
+        st.header("Define your entities")
+
+        st.markdown(
+            "Give meaningful names to your entities to make the results easier to understand."
+        )
 
         st.session_state.left_label = st.text_input(
-            "Left entities", st.session_state.left_label
+            "Left entities (e.g. Employees)", st.session_state.left_label
         )
         st.session_state.right_label = st.text_input(
-            "Right entities", st.session_state.right_label
+            "Right entities (e.g. Projects)", st.session_state.right_label
         )
         st.session_state.skill_label = st.text_input(
-            "Skill label", st.session_state.skill_label
+            "Feature name (e.g. Skills, Metrics)", st.session_state.skill_label
         )
 
         navigation_buttons()
         st.stop()
 
     # ==================================================
-    # STEP 4 — CSV
+    # STEP 4 — CSV selection
     # ==================================================
     if step == 4:
-        csv_files = sorted(f for f in os.listdir(DATA_DIR) if f.endswith(".csv"))
+        st.header("Select your datasets")
 
-        st.session_state.left_csv = st.selectbox("Left CSV", csv_files)
-        st.session_state.right_csv = st.selectbox("Right CSV", csv_files)
+        st.markdown(
+            "Choose files containing your entities and their attributes."
+        )
+
+        csv_files = sorted(
+            f for f in os.listdir(DATA_DIR) if f.endswith(".csv")
+        )
+
+        st.session_state.left_csv = st.selectbox("Left dataset", csv_files)
+        st.session_state.right_csv = st.selectbox("Right dataset", csv_files)
 
         navigation_buttons()
         st.stop()
@@ -75,91 +94,164 @@ def render(step: int):
     # STEP 5 — Mapping
     # ==================================================
     if step == 5:
-        loader = DATA_SOURCE_REGISTRY[st.session_state.data_source].loader_factory()
+        st.header("Map your data")
 
-        left_cols, _ = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
-        right_cols, _ = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
+        loader = DATA_SOURCE_REGISTRY[
+            st.session_state.data_source
+        ].loader_factory()
 
-        st.session_state.left_id_cols = st.multiselect("Left IDs", left_cols)
+        left_cols, _ = loader.load(
+            os.path.join(DATA_DIR, st.session_state.left_csv)
+        )
+        right_cols, _ = loader.load(
+            os.path.join(DATA_DIR, st.session_state.right_csv)
+        )
+
+        st.markdown(
+            "Select identifiers and features used for optimization."
+        )
+
+        st.session_state.left_id_cols = st.multiselect(
+            "Columns identifying left entities", left_cols
+        )
 
         st.session_state.skill_cols = st.multiselect(
-            "Skill columns",
+            "Feature columns (skills / metrics)",
             [c for c in left_cols if c not in st.session_state.left_id_cols],
         )
 
-        st.session_state.right_id_col = st.selectbox("Right ID", right_cols)
+        st.session_state.right_id_col = st.selectbox(
+            "Right entity identifier", right_cols
+        )
 
         navigation_buttons()
         st.stop()
 
     # ==================================================
-    # STEP 6 — CONFIGURATION
+    # STEP 6 — Configuration
     # ==================================================
     if step == 6:
-        st.header("Configure assignment model")
+        st.header("Define your optimization strategy")
 
-        st.subheader("Objective")
-
-        st.session_state.objective_mode = st.radio(
-            "What is your goal?",
-            [
-                "Maximize matching quality",
-                "Ensure all requirements are satisfied",
-                "Balance both (recommended)",
-            ]
+        st.markdown(
+            "We will guide you through a few simple choices."
         )
 
-        st.subheader("Assignment rules")
+        # -----------------------------
+        # Objective
+        # -----------------------------
+        st.subheader("1. Objective")
+
+        choice = st.radio(
+            "What do you want to optimize?",
+            [
+                "Best matching (skills / compatibility)",
+                "Lowest cost / effort",
+                "Hybrid (combine multiple factors)",
+            ],
+        )
+
+        if "matching" in choice.lower():
+            st.session_state.objective = "maximize"
+            st.session_state.use_skills = True
+            st.session_state.use_cost = False
+
+        elif "cost" in choice.lower():
+            st.session_state.objective = "minimize"
+            st.session_state.use_cost = True
+            st.session_state.use_skills = False
+
+        else:
+            st.session_state.objective = "maximize"
+            st.session_state.use_cost = True
+            st.session_state.use_skills = True
+
+        st.info(
+            "Matching = ensures best compatibility\n"
+            "Cost = minimizes expenses or time\n"
+            "Hybrid = balances both"
+        )
+
+        # -----------------------------
+        # Assignment rules
+        # -----------------------------
+        st.subheader("2. Assignment rules")
 
         st.session_state.max_left = st.number_input(
-            "Max assignments per left entity",
-            min_value=1,
-            value=st.session_state.max_left,
+            "Max assignments per left entity", 1, 10, st.session_state.max_left
         )
 
         st.session_state.max_right = st.number_input(
-            "Max assignments per right entity",
-            min_value=1,
-            value=st.session_state.max_right,
+            "Capacity per right entity", 1, 10, st.session_state.max_right
         )
 
         st.session_state.force_all = st.checkbox(
-            "Assign all left entities",
+            "Force assignment of all entities",
             value=st.session_state.force_all,
         )
 
-        st.subheader("Matching behavior")
+        # -----------------------------
+        # Scoring
+        # -----------------------------
+        st.subheader("3. Scoring behavior")
 
-        st.session_state.reward_mode = st.selectbox(
-            "Reward function",
-            ["min", "product", "sqrt_product", "ratio"],
-        )
+        if st.session_state.use_skills:
+            st.markdown("**Feature matching**")
 
-        st.session_state.penalty_mode = st.selectbox(
-            "Penalty function",
-            [None, "shortfall", "relative_shortfall", "absdiff"],
-        )
+            st.session_state.reward_mode = st.selectbox(
+                "Compatibility evaluation",
+                ["min", "product", "ratio"],
+            )
 
-        if st.session_state.penalty_mode:
-            st.session_state.penalty_weight = st.slider(
-                "Penalty weight",
+            st.session_state.penalty_mode = st.selectbox(
+                "Penalty (optional)",
+                [None, "shortfall", "absdiff"],
+            )
+
+            if st.session_state.penalty_mode:
+                st.session_state.penalty_weight = st.slider(
+                    "Penalty importance",
+                    0.0,
+                    5.0,
+                    st.session_state.penalty_weight,
+                )
+
+        if st.session_state.use_cost:
+            st.markdown("**Cost importance**")
+
+            st.session_state.cost_weight = st.slider(
+                "Cost weight",
                 0.0,
                 5.0,
-                st.session_state.penalty_weight,
+                st.session_state.cost_weight,
             )
+
+        # -----------------------------
+        # Advanced
+        # -----------------------------
+        with st.expander("4. Advanced options"):
+            st.session_state.use_preferences = st.checkbox(
+                "Include preference scoring"
+            )
+
+            if st.session_state.use_preferences:
+                st.session_state.preference_weight = st.slider(
+                    "Preference importance",
+                    0.0,
+                    5.0,
+                    st.session_state.preference_weight,
+                )
 
         navigation_buttons()
         st.stop()
 
     # ==================================================
-    # STEP 7 — Solver selection
+    # STEP 7 — Solver
     # ==================================================
     if step == 7:
         st.header("Choose solver")
 
-        assignment_type = "skills"
-
-        solver_group = ASSIGNMENT_SOLVER_GROUPS[assignment_type]
+        solver_group = ASSIGNMENT_SOLVER_GROUPS["skills"]
         solver_registry = import_module(solver_group.registry_module)
 
         for _, solver in solver_registry.SOLVERS.items():
@@ -171,13 +263,20 @@ def render(step: int):
         st.stop()
 
     # ==================================================
-    # STEP 8 — Solve
+    # STEP 8 — Solve + Results
     # ==================================================
     if step == 8:
-        loader = DATA_SOURCE_REGISTRY[st.session_state.data_source].loader_factory()
-        _, left_rows = loader.load(os.path.join(DATA_DIR, st.session_state.left_csv))
-        _, right_rows = loader.load(os.path.join(DATA_DIR, st.session_state.right_csv))
 
+        loader = DATA_SOURCE_REGISTRY[
+            st.session_state.data_source
+        ].loader_factory()
+
+        _, left_rows = loader.load(
+            os.path.join(DATA_DIR, st.session_state.left_csv)
+        )
+        _, right_rows = loader.load(
+            os.path.join(DATA_DIR, st.session_state.right_csv)
+        )
 
         problem, left_labels = build_problem(
             st.session_state, left_rows, right_rows
@@ -185,38 +284,34 @@ def render(step: int):
 
         cfg = problem.config
 
+        # Apply config
         cfg.max_assignments_per_left = st.session_state.max_left
         cfg.max_assignments_per_right = st.session_state.max_right
         cfg.force_all_left_assigned = st.session_state.force_all
+
+        cfg.objective = st.session_state.objective
+
+        cfg.use_cost = st.session_state.use_cost
+        cfg.use_preferences = st.session_state.use_preferences
+
+        cfg.cost_weight = st.session_state.cost_weight
+        cfg.preference_weight = st.session_state.preference_weight
 
         cfg.reward_mode = st.session_state.reward_mode
         cfg.penalty_mode = st.session_state.penalty_mode
         cfg.penalty_weight = st.session_state.penalty_weight
 
-        if st.session_state.objective_mode == "Ensure all requirements are satisfied":
-            cfg.enforce_full_coverage = True
-        elif st.session_state.objective_mode == "Balance both (recommended)":
-            cfg.enforce_full_coverage = False
-            cfg.penalty_mode = "shortfall"
-            cfg.penalty_weight = 2.0
-        else:
-            cfg.enforce_full_coverage = False
-
+        # Solve
         with st.spinner("Optimizing..."):
             solution = st.session_state.solver.solver_class().solve(problem)
 
         engine = ScoringEngine(cfg)
 
-        def compute_score(l, r):
-            return engine.compute(problem, l, r)
-
-        st.session_state.solution = solution
-
         st.session_state.solution_rows = [
             {
                 st.session_state.left_label: left_labels[l],
                 st.session_state.right_label: r,
-                "Score": compute_score(l, r),
+                "Score": engine.compute(problem, l, r),
             }
             for l, r in solution.items()
         ]
@@ -224,43 +319,42 @@ def render(step: int):
         st.success("Solution computed")
         st.table(st.session_state.solution_rows)
 
-        # ==================================================
-        # AI summary + ZIP
-        # ==================================================
+        # ---------------------------------------------
+        # AI explanation
+        # ---------------------------------------------
         st.divider()
-        st.subheader("AI-generated explanation")
+        st.subheader("AI explanation")
 
-        if st.button("Generate AI summary"):
+        if st.button("Generate explanation"):
             session = OptimizationSession(
                 problem_family="Assignment",
                 problem_type=st.session_state.assignment_type,
-                problem_variant="generic_assignment",
+                problem_variant="generic",
                 steps=st.session_state.journey,
-                data_description=describe_data_source(st.session_state.data_source),
-                solver_name=st.session_state.solver.label,
-                result_summary=f"{len(st.session_state.solution)} assignments.",
-                config_summary=(
-                    f"Objective: {st.session_state.objective_mode}, "
-                    f"Reward: {cfg.reward_mode}, "
-                    f"Penalty: {cfg.penalty_mode}"
+                data_description=describe_data_source(
+                    st.session_state.data_source
                 ),
+                solver_name=st.session_state.solver.label,
+                result_summary=f"{len(solution)} assignments",
+                config_summary=f"Objective: {cfg.objective}",
             )
 
             st.session_state.ai_summary = generate_ai_summary(session)
             st.markdown(st.session_state.ai_summary)
 
         if "ai_summary" in st.session_state:
+
             zip_bytes = build_results_zip(
                 solution_rows=st.session_state.solution_rows,
                 ai_summary=st.session_state.ai_summary,
                 metadata={
-                    "solver": st.session_state.solver_label,
-                    "variant": "generic_assignment",
+                    "solver": st.session_state.solver.label,
+                    "type": "assignment",
                 },
             )
 
             st.download_button(
-                "Download results",
+                "Download results (ZIP)",
                 data=zip_bytes,
                 file_name="assignment_results.zip",
                 mime="application/zip",

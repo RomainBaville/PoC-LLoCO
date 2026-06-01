@@ -9,23 +9,34 @@ from typing import Optional, Dict, List, Tuple
 @dataclass
 class AssignmentModelConfig:
     # -----------------------------
-    # Structure
+    # STRUCTURE
     # -----------------------------
     max_assignments_per_left: int = 1
     max_assignments_per_right: Optional[int] = None
-    force_all_left_assigned: bool = False
     min_assignments_per_right: Optional[int] = None
+    force_all_left_assigned: bool = False
 
     # -----------------------------
-    # Objective
+    # OBJECTIVE
     # -----------------------------
+    objective: str = "maximize"
+
     reward_mode: str = "min"
     penalty_mode: Optional[str] = None
     penalty_weight: float = 1.0
     skill_weights: Optional[Dict[str, float]] = None
 
     # -----------------------------
-    # Advanced
+    # SCORING EXTENSIONS
+    # -----------------------------
+    use_cost: bool = False
+    use_preferences: bool = False
+
+    cost_weight: float = 1.0
+    preference_weight: float = 1.0
+
+    # -----------------------------
+    # ADVANCED LOGIC
     # -----------------------------
     use_demand_penalty: bool = False
     demand_weight: float = 1.0
@@ -34,6 +45,21 @@ class AssignmentModelConfig:
     balance_weight: float = 0.0
 
     # -----------------------------
-    # Coverage behavior
+    # LOGICAL CONSTRAINTS
+    # -----------------------------
+    mutual_exclusion: Optional[
+        List[Tuple[Tuple[str, str], Tuple[str, str]]]
+    ] = None
+
+    implications: Optional[
+        List[Tuple[Tuple[str, str], Tuple[str, str]]]
+    ] = None
+
+    group_limits: Optional[
+        List[Tuple[List[Tuple[str, str]], int]]
+    ] = None
+
+    # -----------------------------
+    # COVERAGE
     # -----------------------------
     enforce_full_coverage: bool = False

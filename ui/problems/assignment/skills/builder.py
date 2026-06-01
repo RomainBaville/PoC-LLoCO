@@ -46,7 +46,7 @@ def build_problem(state, left_rows, right_rows):
     # ---------------------------------------------
     # Build domain problem via TYPE registry
     # ---------------------------------------------
-    assignment_type = state.assignment_type  # ✅ ONLY TYPE
+    assignment_type = state.assignment_type
 
     type_registry = import_module(
         f"ui.problems.assignment.{assignment_type}.registry"
@@ -60,6 +60,8 @@ def build_problem(state, left_rows, right_rows):
         "skills": state.skill_cols,
         "left_skills": left_skills,
         "right_requirements": right_requirements,
+        "costs": getattr(state, "costs", None),
+        "preferences": getattr(state, "preferences", None),
     }
 
     problem = model.builder_fn(problem_data)

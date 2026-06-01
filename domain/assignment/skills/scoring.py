@@ -97,17 +97,30 @@ class ScoringEngine:
         self.config = config
 
     def compute(self, problem, l, r):
+
         total = 0
 
+        # ---------------------------------
+        # COST SCORE
+        # ---------------------------------
+        if self.config.use_cost and problem.costs:
+            cost = problem.costs.get((l, r), 0)
+
+            if self.config.objective == "minimize":
+                total += -self.config.cost_weight * cost
+            else:
+                total += self.config.cost_weight * cost
+
+        # ---------------------------------
+        # SKILL SCORE
+        # ---------------------------------
         for s in problem.skills:
             left_val = problem.left_skills[(l, s)]
             target_val = problem.right_requirements[(r, s)]
 
-            # reward
             reward_fn = SCORING_FUNCTIONS[self.config.reward_mode]
             reward = reward_fn(left_val, target_val)
 
-            # penalty (optional)
             penalty = 0
             if self.config.penalty_mode:
                 penalty_fn = SCORING_FUNCTIONS[self.config.penalty_mode]
@@ -116,5 +129,12 @@ class ScoringEngine:
             weight = self.config.skill_weights.get(s, 1)
 
             total += weight * (reward + self.config.penalty_weight * penalty)
+
+        # ---------------------------------
+        # PREFERENCES
+        # ---------------------------------
+        if self.config.use_preferences and problem.preferences:
+            pref = problem.preferences.get((l, r), 0)
+            total += self.config.preference_weight * pref
 
         return int(total)
