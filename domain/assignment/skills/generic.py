@@ -32,4 +32,6 @@ class SkillAssignmentProblem:
                 self.right_requirements.setdefault((r, s), 0)
 
         if self.config.skill_weights is None:
-            self.config.skill_weights = {s: 1 for s in self.skills}
+            self.config.skill_weights = {}
+            for s in self.skills:
+                self.config.skill_weights[ s ] = 1

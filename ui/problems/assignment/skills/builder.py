@@ -3,46 +3,37 @@
 # SPDX-FileContributor: Romain Baville
 
 from importlib import import_module
-from domain.entity_registry import EntityRegistry
 
 
-def build_problem(state, left_rows, right_rows):
+def build_dict( entity_col_id, rows, extrema_col_label=None, extrema=None ):
+    dict = {}
+    for row in rows:
+        if extrema_col_label is None:
+            dict[ row[ entity_col_id ] ] = extrema
+        else:
+            dict[ row[ entity_col_id ] ] = int(row[ extrema_col_label ])
+    return dict
+
+
+def build_parameters( skills_labels, entity_col_id, rows ):
+    dict_skills = {}
+    entity_labels = []
+    for row in rows:
+        entity_label = row[ entity_col_id ]
+        entity_labels.append( entity_label )
+        for skill_label in skills_labels:
+            dict_skills[ ( entity_label, skill_label) ] = int(row[ skill_label ])
+
+    return entity_labels, dict_skills
+
+
+def build_problem(state):
     """
     Build a generic assignment problem from raw CSV data.
 
     This function is type-driven (skills, cost, etc.),
     not variant-driven anymore.
     """
-
-    # ---------------------------------------------
-    # Build LEFT entities
-    # ---------------------------------------------
-    left_registry = EntityRegistry(prefix="left")
-
-    left_entities = []
-    left_skills = {}
-
-    for row in left_rows:
-        label = " ".join(row[c] for c in state.left_id_cols)
-        left_id = left_registry.create(label)
-        left_entities.append(left_id)
-
-        for skill in state.skill_cols:
-            left_skills[(left_id, skill)] = int(row.get(skill, 0))
-
-    # ---------------------------------------------
-    # Build RIGHT entities
-    # ---------------------------------------------
-    right_entities = []
-    right_requirements = {}
-
-    for row in right_rows:
-        right_id = row[state.right_id_col]
-        right_entities.append(right_id)
-
-        for skill in state.skill_cols:
-            right_requirements[(right_id, skill)] = int(row.get(skill, 0))
-
     # ---------------------------------------------
     # Build domain problem via TYPE registry
     # ---------------------------------------------
@@ -55,15 +46,38 @@ def build_problem(state, left_rows, right_rows):
     model = type_registry.ASSIGNMENT_MODEL
 
     problem_data = {
-        "left_entities": left_entities,
-        "right_entities": right_entities,
-        "skills": state.skill_cols,
-        "left_skills": left_skills,
-        "right_requirements": right_requirements,
+        "left_entities": state.left_entity,
+        "right_entities": state.right_entity,
+        "skills": state.skills_labels,
+        "left_skills": state.left_skills,
+        "right_requirements": state.right_requirements,
         "costs": getattr(state, "costs", None),
         "preferences": getattr(state, "preferences", None),
     }
 
     problem = model.builder_fn(problem_data)
 
-    return problem, left_registry.labels
+    cfg = problem.config
+
+    # --- structure
+    cfg.min_assignments_per_left = state.min_assignments_per_left
+    cfg.max_assignments_per_left = state.max_assignments_per_left
+
+    cfg.min_capacities_per_right = state.min_capacities_per_right
+    cfg.max_capacities_per_right = state.max_capacities_per_right
+
+    # --- objective
+    cfg.objective = state.objective
+
+    # --- scoring
+    cfg.use_cost = state.use_cost
+    cfg.use_preferences = state.use_preferences
+
+    cfg.cost_weight = state.cost_weight
+    cfg.preference_weight = state.preference_weight
+
+    cfg.reward_mode = state.reward_mode
+    cfg.penalty_mode = state.penalty_mode
+    cfg.penalty_weight = state.penalty_weight
+
+    return problem

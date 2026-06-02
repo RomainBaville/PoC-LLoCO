@@ -54,7 +54,7 @@ class ORToolsSkillAssignmentSolver(Solver):
         model.Maximize(
             sum(
                 engine.compute(problem, l, r) * x[l, r]
-                for (l, r) in x
+                for l, r in x
             )
         )
 

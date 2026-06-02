@@ -11,9 +11,12 @@ class AssignmentModelConfig:
     # -----------------------------
     # STRUCTURE
     # -----------------------------
-    max_assignments_per_left: int = 1
-    max_assignments_per_right: Optional[int] = None
-    min_assignments_per_right: Optional[int] = None
+    min_assignments_per_left: Optional[Dict[str, int]] = None
+    max_assignments_per_left: Optional[Dict[str, int]] = None
+
+    min_capacities_per_right: Optional[Dict[str, int]] = None
+    max_capacities_per_right: Optional[Dict[str, int]] = None
+
     force_all_left_assigned: bool = False
 
     # -----------------------------

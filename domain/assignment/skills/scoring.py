@@ -125,8 +125,7 @@ class ScoringEngine:
             if self.config.penalty_mode:
                 penalty_fn = SCORING_FUNCTIONS[self.config.penalty_mode]
                 penalty = penalty_fn(left_val, target_val)
-
-            weight = self.config.skill_weights.get(s, 1)
+            weight = self.config.skill_weights[ s ]
 
             total += weight * (reward + self.config.penalty_weight * penalty)
 
