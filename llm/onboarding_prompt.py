@@ -18,7 +18,8 @@ def build_onboarding_prompt(user_description: str) -> str:
     """
 
     context = build_onboarding_context()
-    scoring_text = ", ".join(context.get("scoring_functions", []))
+    reward_text = ", ".join( context.get( "reward_functions", [] ) )
+    penalty_text = ", ".join( context.get( "penalty_functions", [] ) )
 
     # -------------------------------
     # Assignment types & variants
@@ -56,8 +57,9 @@ Assignment types and available formulations:
 Available solvers:
 {solver_text}
 
-Scoring functions available for advanced matching:
-{scoring_text}
+Scoring functions (reward and penalty) available for advanced matching:
+{reward_text} and {penalty_text}
+
 
 Important concept:
 For best-fit assignment, the platform allows configuring how matches are evaluated:

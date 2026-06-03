@@ -17,8 +17,6 @@ class AssignmentModelConfig:
     min_capacities_per_right: Optional[Dict[str, int]] = None
     max_capacities_per_right: Optional[Dict[str, int]] = None
 
-    force_all_left_assigned: bool = False
-
     # -----------------------------
     # OBJECTIVE
     # -----------------------------
@@ -28,24 +26,6 @@ class AssignmentModelConfig:
     penalty_mode: Optional[str] = None
     penalty_weight: float = 1.0
     skill_weights: Optional[Dict[str, float]] = None
-
-    # -----------------------------
-    # SCORING EXTENSIONS
-    # -----------------------------
-    use_cost: bool = False
-    use_preferences: bool = False
-
-    cost_weight: float = 1.0
-    preference_weight: float = 1.0
-
-    # -----------------------------
-    # ADVANCED LOGIC
-    # -----------------------------
-    use_demand_penalty: bool = False
-    demand_weight: float = 1.0
-
-    forbidden_pairs: Optional[List[Tuple[str, str]]] = None
-    balance_weight: float = 0.0
 
     # -----------------------------
     # LOGICAL CONSTRAINTS
@@ -61,8 +41,3 @@ class AssignmentModelConfig:
     group_limits: Optional[
         List[Tuple[List[Tuple[str, str]], int]]
     ] = None
-
-    # -----------------------------
-    # COVERAGE
-    # -----------------------------
-    enforce_full_coverage: bool = False

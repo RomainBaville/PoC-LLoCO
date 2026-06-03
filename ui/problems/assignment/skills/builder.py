@@ -46,13 +46,11 @@ def build_problem(state):
     model = type_registry.ASSIGNMENT_MODEL
 
     problem_data = {
-        "left_entities": state.left_entity,
-        "right_entities": state.right_entity,
-        "skills": state.skills_labels,
+        "left_entities": state.left_entities,
+        "right_entities": state.right_entities,
+        "skills": state.skill_labels,
         "left_skills": state.left_skills,
         "right_requirements": state.right_requirements,
-        "costs": getattr(state, "costs", None),
-        "preferences": getattr(state, "preferences", None),
     }
 
     problem = model.builder_fn(problem_data)
@@ -69,15 +67,9 @@ def build_problem(state):
     # --- objective
     cfg.objective = state.objective
 
-    # --- scoring
-    cfg.use_cost = state.use_cost
-    cfg.use_preferences = state.use_preferences
-
-    cfg.cost_weight = state.cost_weight
-    cfg.preference_weight = state.preference_weight
-
     cfg.reward_mode = state.reward_mode
     cfg.penalty_mode = state.penalty_mode
     cfg.penalty_weight = state.penalty_weight
+    cfg.skill_weight = state.skill_weights
 
     return problem

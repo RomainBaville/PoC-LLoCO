@@ -56,10 +56,10 @@ REM =======================
 REM WAIT FOR USER EXIT
 REM =======================
 echo ------------------------------------------
-echo Press E to close llama-server and Streamlit
+echo Press Q to close llama-server and Streamlit
 echo ------------------------------------------
 
-choice /c E /n /m "Press E to exit: "
+choice /c Q /n /m "Press Q to quit: "
 
 REM =======================
 REM CLEANUP

@@ -3,7 +3,7 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from typing import Dict, Tuple, List, Optional
+from typing import Dict, Tuple, List
 
 from domain.assignment.config import AssignmentModelConfig
 
@@ -18,9 +18,6 @@ class SkillAssignmentProblem:
     right_requirements: Dict[Tuple[str, str], int]
 
     config: AssignmentModelConfig
-
-    costs: Optional[Dict[Tuple[str, str], float]] = None
-    preferences: Optional[Dict[Tuple[str, str], float]] = None
 
     def validate(self):
         for l in self.left_entities:

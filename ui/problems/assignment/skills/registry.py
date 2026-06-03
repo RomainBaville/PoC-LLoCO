@@ -45,8 +45,6 @@ def build_assignment(data):
         skills=data["skills"],
         left_skills=data["left_skills"],
         right_requirements=data["right_requirements"],
-        costs=data.get("costs"),
-        preferences=data.get("preferences"),
         config=config,
     )
 

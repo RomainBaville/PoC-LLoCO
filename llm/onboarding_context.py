@@ -8,7 +8,7 @@ from importlib import import_module
 from ui.registry import PROBLEM_REGISTRY
 from ui.problems.assignment.registry import ASSIGNMENT_TYPES
 from solvers.assignment.registry import ASSIGNMENT_SOLVER_GROUPS
-from domain.assignment.skills.scoring import SCORING_FUNCTIONS
+from domain.assignment.skills.scoring import REWARD_FUNCTIONS, PENALTY_FUNCTIONS
 
 
 def build_onboarding_context() -> dict:
@@ -48,5 +48,6 @@ def build_onboarding_context() -> dict:
     return {
         "problems": problems,
         "assignment_types": assignment_types,
-        "scoring_functions": list(SCORING_FUNCTIONS.keys()),
+        "reward_functions": REWARD_FUNCTIONS.keys(),
+        "penalty_functions" : PENALTY_FUNCTIONS.keys(),
     }

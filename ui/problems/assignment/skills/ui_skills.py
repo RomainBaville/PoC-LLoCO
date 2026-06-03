@@ -16,7 +16,7 @@ from infrastructure.registry import DATA_SOURCE_REGISTRY
 from ui.problems.assignment.skills.builder import build_problem, build_dict, build_parameters
 from llm.session_model import OptimizationSession
 from solvers.assignment.registry import ASSIGNMENT_SOLVER_GROUPS
-from domain.assignment.skills.scoring import ScoringEngine
+from domain.assignment.skills.scoring import REWARD_FUNCTIONS, PENALTY_FUNCTIONS
 
 DATA_DIR = "data"
 
@@ -28,19 +28,20 @@ def render(step: int):
     # --------------------------------------------------
     st.session_state.setdefault("left_label", "Candidates")
     st.session_state.setdefault("right_label", "Targets")
-    st.session_state.setdefault("skill_label", "Skills")
+    st.session_state.setdefault("feature_label", "Skills")
+
+
+    st.session_state.setdefault("min_assignments_per_left", 0)
+    st.session_state.setdefault("max_assignments_per_left", 1)
+    st.session_state.setdefault("min_capacities_per_right", 0)
+    st.session_state.setdefault("max_capacities_per_right", 1)
 
     st.session_state.setdefault("objective", "maximize")
-
-    st.session_state.setdefault("min_left", 0)
-    st.session_state.setdefault("max_left", 1)
-    st.session_state.setdefault("min_right", 0)
-    st.session_state.setdefault("max_right", 1)
-    st.session_state.setdefault("force_all", False)
 
     st.session_state.setdefault("reward_mode", "min")
     st.session_state.setdefault("penalty_mode", None)
     st.session_state.setdefault("penalty_weight", 1.0)
+    st.session_state.setdefault("skill_weights", None)
 
     st.session_state.setdefault("use_skills", True)
     st.session_state.setdefault("use_cost", False)
@@ -60,13 +61,13 @@ def render(step: int):
         )
 
         st.session_state.left_label = st.text_input(
-            "Left entities (e.g. Employees)", st.session_state.left_label
+            "Left entities (e.g. Candidates)", st.session_state.left_label
         )
         st.session_state.right_label = st.text_input(
-            "Right entities (e.g. Projects)", st.session_state.right_label
+            "Right entities (e.g. Targets)", st.session_state.right_label
         )
-        st.session_state.skill_label = st.text_input(
-            "Feature name (e.g. Skills)", st.session_state.skill_label
+        st.session_state.feature_label = st.text_input(
+            "Feature label (e.g. Skills)", st.session_state.feature_label
         )
 
         navigation_buttons()
@@ -82,8 +83,8 @@ def render(step: int):
             f for f in os.listdir(DATA_DIR) if f.endswith(".csv")
         )
 
-        st.session_state.left_csv = st.selectbox("Left dataset", csv_files)
-        st.session_state.right_csv = st.selectbox("Right dataset", csv_files)
+        st.session_state.left_csv = st.selectbox( f"{ st.session_state.left_label } dataset", csv_files )
+        st.session_state.right_csv = st.selectbox( f"{ st.session_state.right_label } dataset", csv_files )
 
         navigation_buttons()
         st.stop()
@@ -108,129 +109,129 @@ def render(step: int):
         # -----------------------------
         # 1. Entities & skills labels
         # -----------------------------
-        st.subheader( f"1. Identify entities and { st.session_state.skill_label }" )
+        st.subheader( f"1. Identify entities and { st.session_state.feature_label }" )
 
-        left_entity_col_id = st.selectbox(
+        left_entities_col_id = st.selectbox(
             f"Columns identifying { st.session_state.left_label }",
             left_cols
         )
 
-        right_entity_col_id = st.selectbox(
+        right_entities_col_id = st.selectbox(
             f"Column identifying { st.session_state.right_label }",
             right_cols
         )
 
-        skills_labels = st.multiselect(
-            f"Columns identifying { st.session_state.skill_label }",
-            [ c for c in left_cols if c != left_entity_col_id ],
+        skill_labels = st.multiselect(
+            f"Columns identifying { st.session_state.feature_label }",
+            [ c for c in left_cols if c != left_entities_col_id ],
         )
 
-        st.session_state.left_entity, st.session_state.left_skills = build_parameters( skills_labels, left_entity_col_id, left_rows )
-        st.session_state.right_entity, st.session_state.right_requirements = build_parameters( skills_labels, right_entity_col_id, right_rows )
-        st.session_state.skills_labels = skills_labels
+        st.session_state.left_entities, st.session_state.left_skills = build_parameters( skill_labels, left_entities_col_id, left_rows )
+        st.session_state.right_entities, st.session_state.right_requirements = build_parameters( skill_labels, right_entities_col_id, right_rows )
+        st.session_state.skill_labels = skill_labels
 
         # -----------------------------
         # 2. LEFT ASSIGNMENT
         # -----------------------------
         st.subheader( f"2. Assignment rules for { st.session_state.left_label }" )
 
-        assignment_mode = st.radio(
-            f"Define minimum and maximum assignments per { st.session_state.left_label }",
-            [
-                "Use data column",
-                f"Set manually for all { st.session_state.left_label } at once",
-                "No minimum and maximum assignment",
-            ],
-        )
+        extrema = [ "minimum", "maximum" ]
+        assignments_cols = st.columns( 2 )
+        assignments_per_left = [ None, None ]
 
-        if assignment_mode == "Use data column":
-            min_left_col_label = st.selectbox(
-                "Column identifying minimum assignments",
-                left_cols,
-                index=len(left_cols)-2
-            )
-            min_assignments_per_left = build_dict( left_entity_col_id, left_rows, extrema_col_label=min_left_col_label )
+        for id, col in enumerate( assignments_cols ):
+            with col:
+                assignment_mode = st.radio(
+                    f"Define { extrema[ id ] } assignments per { st.session_state.left_label }",
+                    [
+                        "Use data column",
+                        f"Set manually for each { st.session_state.left_label }",
+                        f"Set manually for all { st.session_state.left_label } at once",
+                        f"No { extrema[ id ] } assignment",
+                    ],
+                )
 
-            max_left_col_label = st.selectbox(
-                "Column identifying maximum assignments",
-                left_cols,
-                index=len(left_cols)-1
-            )
-            max_assignments_per_left = build_dict( left_entity_col_id, left_rows, extrema_col_label=max_left_col_label )
+                if assignment_mode == "Use data column":
+                    left_col_label = st.selectbox(
+                        f"Column identifying { extrema[ id ] } assignments",
+                        left_cols,
+                        index=len( left_cols ) - 1
+                    )
+                    assignments_per_left[ id ] = build_dict( left_entities_col_id, left_rows, extrema_col_label=left_col_label )
 
-        elif assignment_mode == f"Set manually for all { st.session_state.left_label } at once":
-            min_left_number = st.number_input(
-                f"Minimum assignments per { st.session_state.left_label }",
-                min_value=0,
-                max_value=len(left_rows),
-            )
-            min_assignments_per_left = build_dict( left_entity_col_id, left_rows, extrema=min_left_number )
+                elif assignment_mode == f"Set manually for each { st.session_state.left_label }":
+                    assignments_per_left[ id ] = {}
+                    for left_entity in st.session_state.left_entities:
+                        assignments_per_left[ id ][ left_entity ] = st.number_input(
+                            f"{ extrema[ id ] } assignments for { left_entity }",
+                            min_value=0,
+                            max_value=len(right_rows),
+                        )
 
+                elif assignment_mode == f"Set manually for all { st.session_state.left_label } at once":
+                    left_number = st.number_input(
+                        f"{ extrema[ id ] } assignments per { st.session_state.left_label }",
+                        min_value=0,
+                        max_value=len(right_rows),
+                    )
+                    assignments_per_left[ id ] = build_dict( left_entities_col_id, left_rows, extrema=left_number )
 
-            max_left_number = st.number_input(
-                f"Maximum assignments per { st.session_state.left_label }",
-                min_value=0,
-                max_value=len(left_rows)
-            )
-            max_assignments_per_left = build_dict( left_entity_col_id, left_rows, extrema=max_left_number )
+                else:
+                    assignments_per_left[ id ] = None
 
-        else:
-            min_assignments_per_left = None
-            max_assignments_per_left = None
-
-        st.session_state.min_assignments_per_left = min_assignments_per_left
-        st.session_state.max_assignments_per_left = max_assignments_per_left
+        st.session_state.min_assignments_per_left = assignments_per_left[ 0 ]
+        st.session_state.max_assignments_per_left = assignments_per_left[ 1 ]
 
         # -----------------------------
         # 3. RIGHT CAPACITY
         # -----------------------------
         st.subheader( f"3. Capacity rules for { st.session_state.right_label }" )
 
-        capacity_mode = st.radio(
-            f"Define minminum and maximum capacities per { st.session_state.right_label }",
-            [
-                "Use data column",
-                f"Set manually for all { st.session_state.right_label } at once",
-                "No minimum and maximum requirement",
-            ],
-        )
+        capacities_cols = st.columns( 2 )
+        capacities_per_right = [ None, None ]
 
-        if capacity_mode == "Use data column":
-            min_right_col_label = st.selectbox(
-                "Column identifying minimum capacities",
-                right_cols,
-                index=len(right_cols)-2
-            )
-            min_capacities_per_right = build_dict( right_entity_col_id, right_rows, extrema_col_label=min_right_col_label )
+        for id, col in enumerate( capacities_cols ):
+            with col:
+                capacity_mode = st.radio(
+                    f"Define { extrema[ id ] } capacities per { st.session_state.right_label }",
+                    [
+                        "Use data column",
+                        f"Set manually for each { st.session_state.right_label }",
+                        f"Set manually for all { st.session_state.right_label } at once",
+                        f"No { extrema[ id ] } capacity",
+                    ],
+                )
 
-            max_right_col_label = st.selectbox(
-                "Column identifying maximum capacities",
-                right_cols,
-                index=len(right_cols)-1
-            )
-            max_capacities_per_right = build_dict( right_entity_col_id, right_rows, extrema_col_label=max_right_col_label )
+                if capacity_mode == "Use data column":
+                    right_col_label = st.selectbox(
+                        f"Column identifying { extrema[ id ] } capacities",
+                        right_cols,
+                        index=len(right_cols) - 1
+                    )
+                    capacities_per_right[ id ] = build_dict( right_entities_col_id, right_rows, extrema_col_label=right_col_label )
 
-        elif capacity_mode == f"Set manually for all { st.session_state.right_label } at once":
-            min_right_number = st.number_input(
-                f"Minimum assignments per { st.session_state.right_label }",
-                min_value=0,
-                max_value=len(right_rows),
-            )
-            min_capacities_per_right = build_dict( right_entity_col_id, right_rows, extrema=min_right_number )
+                elif capacity_mode == f"Set manually for each { st.session_state.right_label }":
+                    capacities_per_right[ id ] = {}
+                    for right_entity in st.session_state.right_entities:
+                        capacities_per_right[ id ][ right_entity ] = st.number_input(
+                            f"{ extrema[ id ] } capacities for { right_entity }",
+                            min_value=0,
+                            max_value=len(left_rows),
+                        )
 
-            max_right_number = st.number_input(
-                f"Maximum capacities per { st.session_state.right_label }",
-                min_value=0,
-                max_value=len(right_rows)
-            )
-            max_capacities_per_right = build_dict( right_entity_col_id, right_rows, extrema=max_right_number )
+                elif capacity_mode == f"Set manually for all { st.session_state.right_label } at once":
+                    right_number = st.number_input(
+                        f"{ extrema[ id ] } capacities per { st.session_state.right_label }",
+                        min_value=0,
+                        max_value=len(left_rows),
+                    )
+                    capacities_per_right[ id ] = build_dict( right_entities_col_id, right_rows, extrema=right_number )
 
-        else:
-            min_capacities_per_right = None
-            max_capacities_per_right = None
+                else:
+                    capacities_per_right[ id ] = None
 
-        st.session_state.min_capacities_per_right = min_capacities_per_right
-        st.session_state.max_capacities_per_right = max_capacities_per_right
+        st.session_state.min_capacities_per_right = capacities_per_right[ 0 ]
+        st.session_state.max_capacities_per_right = capacities_per_right[ 1 ]
 
         navigation_buttons()
         st.stop()
@@ -241,60 +242,31 @@ def render(step: int):
     if step == 6:
         st.header("Optimization strategy")
 
-        choice = st.radio(
-            "What do you want to optimize?",
-            [
-                "Best matching",
-                "Lowest cost",
-                "Hybrid",
-            ],
+        st.session_state.reward_mode = st.selectbox(
+            "Compatibility evaluation",
+            REWARD_FUNCTIONS,
         )
 
-        if "matching" in choice.lower():
-            st.session_state.objective = "maximize"
-            st.session_state.use_cost = False
-            st.session_state.use_skills = True
-
-        elif "cost" in choice.lower():
-            st.session_state.objective = "minimize"
-            st.session_state.use_cost = True
-            st.session_state.use_skills = False
-
-        else:
-            st.session_state.objective = "maximize"
-            st.session_state.use_cost = True
-            st.session_state.use_skills = True
-
-        st.subheader("Scoring behavior")
-
-        if st.session_state.use_skills:
-            st.session_state.reward_mode = st.selectbox(
-                "Compatibility evaluation",
-                ["min", "product", "ratio"],
-            )
-
+        use_penalty = st.checkbox( "Use penalty" )
+        if use_penalty:
             st.session_state.penalty_mode = st.selectbox(
-                "Penalty",
-                [None, "shortfall", "absdiff"],
+            "Penalty mode",
+            PENALTY_FUNCTIONS,
+        )
+            st.session_state.penalty_weight = st.slider(
+                "Penalty weight", 0.0, 5.0, 1.0
             )
+        else:
+            st.session_state.penalty_mode = None
+            st.session_state.penalty_weight = 1
 
-            if st.session_state.penalty_mode:
-                st.session_state.penalty_weight = st.slider(
-                    "Penalty weight", 0.0, 5.0, 1.0
-                )
-
-        if st.session_state.use_cost:
-            st.session_state.cost_weight = st.slider(
-                "Cost importance", 0.0, 5.0, 1.0
-            )
-
-        with st.expander("Advanced"):
-            st.session_state.use_preferences = st.checkbox("Use preferences")
-
-            if st.session_state.use_preferences:
-                st.session_state.preference_weight = st.slider(
-                    "Preference weight", 0.0, 5.0, 1.0
-                )
+        use_skill_weights = st.checkbox( f"Use { st.session_state.feature_label } weights" )
+        if use_skill_weights:
+            st.session_state.skill_weights = {}
+            for skill_label in st.session_state.skill_labels:
+                st.session_state.skill_weights[ skill_label ] = st.number_input(f"Weight for { skill_label }", value=1.0)
+        else:
+            st.session_state.skill_weights = None
 
         navigation_buttons()
         st.stop()
@@ -329,13 +301,10 @@ def render(step: int):
         with st.spinner("Optimizing..."):
             solution = st.session_state.solver.solver_class().solve(problem)
 
-        engine = ScoringEngine(problem.config)
-
         st.session_state.solution_rows = [
             {
                 st.session_state.left_label: l,
                 st.session_state.right_label: r,
-                "Score": engine.compute(problem, l, r),
             }
             for l, r in solution.items()
         ]

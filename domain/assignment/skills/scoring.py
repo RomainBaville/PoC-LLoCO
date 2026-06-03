@@ -70,9 +70,7 @@ def score_overqualification(left, target):
 def score_log_shortfall(left, target):
     return -math.log(1 + max(0, target - left))
 
-SCORING_FUNCTIONS = {
-
-    # Reward
+REWARD_FUNCTIONS = {
     "min": score_min,
     "product": score_product,
     "ratio": score_ratio,
@@ -80,8 +78,9 @@ SCORING_FUNCTIONS = {
     "sqrt_product": score_sqrt_product,
     "log_product": score_log_product,
     "soft_min": score_soft_min,
+}
 
-    # Penalty
+PENALTY_FUNCTIONS = {
     "shortfall": score_shortfall,
     "absdiff": score_absdiff,
     "relative_shortfall": score_relative_shortfall,
@@ -101,39 +100,21 @@ class ScoringEngine:
         total = 0
 
         # ---------------------------------
-        # COST SCORE
-        # ---------------------------------
-        if self.config.use_cost and problem.costs:
-            cost = problem.costs.get((l, r), 0)
-
-            if self.config.objective == "minimize":
-                total += -self.config.cost_weight * cost
-            else:
-                total += self.config.cost_weight * cost
-
-        # ---------------------------------
         # SKILL SCORE
         # ---------------------------------
         for s in problem.skills:
             left_val = problem.left_skills[(l, s)]
             target_val = problem.right_requirements[(r, s)]
 
-            reward_fn = SCORING_FUNCTIONS[self.config.reward_mode]
+            reward_fn = REWARD_FUNCTIONS[self.config.reward_mode]
             reward = reward_fn(left_val, target_val)
 
             penalty = 0
             if self.config.penalty_mode:
-                penalty_fn = SCORING_FUNCTIONS[self.config.penalty_mode]
+                penalty_fn = PENALTY_FUNCTIONS[self.config.penalty_mode]
                 penalty = penalty_fn(left_val, target_val)
             weight = self.config.skill_weights[ s ]
 
             total += weight * (reward + self.config.penalty_weight * penalty)
-
-        # ---------------------------------
-        # PREFERENCES
-        # ---------------------------------
-        if self.config.use_preferences and problem.preferences:
-            pref = problem.preferences.get((l, r), 0)
-            total += self.config.preference_weight * pref
 
         return int(total)

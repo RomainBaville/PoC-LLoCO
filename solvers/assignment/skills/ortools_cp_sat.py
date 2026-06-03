@@ -12,7 +12,6 @@ from solvers.assignment.skills.constraints import (
     apply_right_constraints,
 )
 
-from solvers.assignment.skills.coverage_constraints import apply_coverage_constraints
 from solvers.assignment.skills.logical_constraints import apply_logical_constraints
 
 
@@ -43,7 +42,6 @@ class ORToolsSkillAssignmentSolver(Solver):
         # --------------------------------------------------
         apply_left_constraints(model, x, problem)
         apply_right_constraints(model, x, problem)
-        apply_coverage_constraints(model, x, problem)
         apply_logical_constraints(model, x, problem)
 
         # --------------------------------------------------
