@@ -241,17 +241,34 @@ def render(step: int):
         else:
             st.session_state.skill_weights = None
 
-        define_candidates_mutual_exclusion = st.checkbox( f"Is there paires of { st.session_state.left_label } who can't be assigned to the same { st.session_state.right_label }" )
+        define_candidates_mutual_exclusion = st.checkbox( f"Is there groups of { st.session_state.left_label } who can't be assigned to the same { st.session_state.right_label }" )
         if define_candidates_mutual_exclusion:
-            nb_paires = st.number_input( "How many paires ?", 1 )
-            st.session_state.candidates_mutual_exclusion = [ [ None, None ] for _ in range( nb_paires ) ]
-            for paire in range( nb_paires ):
-                exclusion_cols = st.columns( 2 )
-                for id, col in enumerate( exclusion_cols ):
-                    with col:
-                        st.session_state.candidates_mutual_exclusion[ paire ][ id ] = st.selectbox( f"{ st.session_state.left_label } for the paire { paire + 1 }", st.session_state.left_entities, index=id )
+            nb_candidates_groups = st.number_input( f"How many group of { st.session_state.left_label } ?", 1 )
+
+            st.session_state.candidates_mutual_exclusion = [ [] for _ in range( nb_candidates_groups ) ]
+            for candidates_group in range( nb_candidates_groups ):
+                nb_candidates = st.number_input( f"How many { st.session_state.left_label } are conserned for the group { candidates_group + 1 } ?", 2 )
+                st.session_state.candidates_mutual_exclusion[ candidates_group ] = [ None for _ in range( nb_candidates ) ]
+                candidates_exclusion_cols = st.columns( nb_candidates )
+                for id, candidates_col in enumerate( candidates_exclusion_cols ):
+                    with candidates_col:
+                        st.session_state.candidates_mutual_exclusion[ candidates_group ][ id ] = st.selectbox( f"{ st.session_state.left_label } { id + 1 } for the group { candidates_group + 1 }", st.session_state.left_entities, index=id )
         else:
             st.session_state.candidates_mutual_exclusion = None
+
+        define_targets_mutual_exclusion = st.checkbox( f"Is there groups of { st.session_state.right_label } who can't contain the same { st.session_state.left_label }" )
+        if define_targets_mutual_exclusion:
+            nb_targets_groups = st.number_input( f"How many group of { st.session_state.right_label }?", 1 )
+            st.session_state.targets_mutual_exclusion = [ [] for _ in range( nb_targets_groups ) ]
+            for targets_group in range( nb_targets_groups ):
+                nb_targets = st.number_input( f"How many { st.session_state.right_label } are conserned for the group { targets_group + 1 } ?", 2 )
+                st.session_state.targets_mutual_exclusion[ targets_group ] = [ None for _ in range( nb_targets ) ]
+                targets_exclusion_cols = st.columns( nb_targets )
+                for id, target_col in enumerate( targets_exclusion_cols ):
+                    with target_col:
+                        st.session_state.targets_mutual_exclusion[ targets_group ][ id ] = st.selectbox( f"{ st.session_state.right_label } { id + 1 } for the group { targets_group + 1 }", st.session_state.right_entities, index=id )
+        else:
+            st.session_state.targets_mutual_exclusion = None
 
 
         navigation_buttons()

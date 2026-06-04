@@ -69,5 +69,6 @@ def build_problem( state ):
     cfg.skill_weight = state.skill_weights
 
     cfg.candidates_mutual_exclusion = state.candidates_mutual_exclusion
+    cfg.targets_mutual_exclusion = state.targets_mutual_exclusion
 
     return problem

@@ -8,20 +8,20 @@ from typing import Optional, Dict, List, Tuple
 
 @dataclass
 class AssignmentModelConfig:
-    min_assignments_per_left: Optional[Dict[str, int]] = None
-    max_assignments_per_left: Optional[Dict[str, int]] = None
+    min_assignments_per_left: Optional[ Dict[ str, int ] ] = None
+    max_assignments_per_left: Optional[ Dict[ str, int ] ] = None
 
-    min_capacities_per_right: Optional[Dict[str, int]] = None
-    max_capacities_per_right: Optional[Dict[str, int]] = None
+    min_capacities_per_right: Optional[ Dict[ str, int ] ] = None
+    max_capacities_per_right: Optional[ Dict[ str, int ] ] = None
 
     reward_mode: str = "min"
-    penalty_mode: Optional[str] = None
+    penalty_mode: Optional[ str ] = None
     penalty_weight: float = 1.0
-    skill_weights: Optional[Dict[str, float]] = None
+    skill_weights: Optional[ Dict[ str, float ] ] = None
 
     candidates_mutual_exclusion: Optional[
-        List[ Tuple[ str, str ] ]
+        List[ Tuple[ str, ... ] ]
     ] = None
-    implications: Optional[
-        List[Tuple[Tuple[str, str], Tuple[str, str]]]
+    targets_mutual_exclusion: Optional[
+        List[ Tuple[ str, ... ] ]
     ] = None
