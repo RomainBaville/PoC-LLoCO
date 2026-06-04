@@ -22,12 +22,12 @@ def build_parameters( skills_labels, entity_col_id, rows ):
         entity_label = row[ entity_col_id ]
         entity_labels.append( entity_label )
         for skill_label in skills_labels:
-            dict_skills[ ( entity_label, skill_label) ] = int(row[ skill_label ])
+            dict_skills[ ( entity_label, skill_label ) ] = int( row[ skill_label ] )
 
     return entity_labels, dict_skills
 
 
-def build_problem(state):
+def build_problem( state ):
     """
     Build a generic assignment problem from raw CSV data.
 
@@ -40,7 +40,7 @@ def build_problem(state):
     assignment_type = state.assignment_type
 
     type_registry = import_module(
-        f"ui.problems.assignment.{assignment_type}.registry"
+        f"ui.problems.assignment.{ assignment_type }.registry"
     )
 
     model = type_registry.ASSIGNMENT_MODEL
@@ -53,23 +53,21 @@ def build_problem(state):
         "right_requirements": state.right_requirements,
     }
 
-    problem = model.builder_fn(problem_data)
+    problem = model.builder_fn( problem_data )
 
     cfg = problem.config
 
-    # --- structure
     cfg.min_assignments_per_left = state.min_assignments_per_left
     cfg.max_assignments_per_left = state.max_assignments_per_left
 
     cfg.min_capacities_per_right = state.min_capacities_per_right
     cfg.max_capacities_per_right = state.max_capacities_per_right
 
-    # --- objective
-    cfg.objective = state.objective
-
     cfg.reward_mode = state.reward_mode
     cfg.penalty_mode = state.penalty_mode
     cfg.penalty_weight = state.penalty_weight
     cfg.skill_weight = state.skill_weights
+
+    cfg.candidates_mutual_exclusion = state.candidates_mutual_exclusion
 
     return problem

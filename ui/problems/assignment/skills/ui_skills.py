@@ -23,51 +23,24 @@ DATA_DIR = "data"
 
 def render(step: int):
 
-    # --------------------------------------------------
-    # Defaults
-    # --------------------------------------------------
-    st.session_state.setdefault("left_label", "Candidates")
-    st.session_state.setdefault("right_label", "Targets")
-    st.session_state.setdefault("feature_label", "Skills")
-
-
-    st.session_state.setdefault("min_assignments_per_left", 0)
-    st.session_state.setdefault("max_assignments_per_left", 1)
-    st.session_state.setdefault("min_capacities_per_right", 0)
-    st.session_state.setdefault("max_capacities_per_right", 1)
-
-    st.session_state.setdefault("objective", "maximize")
-
-    st.session_state.setdefault("reward_mode", "min")
-    st.session_state.setdefault("penalty_mode", None)
-    st.session_state.setdefault("penalty_weight", 1.0)
-    st.session_state.setdefault("skill_weights", None)
-
-    st.session_state.setdefault("use_skills", True)
-    st.session_state.setdefault("use_cost", False)
-    st.session_state.setdefault("use_preferences", False)
-
-    st.session_state.setdefault("cost_weight", 1.0)
-    st.session_state.setdefault("preference_weight", 1.0)
-
     # ==================================================
     # STEP 3 — Naming
     # ==================================================
     if step == 3:
-        st.header("Define your entities")
+        st.header( "Define your entities" )
 
         st.markdown(
             "Give meaningful names to your entities to make results easier to read."
         )
 
         st.session_state.left_label = st.text_input(
-            "Left entities (e.g. Candidates)", st.session_state.left_label
+            "Left entities (e.g. Candidates)", "Candidates"
         )
         st.session_state.right_label = st.text_input(
-            "Right entities (e.g. Targets)", st.session_state.right_label
+            "Right entities (e.g. Targets)", "Targets"
         )
         st.session_state.feature_label = st.text_input(
-            "Feature label (e.g. Skills)", st.session_state.feature_label
+            "Feature label (e.g. Skills)", "Skills"
         )
 
         navigation_buttons()
@@ -77,10 +50,10 @@ def render(step: int):
     # STEP 4 — CSV
     # ==================================================
     if step == 4:
-        st.header("Select datasets")
+        st.header( "Select datasets" )
 
         csv_files = sorted(
-            f for f in os.listdir(DATA_DIR) if f.endswith(".csv")
+            f for f in os.listdir( DATA_DIR ) if f.endswith( ".csv" )
         )
 
         st.session_state.left_csv = st.selectbox( f"{ st.session_state.left_label } dataset", csv_files )
@@ -93,17 +66,17 @@ def render(step: int):
     # STEP 5 — Mapping + assignment behavior
     # ==================================================
     if step == 5:
-        st.header("Map your data")
+        st.header( "Map your data" )
 
         loader = DATA_SOURCE_REGISTRY[
             st.session_state.data_source
         ].loader_factory()
 
         left_cols, left_rows = loader.load(
-            os.path.join(DATA_DIR, st.session_state.left_csv)
+            os.path.join( DATA_DIR, st.session_state.left_csv )
         )
         right_cols, right_rows = loader.load(
-            os.path.join(DATA_DIR, st.session_state.right_csv)
+            os.path.join( DATA_DIR, st.session_state.right_csv )
         )
 
         # -----------------------------
@@ -240,7 +213,7 @@ def render(step: int):
     # STEP 6 — Strategy
     # ==================================================
     if step == 6:
-        st.header("Optimization strategy")
+        st.header( "Optimization strategy" )
 
         st.session_state.reward_mode = st.selectbox(
             "Compatibility evaluation",
@@ -268,6 +241,19 @@ def render(step: int):
         else:
             st.session_state.skill_weights = None
 
+        define_candidates_mutual_exclusion = st.checkbox( f"Is there paires of { st.session_state.left_label } who can't be assigned to the same { st.session_state.right_label }" )
+        if define_candidates_mutual_exclusion:
+            nb_paires = st.number_input( "How many paires ?", 1 )
+            st.session_state.candidates_mutual_exclusion = [ [ None, None ] for _ in range( nb_paires ) ]
+            for paire in range( nb_paires ):
+                exclusion_cols = st.columns( 2 )
+                for id, col in enumerate( exclusion_cols ):
+                    with col:
+                        st.session_state.candidates_mutual_exclusion[ paire ][ id ] = st.selectbox( f"{ st.session_state.left_label } for the paire { paire + 1 }", st.session_state.left_entities, index=id )
+        else:
+            st.session_state.candidates_mutual_exclusion = None
+
+
         navigation_buttons()
         st.stop()
 
@@ -275,17 +261,17 @@ def render(step: int):
     # STEP 7 — Solver
     # ==================================================
     if step == 7:
-        st.header("Choose solver")
+        st.header( "Choose solver" )
 
-        solver_group = ASSIGNMENT_SOLVER_GROUPS["skills"]
-        solver_registry = import_module(solver_group.registry_module)
+        solver_group = ASSIGNMENT_SOLVER_GROUPS[ "skills" ]
+        solver_registry = import_module( solver_group.registry_module )
 
         for _, solver in solver_registry.SOLVERS.items():
-            if st.button(solver.label):
+            if st.button( solver.label ):
                 st.session_state.solver = solver
                 st.session_state.step += 1
 
-        navigation_buttons(show_next=False)
+        navigation_buttons( show_next=False )
         st.stop()
 
     # ==================================================
@@ -298,27 +284,33 @@ def render(step: int):
         # ---------------------------------
         # Solve
         # ---------------------------------
-        with st.spinner("Optimizing..."):
-            solution = st.session_state.solver.solver_class().solve(problem)
+        try:
+            with st.spinner( "Optimizing..." ):
+                solution = st.session_state.solver.solver_class().solve( problem )
 
-        st.session_state.solution_rows = [
-            {
-                st.session_state.left_label: l,
-                st.session_state.right_label: r,
-            }
-            for l, r in solution.items()
-        ]
+            st.session_state.solution_rows = [
+                {
+                    st.session_state.left_label: l,
+                    st.session_state.right_label: r,
+                }
+                for l, r in solution.items()
+            ]
 
-        st.success("Solution computed")
-        st.table(st.session_state.solution_rows)
+            st.success( "Solution computed" )
+            st.table( st.session_state.solution_rows )
+        except RuntimeError as e:
+            st.error( e )
+
+            navigation_buttons( show_next=False )
+            st.stop()
 
         # ---------------------------------
         # AI explanation
         # ---------------------------------
         st.divider()
-        st.subheader("AI explanation")
+        st.subheader( "AI explanation" )
 
-        if st.button("Generate explanation"):
+        if st.button( "Generate explanation by AI" ):
             session = OptimizationSession(
                 problem_family="Assignment",
                 problem_type=st.session_state.assignment_type,
@@ -328,12 +320,12 @@ def render(step: int):
                     st.session_state.data_source
                 ),
                 solver_name=st.session_state.solver.label,
-                result_summary=f"{len(solution)} assignments",
-                config_summary=f"Objective: {problem.config.objective}",
+                result_summary=f"{ len( solution ) } assignments",
+                config_summary=f"Objective: maximize",
             )
 
-            st.session_state.ai_summary = generate_ai_summary(session)
-            st.markdown(st.session_state.ai_summary)
+            st.session_state.ai_summary = generate_ai_summary( session )
+            st.markdown( st.session_state.ai_summary )
 
         if "ai_summary" in st.session_state:
             zip_bytes = build_results_zip(
@@ -352,5 +344,5 @@ def render(step: int):
                 mime="application/zip",
             )
 
-        navigation_buttons(show_next=False)
+        navigation_buttons( show_next=False )
         st.stop()

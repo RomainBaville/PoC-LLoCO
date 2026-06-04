@@ -5,70 +5,36 @@
 import math
 
 
-# --------------------------------------------------
-# Base scoring functions
-# --------------------------------------------------
-
 # Reward
-def score_min(left, target):
-    return min(left, target)
+def score_min( left, target ):
+    return min( left, target )
 
 
-def score_product(left, target):
+def score_product( left, target ):
     return left * target
 
 
-def score_ratio(left, target):
+def score_ratio( left, target ):
     if target == 0:
         return 0
-    return min(left / target, 1)
+    return min( left / target, 1 )
 
 
-def score_threshold(left, target):
+def score_threshold( left, target ):
     return 1 if left >= target else 0
 
 
-def score_sqrt_product(left, target):
-    return math.sqrt(left * target)
+def score_sqrt_product( left, target ):
+    return math.sqrt( left * target )
 
 
-def score_log_product(left, target):
-    return math.log(1 + left * target)
+def score_log_product( left, target ):
+    return math.log( 1 + left * target )
 
 
-def score_soft_min(left, target):
-    return (left * target) / (left + target + 1e-6)
+def score_soft_min( left, target ):
+    return ( left * target ) / ( left + target + 1e-6 )
 
-
-# Penalty
-def score_shortfall(left, target):
-    return -max(0, target - left)
-
-
-def score_absdiff(left, target):
-    return -abs(left - target)
-
-
-def score_relative_shortfall(left, target):
-    if target == 0:
-        return 0
-    return -max(0, (target - left) / target)
-
-
-def score_squared_diff(left, target):
-    return -(left - target) ** 2
-
-
-def score_shortfall_squared(left, target):
-    return -(max(0, target - left) ** 2)
-
-
-def score_overqualification(left, target):
-    return -max(0, left - target)
-
-
-def score_log_shortfall(left, target):
-    return -math.log(1 + max(0, target - left))
 
 REWARD_FUNCTIONS = {
     "min": score_min,
@@ -79,6 +45,38 @@ REWARD_FUNCTIONS = {
     "log_product": score_log_product,
     "soft_min": score_soft_min,
 }
+
+
+# Penalty
+def score_shortfall( left, target ):
+    return -max( 0, target - left )
+
+
+def score_absdiff( left, target ):
+    return -abs( left - target )
+
+
+def score_relative_shortfall( left, target ):
+    if target == 0:
+        return 0
+    return -max( 0, ( target - left ) / target )
+
+
+def score_squared_diff( left, target ):
+    return -( left - target ) ** 2
+
+
+def score_shortfall_squared( left, target ):
+    return -( max( 0, target - left ) ** 2 )
+
+
+def score_overqualification( left, target ):
+    return -max( 0, left - target )
+
+
+def score_log_shortfall( left, target ):
+    return -math.log( 1 + max( 0, target - left ) )
+
 
 PENALTY_FUNCTIONS = {
     "shortfall": score_shortfall,
@@ -92,29 +90,25 @@ PENALTY_FUNCTIONS = {
 
 
 class ScoringEngine:
-    def __init__(self, config):
+    def __init__( self, config ):
         self.config = config
 
-    def compute(self, problem, l, r):
+    def compute( self, problem, l, r ):
 
         total = 0
-
-        # ---------------------------------
-        # SKILL SCORE
-        # ---------------------------------
         for s in problem.skills:
-            left_val = problem.left_skills[(l, s)]
-            target_val = problem.right_requirements[(r, s)]
+            left_val = problem.left_skills[ ( l, s ) ]
+            target_val = problem.right_requirements[ ( r, s ) ]
 
-            reward_fn = REWARD_FUNCTIONS[self.config.reward_mode]
-            reward = reward_fn(left_val, target_val)
+            reward_fn = REWARD_FUNCTIONS[ self.config.reward_mode ]
+            reward = reward_fn( left_val, target_val )
 
             penalty = 0
             if self.config.penalty_mode:
-                penalty_fn = PENALTY_FUNCTIONS[self.config.penalty_mode]
-                penalty = penalty_fn(left_val, target_val)
+                penalty_fn = PENALTY_FUNCTIONS[ self.config.penalty_mode ]
+                penalty = penalty_fn( left_val, target_val )
             weight = self.config.skill_weights[ s ]
 
-            total += weight * (reward + self.config.penalty_weight * penalty)
+            total += weight * ( reward + self.config.penalty_weight * penalty )
 
-        return int(total)
+        return int( total )

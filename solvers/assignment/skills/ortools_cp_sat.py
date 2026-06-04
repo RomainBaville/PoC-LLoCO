@@ -68,6 +68,13 @@ class ORToolsSkillAssignmentSolver(Solver):
         # --------------------------------------------------
         # Extract solution
         # --------------------------------------------------
-        return {
-            l: r for (l, r) in x if solver.Value(x[l, r]) == 1
-        }
+
+        print(x)
+        result = {}
+        for ( l, r ) in x:
+            if solver.Value( x[ l, r ] ) == 1:
+                if l not in result:
+                    result[ l ] = []
+                result[ l ]. append( r )
+
+        return result

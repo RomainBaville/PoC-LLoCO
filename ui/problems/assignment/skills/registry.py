@@ -33,8 +33,6 @@ def build_assignment(data):
     """
     Generic assignment builder supporting:
     - skills
-    - cost
-    - preferences
     """
 
     config = AssignmentModelConfig()
