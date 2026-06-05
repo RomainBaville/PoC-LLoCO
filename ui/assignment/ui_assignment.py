@@ -245,12 +245,12 @@ def render( step: int ):
 
         st.session_state.skills_reward_function = st.selectbox(
             "Reward function",
-            RewardFunction._member_map_,
+            RewardFunction,
         )
 
         st.session_state.skills_penalty_function = st.selectbox(
             "Penalty function",
-            PenaltyFunctions._member_map_,
+            PenaltyFunctions,
         )
 
         use_skill_weights = st.checkbox( f"Use { st.session_state.feature_label } weights" )
