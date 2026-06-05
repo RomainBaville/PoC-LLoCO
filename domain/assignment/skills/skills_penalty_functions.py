@@ -54,5 +54,8 @@ class PenaltyFunctions( Enum ):
     def __init__( self: Self, func ):
         self.func = func
 
+    def __str__( self: Self ) -> str:
+        return self.name
+
     def __call__( self: Self, left: float, right: float ) -> float:
         return self.func( left, right )

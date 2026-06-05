@@ -3,8 +3,12 @@
 # SPDX-FileContributor: Romain Baville
 
 from enum import Enum
+from typing_extensions import Self
 
 class Objective( Enum ):
     """Enum for objective functions."""
-    MAXIMIZE = 1
-    MINIMIZE = -1
+    MAXIMIZE: int = 1
+    MINIMIZE: int = -1
+
+    def __str__( self: Self ) -> str:
+        return self.name
