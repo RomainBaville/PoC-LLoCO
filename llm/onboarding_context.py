@@ -6,9 +6,9 @@
 from importlib import import_module
 
 from ui.registry import PROBLEM_REGISTRY
-from ui.problems.assignment.registry import ASSIGNMENT_TYPES
-from solvers.assignment.registry import ASSIGNMENT_SOLVER_GROUPS
-from domain.assignment.skills.scoring import REWARD_FUNCTIONS, PENALTY_FUNCTIONS
+from ui.assignment.registry import ASSIGNMENT_TYPES
+from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
+from domain.assignment.skills.skills_reward_functions import REWARD_FUNCTIONS, PENALTY_FUNCTIONS
 
 
 def build_onboarding_context() -> dict:

@@ -3,20 +3,24 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from ui.problems.assignment.ui_router import render_assignment
+from typing_extensions import Callable
+
+from ui.assignment.ui_assignment import render
 
 
 @dataclass
-class ProblemDefinition:
+class ProblemType:
     key: str
     label: str
-    render_fn: callable
+    description: str
+    render_fn: Callable
 
 
-PROBLEM_REGISTRY = {
-    "assignment": ProblemDefinition(
+PROBLEM_REGISTRY: dict[ str, ProblemType ] = {
+    "assignment": ProblemType(
         key="assignment",
         label="Assignment problem",
-        render_fn=render_assignment,
+        description="Assignments problem between left and right entities",
+        render_fn=render,
     ),
 }

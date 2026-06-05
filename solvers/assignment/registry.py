@@ -3,26 +3,27 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
+from typing import Type
+
+from solvers.base import Solver
+from solvers.assignment.cp_model.ortools_cp_sat import ORToolsAssignmentSolver
 
 
 @dataclass
-class AssignmentSolverGroup:
+class SolverDefinition:
     key: str
+    label: str
     description: str
-    registry_module: str  # import path
+    solver_class: Type[ Solver ]
 
 
-ASSIGNMENT_SOLVER_GROUPS = {
-    "skills": AssignmentSolverGroup(
-        key="skills",
-        description="Solvers for skill-based assignment problems",
-        registry_module="solvers.assignment.skills.registry",
+SOLVERS = {
+    "ortools_cp_sat": SolverDefinition(
+        key="ortools_cp_sat",
+        label="OR-Tools CP-SAT",
+        description=(
+            "Constraint Programming solver suitable for assignment problems with configurable behavior."
+        ),
+        solver_class=ORToolsAssignmentSolver,
     ),
-
-    # Future:
-    # "cost": AssignmentSolverGroup(
-    #     key="cost",
-    #     description="Solvers for cost-based assignment problems",
-    #     registry_module="solvers.assignment.cost.registry",
-    # ),
 }

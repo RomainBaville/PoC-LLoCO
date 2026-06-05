@@ -2,10 +2,9 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from abc import ABC, abstractmethod
+from enum import Enum
 
-
-class ProblemUI(ABC):
-    @abstractmethod
-    def render(self, step: int):
-        ...
+class Objective( Enum ):
+    """Enum for objective functions."""
+    MAXIMIZE = 1
+    MINIMIZE = -1
