@@ -16,16 +16,13 @@ def build_dict( entity_col_id, rows, extrema_col_label=None, extrema=None ):
     return dict
 
 
-def build_parameters( skills_labels, entity_col_id, rows ):
-    dict_skills = {}
-    entity_labels = []
+def build_entities( entity_col_id, rows ):
+    entities = []
     for row in rows:
-        entity_label = row[ entity_col_id ]
-        entity_labels.append( entity_label )
-        for skill_label in skills_labels:
-            dict_skills[ ( entity_label, skill_label ) ] = int( row[ skill_label ] )
+        entity = row[ entity_col_id ]
+        entities.append( entity )
 
-    return entity_labels, dict_skills
+    return entities
 
 
 def build_problem( state ):

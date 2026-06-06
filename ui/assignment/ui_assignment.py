@@ -13,12 +13,10 @@ from ui.utils import (
     # build_results_zip,
 )
 from infrastructure.registry import DATA_SOURCE_REGISTRY
-from ui.assignment.builder import build_problem, build_dict, build_parameters
+from ui.assignment.builder import build_problem, build_dict, build_entities
 # from llm.session_model import OptimizationSession
 from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
-from domain.assignment.skills.skills_reward_functions import RewardFunction
-from domain.assignment.skills.skills_penalty_functions import PenaltyFunctions
-from domain.objective import Objective
+from ui.assignment.skills.ui_skills import use_skills, map_skills, skills_strategy
 
 DATA_DIR = "data"
 
@@ -78,14 +76,7 @@ def render( step: int ):
     if step == 4:
         st.header( "How to assigned entities" )
 
-        st.session_state.use_skills = st.checkbox( "Use feature to compare between entites (e.g. Skills)" )
-        if st.session_state.use_skills:
-            st.session_state.feature_label = st.text_input(
-                "Feature label (e.g. Skills)", "Skills"
-            )
-            st.session_state.skills_objective = st.selectbox( f" What is the objective with the { st.session_state.feature_label }", list( Objective ) )
-
-            print(st.session_state.skills_objective.value)
+        use_skills( st.session_state )
 
         navigation_buttons()
         st.stop()
@@ -100,36 +91,30 @@ def render( step: int ):
             st.session_state.data_source
         ].loader_factory()
 
-        left_cols, left_rows = loader.load(
+        st.session_state.left_cols, st.session_state.left_rows = loader.load(
             os.path.join( DATA_DIR, st.session_state.left_csv )
         )
-        right_cols, right_rows = loader.load(
+        st.session_state.right_cols, st.session_state.right_rows = loader.load(
             os.path.join( DATA_DIR, st.session_state.right_csv )
         )
 
         # -----------------------------
-        # 1. Entities & skills labels
+        # 1. Entities
         # -----------------------------
         st.subheader( f"1. Identify entities and { st.session_state.feature_label }" )
 
-        left_entities_col_id = st.selectbox(
+        st.session_state.left_entities_col_id = st.selectbox(
             f"Columns identifying { st.session_state.left_label }",
-            left_cols
+            st.session_state.left_cols
         )
 
-        right_entities_col_id = st.selectbox(
+        st.session_state.right_entities_col_id = st.selectbox(
             f"Column identifying { st.session_state.right_label }",
-            right_cols
+            st.session_state.right_cols
         )
 
-        skill_labels = st.multiselect(
-            f"Columns identifying { st.session_state.feature_label }",
-            [ c for c in left_cols if c != left_entities_col_id ],
-        )
-
-        st.session_state.left_entities, st.session_state.left_skills_val = build_parameters( skill_labels, left_entities_col_id, left_rows )
-        st.session_state.right_entities, st.session_state.right_skills_val = build_parameters( skill_labels, right_entities_col_id, right_rows )
-        st.session_state.skills_label = skill_labels
+        st.session_state.left_entities = build_entities( st.session_state.left_entities_col_id, st.session_state.left_rows )
+        st.session_state.right_entities = build_entities( st.session_state.right_entities_col_id, st.session_state.right_rows )
 
         # -----------------------------
         # 2. LEFT ASSIGNMENT
@@ -155,27 +140,27 @@ def render( step: int ):
                 if assignment_mode == "Use data column":
                     left_col_label = st.selectbox(
                         f"Column identifying { extrema[ id ] } assignments",
-                        left_cols,
-                        index=len( left_cols ) - 1
+                        st.session_state.left_cols,
+                        index=len( st.session_state.left_cols ) - 1
                     )
-                    assignments_per_left[ id ] = build_dict( left_entities_col_id, left_rows, extrema_col_label=left_col_label )
+                    assignments_per_left[ id ] = build_dict( st.session_state.left_entities_col_id, st.session_state.left_rows, extrema_col_label=left_col_label )
 
                 elif assignment_mode == f"Set manually for each { st.session_state.left_label }":
                     assignments_per_left[ id ] = {}
                     for left_entity in st.session_state.left_entities:
                         assignments_per_left[ id ][ left_entity ] = st.number_input(
                             f"{ extrema[ id ] } assignments for { left_entity }",
-                            min_value=0,
-                            max_value=len(right_rows),
+                            min_value=1,
+                            max_value=len( st.session_state.right_rows ),
                         )
 
                 elif assignment_mode == f"Set manually for all { st.session_state.left_label } at once":
                     left_number = st.number_input(
                         f"{ extrema[ id ] } assignments per { st.session_state.left_label }",
-                        min_value=0,
-                        max_value=len(right_rows),
+                        min_value=1,
+                        max_value=len( st.session_state.right_rows ),
                     )
-                    assignments_per_left[ id ] = build_dict( left_entities_col_id, left_rows, extrema=left_number )
+                    assignments_per_left[ id ] = build_dict( st.session_state.left_entities_col_id, st.session_state.left_rows, extrema=left_number )
 
                 else:
                     assignments_per_left[ id ] = None
@@ -206,33 +191,40 @@ def render( step: int ):
                 if capacity_mode == "Use data column":
                     right_col_label = st.selectbox(
                         f"Column identifying { extrema[ id ] } capacities",
-                        right_cols,
-                        index=len(right_cols) - 1
+                        st.session_state.right_cols,
+                        index=len( st.session_state.right_cols ) - 1
                     )
-                    capacities_per_right[ id ] = build_dict( right_entities_col_id, right_rows, extrema_col_label=right_col_label )
+                    capacities_per_right[ id ] = build_dict( st.session_state.right_entities_col_id, st.session_state.right_rows, extrema_col_label=right_col_label )
 
                 elif capacity_mode == f"Set manually for each { st.session_state.right_label }":
                     capacities_per_right[ id ] = {}
                     for right_entity in st.session_state.right_entities:
                         capacities_per_right[ id ][ right_entity ] = st.number_input(
                             f"{ extrema[ id ] } capacities for { right_entity }",
-                            min_value=0,
-                            max_value=len(left_rows),
+                            min_value=1,
+                            max_value=len( st.session_state.left_rows ),
                         )
 
                 elif capacity_mode == f"Set manually for all { st.session_state.right_label } at once":
                     right_number = st.number_input(
                         f"{ extrema[ id ] } capacities per { st.session_state.right_label }",
-                        min_value=0,
-                        max_value=len(left_rows),
+                        min_value=1,
+                        max_value=len( st.session_state.left_rows ),
                     )
-                    capacities_per_right[ id ] = build_dict( right_entities_col_id, right_rows, extrema=right_number )
+                    capacities_per_right[ id ] = build_dict( st.session_state.right_entities_col_id, st.session_state.right_rows, extrema=right_number )
 
                 else:
                     capacities_per_right[ id ] = None
 
         st.session_state.min_capacities_per_right = capacities_per_right[ 0 ]
         st.session_state.max_capacities_per_right = capacities_per_right[ 1 ]
+
+        # -----------------------------
+        # 4. Skills
+        # -----------------------------
+
+        if st.session_state.use_skills:
+            map_skills( st.session_state )
 
         navigation_buttons()
         st.stop()
@@ -242,24 +234,6 @@ def render( step: int ):
     # ==================================================
     if step == 6:
         st.header( "Optimization strategy" )
-
-        st.session_state.skills_reward_function = st.selectbox(
-            "Reward function",
-            RewardFunction,
-        )
-
-        st.session_state.skills_penalty_function = st.selectbox(
-            "Penalty function",
-            PenaltyFunctions,
-        )
-
-        use_skill_weights = st.checkbox( f"Use { st.session_state.feature_label } weights" )
-        if use_skill_weights:
-            st.session_state.skills_weight = {}
-            for skill_label in st.session_state.skills_label:
-                st.session_state.skills_weight[ skill_label ] = st.number_input( f"Weight for { skill_label }", value=1.0 )
-        else:
-            st.session_state.skills_weight = None
 
         define_left_mutual_exclusion = st.checkbox( f"Is there groups of { st.session_state.left_label } who can't be assigned to the same { st.session_state.right_label }" )
         if define_left_mutual_exclusion:
@@ -290,6 +264,8 @@ def render( step: int ):
         else:
             st.session_state.right_mutual_exclusions = None
 
+        if st.session_state.use_skills:
+            skills_strategy( st.session_state )
 
         navigation_buttons()
         st.stop()
