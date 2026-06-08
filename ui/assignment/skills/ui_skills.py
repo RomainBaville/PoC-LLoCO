@@ -15,7 +15,7 @@ def use_skills( state ):
         state.feature_label = st.text_input(
             "Feature label (e.g. Skills)", "Skills"
         )
-        st.session_state.skills_objective = st.selectbox( f" What is the objective with the { st.session_state.feature_label }", list( Objective ) )
+        state.skills_objective = st.selectbox( f" What is the objective with the { state.feature_label }", Objective )
 
 def map_skills( state ):
 
@@ -27,20 +27,20 @@ def map_skills( state ):
     state.right_skills_val = build_skills_val( state.right_entities, state.skills_label, state.right_rows )
 
 def skills_strategy( state ):
-    st.session_state.skills_reward_function = st.selectbox(
+    state.skills_reward_function = st.selectbox(
         "Reward function",
         RewardFunction,
     )
 
-    st.session_state.skills_penalty_function = st.selectbox(
+    state.skills_penalty_function = st.selectbox(
         "Penalty function",
         PenaltyFunctions,
     )
 
-    use_skill_weights = st.checkbox( f"Use { st.session_state.feature_label } weights" )
+    use_skill_weights = st.checkbox( f"Use { state.feature_label } weights" )
     if use_skill_weights:
-        st.session_state.skills_weight = {}
+        state.skills_weight = {}
         for skill_label in st.session_state.skills_label:
-            st.session_state.skills_weight[ skill_label ] = st.number_input( f"Weight for { skill_label }", value=1.0 )
+            state.skills_weight[ skill_label ] = st.number_input( f"Weight for { skill_label }", value=1.0 )
     else:
-        st.session_state.skills_weight = None
+        state.skills_weight = None

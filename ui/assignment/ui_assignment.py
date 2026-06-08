@@ -117,7 +117,14 @@ def render( step: int ):
         st.session_state.right_entities = build_entities( st.session_state.right_entities_col_id, st.session_state.right_rows )
 
         # -----------------------------
-        # 2. LEFT ASSIGNMENT
+        # 2. Skills
+        # -----------------------------
+
+        if st.session_state.use_skills:
+            map_skills( st.session_state )
+
+        # -----------------------------
+        # 3. LEFT ASSIGNMENT
         # -----------------------------
         st.subheader( f"2. Assignment rules for { st.session_state.left_label }" )
 
@@ -169,7 +176,7 @@ def render( step: int ):
         st.session_state.max_assignments_per_left = assignments_per_left[ 1 ]
 
         # -----------------------------
-        # 3. RIGHT CAPACITY
+        # 4. RIGHT CAPACITY
         # -----------------------------
         st.subheader( f"3. Capacity rules for { st.session_state.right_label }" )
 
@@ -219,12 +226,6 @@ def render( step: int ):
         st.session_state.min_capacities_per_right = capacities_per_right[ 0 ]
         st.session_state.max_capacities_per_right = capacities_per_right[ 1 ]
 
-        # -----------------------------
-        # 4. Skills
-        # -----------------------------
-
-        if st.session_state.use_skills:
-            map_skills( st.session_state )
 
         navigation_buttons()
         st.stop()
@@ -235,32 +236,38 @@ def render( step: int ):
     if step == 6:
         st.header( "Optimization strategy" )
 
-        define_left_mutual_exclusion = st.checkbox( f"Is there groups of { st.session_state.left_label } who can't be assigned to the same { st.session_state.right_label }" )
-        if define_left_mutual_exclusion:
-            nb_left_groups = st.number_input( f"How many group of { st.session_state.left_label } ?", 1 )
+        if st.session_state.max_capacities_per_right is None or max( st.session_state.max_capacities_per_right.values() ) > 1:
+            define_left_mutual_exclusion = st.checkbox( f"Is there groups of { st.session_state.left_label } who can't be assigned to the same { st.session_state.right_label }" )
+            if define_left_mutual_exclusion:
+                nb_left_groups = st.number_input( f"How many group of { st.session_state.left_label } ?", 1 )
 
-            st.session_state.left_mutual_exclusions = [ [] for _ in range( nb_left_groups ) ]
-            for left_group in range( nb_left_groups ):
-                nb_left = st.number_input( f"How many { st.session_state.left_label } are conserned for the group { left_group + 1 } ?", 2 )
-                st.session_state.left_mutual_exclusions[ left_group ] = [ None for _ in range( nb_left ) ]
-                left_exclusion_cols = st.columns( nb_left )
-                for id, left_col in enumerate( left_exclusion_cols ):
-                    with left_col:
-                        st.session_state.left_mutual_exclusions[ left_group ][ id ] = st.selectbox( f"{ st.session_state.left_label } { id + 1 } for the group { left_group + 1 }", st.session_state.left_entities, index=id )
+                st.session_state.left_mutual_exclusions = [ [] for _ in range( nb_left_groups ) ]
+                for left_group in range( nb_left_groups ):
+                    nb_left = st.number_input( f"How many { st.session_state.left_label } are conserned for the group { left_group + 1 } ?", 2 )
+                    st.session_state.left_mutual_exclusions[ left_group ] = [ None for _ in range( nb_left ) ]
+                    left_exclusion_cols = st.columns( nb_left )
+                    for id, left_col in enumerate( left_exclusion_cols ):
+                        with left_col:
+                            st.session_state.left_mutual_exclusions[ left_group ][ id ] = st.selectbox( f"{ st.session_state.left_label } { id + 1 } for the group { left_group + 1 }", st.session_state.left_entities, index=id )
+            else:
+                st.session_state.left_mutual_exclusions = None
         else:
             st.session_state.left_mutual_exclusions = None
 
-        define_right_mutual_exclusions = st.checkbox( f"Is there groups of { st.session_state.right_label } who can't contain the same { st.session_state.left_label }" )
-        if define_right_mutual_exclusions:
-            nb_right_groups = st.number_input( f"How many group of { st.session_state.right_label }?", 1 )
-            st.session_state.right_mutual_exclusions = [ [] for _ in range( nb_right_groups ) ]
-            for right_group in range( nb_right_groups ):
-                nb_right = st.number_input( f"How many { st.session_state.right_label } are conserned for the group { right_group + 1 } ?", 2 )
-                st.session_state.right_mutual_exclusions[ right_group ] = [ None for _ in range( nb_right ) ]
-                right_exclusion_cols = st.columns( nb_right )
-                for id, right_col in enumerate( right_exclusion_cols ):
-                    with right_col:
-                        st.session_state.right_mutual_exclusions[ right_group ][ id ] = st.selectbox( f"{ st.session_state.right_label } { id + 1 } for the group { right_group + 1 }", st.session_state.right_entities, index=id )
+        if st.session_state.max_assignments_per_left is None or max( st.session_state.max_assignments_per_left.values() ) > 1:
+            define_right_mutual_exclusions = st.checkbox( f"Is there groups of { st.session_state.right_label } who can't contain the same { st.session_state.left_label }" )
+            if define_right_mutual_exclusions:
+                nb_right_groups = st.number_input( f"How many group of { st.session_state.right_label }?", 1 )
+                st.session_state.right_mutual_exclusions = [ [] for _ in range( nb_right_groups ) ]
+                for right_group in range( nb_right_groups ):
+                    nb_right = st.number_input( f"How many { st.session_state.right_label } are conserned for the group { right_group + 1 } ?", 2 )
+                    st.session_state.right_mutual_exclusions[ right_group ] = [ None for _ in range( nb_right ) ]
+                    right_exclusion_cols = st.columns( nb_right )
+                    for id, right_col in enumerate( right_exclusion_cols ):
+                        with right_col:
+                            st.session_state.right_mutual_exclusions[ right_group ][ id ] = st.selectbox( f"{ st.session_state.right_label } { id + 1 } for the group { right_group + 1 }", st.session_state.right_entities, index=id )
+            else:
+                st.session_state.right_mutual_exclusions = None
         else:
             st.session_state.right_mutual_exclusions = None
 
