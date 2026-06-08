@@ -13,10 +13,11 @@ from ui.utils import (
     # build_results_zip,
 )
 from infrastructure.registry import DATA_SOURCE_REGISTRY
-from ui.assignment.builder import build_problem, build_dict, build_entities
+from ui.assignment.builder import build_entities, build_extrema_dict, build_problem
 # from llm.session_model import OptimizationSession
 from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
 from ui.assignment.skills.ui_skills import use_skills, map_skills, skills_strategy
+from ui.assignment.costs.ui_costs import use_costs, map_costs, costs_strategy
 
 DATA_DIR = "data"
 
@@ -77,6 +78,7 @@ def render( step: int ):
         st.header( "How to assigned entities" )
 
         use_skills( st.session_state )
+        use_costs( st.session_state )
 
         navigation_buttons()
         st.stop()
@@ -101,7 +103,7 @@ def render( step: int ):
         # -----------------------------
         # 1. Entities
         # -----------------------------
-        st.subheader( f"1. Identify entities and { st.session_state.feature_label }" )
+        st.subheader( f"1. Identify entities and features" )
 
         st.session_state.left_entities_col_id = st.selectbox(
             f"Columns identifying { st.session_state.left_label }",
@@ -117,11 +119,14 @@ def render( step: int ):
         st.session_state.right_entities = build_entities( st.session_state.right_entities_col_id, st.session_state.right_rows )
 
         # -----------------------------
-        # 2. Skills
+        # 2. feature
         # -----------------------------
 
         if st.session_state.use_skills:
             map_skills( st.session_state )
+
+        if st.session_state.use_costs:
+            map_costs( st.session_state )
 
         # -----------------------------
         # 3. LEFT ASSIGNMENT
@@ -150,7 +155,7 @@ def render( step: int ):
                         st.session_state.left_cols,
                         index=len( st.session_state.left_cols ) - 1
                     )
-                    assignments_per_left[ id ] = build_dict( st.session_state.left_entities_col_id, st.session_state.left_rows, extrema_col_label=left_col_label )
+                    assignments_per_left[ id ] = build_extrema_dict( st.session_state.left_entities_col_id, st.session_state.left_rows, extrema_col_label=left_col_label )
 
                 elif assignment_mode == f"Set manually for each { st.session_state.left_label }":
                     assignments_per_left[ id ] = {}
@@ -167,7 +172,7 @@ def render( step: int ):
                         min_value=1,
                         max_value=len( st.session_state.right_rows ),
                     )
-                    assignments_per_left[ id ] = build_dict( st.session_state.left_entities_col_id, st.session_state.left_rows, extrema=left_number )
+                    assignments_per_left[ id ] = build_extrema_dict( st.session_state.left_entities_col_id, st.session_state.left_rows, extrema=left_number )
 
                 else:
                     assignments_per_left[ id ] = None
@@ -201,7 +206,7 @@ def render( step: int ):
                         st.session_state.right_cols,
                         index=len( st.session_state.right_cols ) - 1
                     )
-                    capacities_per_right[ id ] = build_dict( st.session_state.right_entities_col_id, st.session_state.right_rows, extrema_col_label=right_col_label )
+                    capacities_per_right[ id ] = build_extrema_dict( st.session_state.right_entities_col_id, st.session_state.right_rows, extrema_col_label=right_col_label )
 
                 elif capacity_mode == f"Set manually for each { st.session_state.right_label }":
                     capacities_per_right[ id ] = {}
@@ -218,7 +223,7 @@ def render( step: int ):
                         min_value=1,
                         max_value=len( st.session_state.left_rows ),
                     )
-                    capacities_per_right[ id ] = build_dict( st.session_state.right_entities_col_id, st.session_state.right_rows, extrema=right_number )
+                    capacities_per_right[ id ] = build_extrema_dict( st.session_state.right_entities_col_id, st.session_state.right_rows, extrema=right_number )
 
                 else:
                     capacities_per_right[ id ] = None
@@ -273,6 +278,9 @@ def render( step: int ):
 
         if st.session_state.use_skills:
             skills_strategy( st.session_state )
+
+        if st.session_state.use_costs:
+            costs_strategy( st.session_state )
 
         navigation_buttons()
         st.stop()

@@ -5,6 +5,7 @@
 from dataclasses import dataclass
 from typing import Optional
 from domain.assignment.skills.skills_config import SkillsConfig
+from domain.assignment.costs.costs_config import CostsConfig
 
 
 @dataclass
@@ -23,3 +24,6 @@ class AssignmentProblem:
 
     use_skills: bool = False
     skills_config: Optional[ SkillsConfig ] = None
+
+    use_costs: bool = False
+    costs_config: Optional[ CostsConfig ] = None

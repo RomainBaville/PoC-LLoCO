@@ -7,26 +7,26 @@ import streamlit as st
 from domain.objective import Objective
 from domain.assignment.skills.skills_reward_functions import RewardFunction
 from domain.assignment.skills.skills_penalty_functions import PenaltyFunctions
-from ui.assignment.skills.builder import build_skills_val
+from ui.assignment.builder import build_val_dict
 
 def use_skills( state ):
     state.use_skills = st.checkbox( "Use feature to compare between entites (e.g. Skills)" )
     if state.use_skills:
-        state.feature_label = st.text_input(
+        state.skill_label = st.text_input(
             "Feature label (e.g. Skills)", "Skills"
         )
-        state.skills_objective = st.selectbox( f" What is the objective with the { state.feature_label }", Objective )
 
 def map_skills( state ):
-
     state.skills_label = st.multiselect(
-        f"Columns identifying { st.session_state.feature_label }",
-        [ c for c in state.left_cols if c != state.left_entities_col_id ],
+        f"Columns identifying { st.session_state.skill_label }",
+        state.left_cols,
     )
-    state.left_skills_val = build_skills_val( state.left_entities, state.skills_label, state.left_rows )
-    state.right_skills_val = build_skills_val( state.right_entities, state.skills_label, state.right_rows )
+    state.left_skills_val = build_val_dict( state.left_entities, state.skills_label, state.left_rows )
+    state.right_skills_val = build_val_dict( state.right_entities, state.skills_label, state.right_rows )
 
 def skills_strategy( state ):
+    state.skills_objective = st.selectbox( f" What is the objective with the { state.skill_label }", Objective )
+
     state.skills_reward_function = st.selectbox(
         "Reward function",
         RewardFunction,
@@ -37,7 +37,7 @@ def skills_strategy( state ):
         PenaltyFunctions,
     )
 
-    use_skill_weights = st.checkbox( f"Use { state.feature_label } weights" )
+    use_skill_weights = st.checkbox( f"Use { state.skill_label } weights" )
     if use_skill_weights:
         state.skills_weight = {}
         for skill_label in st.session_state.skills_label:

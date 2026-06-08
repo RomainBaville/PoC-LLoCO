@@ -4,16 +4,7 @@
 from typing import Optional
 from domain.assignment.base import AssignmentProblem
 from domain.assignment.skills.skills_config import SkillsConfig
-
-
-def build_dict( entity_col_id, rows, extrema_col_label=None, extrema=None ):
-    dict = {}
-    for row in rows:
-        if extrema_col_label is None:
-            dict[ row[ entity_col_id ] ] = extrema
-        else:
-            dict[ row[ entity_col_id ] ] = int(row[ extrema_col_label ])
-    return dict
+from domain.assignment.costs.costs_config import CostsConfig
 
 
 def build_entities( entity_col_id, rows ):
@@ -23,6 +14,27 @@ def build_entities( entity_col_id, rows ):
         entities.append( entity )
 
     return entities
+
+
+def build_extrema_dict( entity_col_id, rows, extrema_col_label=None, extrema=None ):
+    extrema_dict = {}
+    for row in rows:
+        if extrema_col_label is None:
+            extrema_dict[ row[ entity_col_id ] ] = extrema
+        else:
+            extrema_dict[ row[ entity_col_id ] ] = int(row[ extrema_col_label ])
+    return extrema_dict
+
+
+def build_val_dict( entities: list[ str ], features_label: list[ str ], rows ):
+    val_dict: dict[ list[ str ], float ] = {}
+    for i, row in enumerate( rows ):
+        entity: str = entities[ i ]
+        for feature in features_label:
+            val_dict[ ( entity, feature ) ] = float( row[ feature ] )
+
+    return val_dict
+
 
 
 def build_problem( state ):
@@ -42,6 +54,18 @@ def build_problem( state ):
     else:
         skills_config = None
 
+    costs_config: Optional[ CostsConfig ]
+    if state.use_costs:
+        costs_config = CostsConfig(
+            costs_label = state.costs_label,
+            costs_val = state.costs_val,
+            costs_objective = state.costs_objective,
+            limit_costs_label = state.limit_costs_label,
+            limit_costs_val = state.limit_costs_val,
+        )
+    else:
+        costs_config = None
+
     problem: AssignmentProblem = AssignmentProblem(
         left_entities = state.left_entities,
         right_entities = state.right_entities,
@@ -53,6 +77,8 @@ def build_problem( state ):
         right_mutual_exclusions = state.right_mutual_exclusions,
         use_skills = state.use_skills,
         skills_config = skills_config,
+        use_costs = state.use_costs,
+        costs_config = costs_config,
     )
 
     return problem
