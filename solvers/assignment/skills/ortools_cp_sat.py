@@ -75,6 +75,9 @@ class ORToolsSkillAssignmentSolver(Solver):
         )
 
         solver = cp_model.CpSolver()
+        # num_search_workers=1 avoids a threading hang on Python 3.14+
+        solver.parameters.num_search_workers = 1
+        solver.parameters.max_time_in_seconds = 60.0
         status = solver.Solve(model)
 
         if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
@@ -115,6 +118,9 @@ class ORToolsSkillAssignmentSolver(Solver):
         )
 
         solver = cp_model.CpSolver()
+        # num_search_workers=1 avoids a threading hang on Python 3.14+
+        solver.parameters.num_search_workers = 1
+        solver.parameters.max_time_in_seconds = 60.0
         status = solver.Solve(model)
 
         if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
