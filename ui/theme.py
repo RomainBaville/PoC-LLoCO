@@ -5,13 +5,81 @@ import streamlit as st
 
 _CSS = """
 <style>
+/* ── Top bar ─────────────────────────────────────── */
+[data-testid="stHeader"] { display: none !important; }
+
+.ui-topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    height: 52px;
+    background: #0F172A;
+    border-bottom: 1px solid #1E3A8A;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.75rem;
+}
+.ui-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+.ui-topbar-brand {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #F1F5F9;
+    letter-spacing: 0.06em;
+    margin-right: 0.9rem;
+}
+.ui-topbar-sep {
+    width: 1px;
+    height: 18px;
+    background: rgba(255,255,255,0.15);
+    margin-right: 0.9rem;
+}
+.ui-topbar-sub {
+    font-size: 0.75rem;
+    color: #94A3B8;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+.ui-topbar-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #93C5FD;
+    background: rgba(37,99,235,0.25);
+    border: 1px solid rgba(59,130,246,0.35);
+    border-radius: 20px;
+    padding: 0.18rem 0.65rem;
+}
+.ui-topbar-model {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.73rem;
+    color: #CBD5E1;
+}
+.ui-topbar-model-dot {
+    width: 7px; height: 7px;
+    background: #4ADE80;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* compensate for fixed topbar height */
+.main .block-container { padding-top: 4.5rem !important; }
+
 /* ── Sidebar ─────────────────────────────────────── */
 [data-testid="stSidebar"] {
     background-color: #F8FAFC;
     border-right: 1px solid #E2E8F0;
 }
 [data-testid="stSidebar"] section[data-testid="stSidebarContent"] {
-    padding-top: 1.4rem;
+    padding-top: 4.5rem !important;
     padding-bottom: 1.5rem;
 }
 [data-testid="stSidebar"] h2 {
@@ -155,3 +223,27 @@ def hero(title: str, subtitle: str = ""):
     if subtitle:
         html += f'<p class="ui-hero-sub">{subtitle}</p>'
     st.markdown(html, unsafe_allow_html=True)
+
+
+def render_topbar(active_model: str | None = None):
+    if active_model:
+        right_html = (
+            '<div class="ui-topbar-model">'
+            '<span class="ui-topbar-model-dot"></span>'
+            f'<span>{active_model}</span>'
+            '</div>'
+        )
+    else:
+        right_html = '<span class="ui-topbar-badge">PoC</span>'
+
+    st.markdown(
+        '<div class="ui-topbar">'
+        '  <div class="ui-topbar-left">'
+        '    <span class="ui-topbar-brand">⚙ LLoCO</span>'
+        '    <span class="ui-topbar-sep"></span>'
+        '    <span class="ui-topbar-sub">Optimization Playground</span>'
+        '  </div>'
+        f'  <div>{right_html}</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )

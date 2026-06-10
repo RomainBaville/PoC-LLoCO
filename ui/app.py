@@ -50,8 +50,9 @@ st.session_state.setdefault("problem_key", None)
 st.session_state.setdefault("assignment_type", None)
 st.session_state.setdefault("assignment_variant", None)
 
-# ── Sidebar ──────────────────────────────────────────────────────────────────
+# ── Sidebar + top bar ────────────────────────────────────────────────────────
 render_sidebar()
+theme.render_topbar(st.session_state.get("llm_model_name"))
 
 
 # ── Problem configuration inference ─────────────────────────────────────────
