@@ -41,7 +41,7 @@ The LLM **never replaces the solver**: it acts as a **guidance and explanation l
 
 - Streamlit-based interactive UI — single-page dashboard layout
 - Sidebar-driven configuration with progressive disclosure
-- Local LLM model picker (Ollama and llama-server auto-detected)
+- Multi-backend LLM model picker: Ollama, llama-server, and AKKODIS Azure OpenAI (auto-detected)
 - LLM-assisted onboarding and result summarization
 - Generic domain modeling (solver-agnostic)
 - Registry-based problem and solver selection
@@ -93,7 +93,8 @@ PoC-LLoCO/
 │   ├── registry.py                   # Problem FAMILY registry (Assignment, etc.)
 │   ├── sidebar.py                    # Sidebar — progressive configuration panel
 │   ├── theme.py                      # CSS design system and render helpers
-│   ├── model_picker.py               # Local LLM model discovery (Ollama, llama-server)
+│   ├── model_picker.py               # LLM model discovery (Ollama, llama-server, AKKODIS)
+│   ├── akkodis_client.py             # AKKODIS Azure OpenAI client (mirrors LLoCO/llm_utils.py)
 │   ├── utils.py                      # Journey logging, AI summary, ZIP export
 │   │
 │   └── problems/
@@ -176,16 +177,33 @@ python -m venv .venv
 The LLM is used for two optional features: problem onboarding guidance and solution summarization.
 **The optimizer works fully without a LLM** — simply leave the model selector set to "Aucun".
 
-Two backends are supported and auto-detected by the application:
+Three backends are supported and auto-detected by the application:
 
-#### Option A — Ollama (recommended, all platforms)
+#### Option A — AKKODIS Azure OpenAI (recommended for AKKODIS employees)
+
+The application automatically discovers AKKODIS GPT models when an API key is present.
+Available models: `GPT-4o mini`, `GPT-4o`, `GPT-5`, `o4-mini`.
+
+Place your API key in **one** of the following locations (checked in order):
+
+| Location | Notes |
+|----------|-------|
+| `OPENAI_API_KEY` environment variable | Highest priority |
+| `.api_key.txt` at the project root | Local override |
+| `../LLoCO/.api_key.txt` | Auto-detected from sibling project |
+
+> **Security:** `.api_key.txt` is listed in `.gitignore` and must **never** be committed.
+
+No server to start — models appear automatically in the picker when the key is found.
+
+#### Option B — Ollama (recommended for local use, all platforms)
 
 1. Install Ollama: https://ollama.com/download
 2. Pull a model:
    ```bash
-   ollama pull qwen3:8b
+   ollama pull qwen3:0.6b   # lightweight (~522 MB, works on 8 GB RAM)
    # or
-   ollama pull deepseek-r1:7b
+   ollama pull qwen3:8b
    ```
 3. Ollama starts automatically at boot. If not running, start it:
 
@@ -197,7 +215,7 @@ Two backends are supported and auto-detected by the application:
 
    The application detects available models automatically — no configuration needed.
 
-#### Option B — llama-server + GGUF (Windows, original setup)
+#### Option C — llama-server + GGUF (Windows, original setup)
 
 1. Download a Qwen GGUF model from https://huggingface.co/Qwen and place it in `models/`
 2. Download llama.cpp binaries from https://github.com/ggml-org/llama.cpp/releases and place them in `llama_cpp/`
@@ -220,7 +238,7 @@ REM launch Streamlit
 streamlit run ui\app.py
 ```
 
-Or use the provided script which also starts llama-server (Option B only):
+Or use the provided script which also starts llama-server (Option C only):
 ```bat
 run_app.bat
 ```
@@ -265,5 +283,6 @@ To use a different port: `streamlit run ui/app.py --server.port 8502`
 ### Notes
 
 - All optimization computations are performed by **deterministic solvers** — the LLM never affects the result
-- The model picker auto-detects Ollama models and GGUF files in `models/` at each page load
-- Once dependencies and models are installed, **no internet connection is required**
+- The model picker auto-detects all three backends (AKKODIS, Ollama, llama-server) at each page load
+- AKKODIS GPT models require an internet connection; Ollama and llama-server run fully offline
+- `.api_key.txt` is gitignored — never commit it
