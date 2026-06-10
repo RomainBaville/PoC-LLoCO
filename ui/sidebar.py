@@ -96,11 +96,39 @@ def _render_config_panel():
     )
     st.session_state.assignment_variant = f"{assignment_type}_{variant_local}"
 
+    # Recommendation hint
+    rec = st.session_state.get("analysis_recommendation")
+    if rec:
+        rec_variant_label = variants.get(rec.get("variant_local", ""), None)
+        if rec_variant_label:
+            st.markdown(
+                f'<p class="ui-hint">💡 Recommandation IA : '
+                f'<strong>{rec_variant_label.label}</strong></p>',
+                unsafe_allow_html=True,
+            )
+
     st.markdown("")
-    if st.button("✔  Valider la configuration", type="primary", use_container_width=True):
+    can_validate = (
+        st.session_state.get("analysis_done")
+        and st.session_state.get("problem_key")
+        and st.session_state.get("assignment_type")
+        and st.session_state.get("assignment_variant")
+    )
+    if st.button(
+        "✔  Valider la configuration",
+        type="primary",
+        use_container_width=True,
+        disabled=not can_validate,
+    ):
         st.session_state.config_validated = True
         st.session_state.data_step = 1
         st.rerun()
+
+    if not can_validate:
+        st.markdown(
+            '<p class="ui-hint">→ Analysez d\'abord votre problème dans la zone centrale.</p>',
+            unsafe_allow_html=True,
+        )
 
 
 # ── Guide panel — shown after validation ────────────────────────────────────

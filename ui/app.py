@@ -43,9 +43,46 @@ st.session_state.setdefault("ai_summary", None)
 st.session_state.setdefault("journey", [])
 st.session_state.setdefault("onboarding_result", None)
 st.session_state.setdefault("solve_error", None)
+st.session_state.setdefault("analysis_done", False)
+st.session_state.setdefault("analysis_recommendation", None)
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 render_sidebar()
+
+
+# ── Problem configuration inference ─────────────────────────────────────────
+
+def infer_problem_configuration(user_desc: str, ai_text: str | None = None) -> dict:
+    """Deterministic keyword-based recommendation — no extra LLM call."""
+    text = f"{user_desc}\n{ai_text or ''}".lower()
+
+    assignment_keywords = [
+        "assign", "affect", "affectation", "affecter", "assignment",
+        "employee", "employé", "project", "projet", "skill", "compétence", "competence",
+    ]
+    if not any(w in text for w in assignment_keywords):
+        return {}
+
+    problem_key = "assignment"
+    assignment_type = "skills"
+
+    if any(w in text for w in ["coverage", "required", "requirement", "besoin", "couverture", "requis"]):
+        variant_local = "coverage"
+    elif any(w in text for w in ["best fit", "best_fit", "matching", "compatibility", "score", "compatibilité"]):
+        variant_local = "best_fit"
+    elif any(w in text for w in ["team", "équipe", "group", "groupe"]):
+        variant_local = "team"
+    elif any(w in text for w in ["portfolio", "selection", "budget", "sélection"]):
+        variant_local = "portfolio"
+    else:
+        variant_local = "coverage"
+
+    return {
+        "problem_key": problem_key,
+        "assignment_type": assignment_type,
+        "variant_local": variant_local,
+        "assignment_variant": f"{assignment_type}_{variant_local}",
+    }
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -293,7 +330,7 @@ def _render_step4():
 def _render_onboarding():
     theme.hero(
         "Optimization Playground",
-        "Décrivez votre problème, sélectionnez-le dans la barre latérale, puis validez la configuration.",
+        "Décrivez votre problème en langage naturel. L'IA configurera automatiquement la barre latérale.",
     )
 
     st.markdown("### Analyser votre problème avec l'IA")
@@ -315,22 +352,49 @@ def _render_onboarding():
         else:
             try:
                 with st.spinner("Analyse en cours…"):
-                    st.session_state.onboarding_result = _llm_ask(
-                        build_onboarding_prompt(user_desc)
-                    )
+                    result = _llm_ask(build_onboarding_prompt(user_desc))
+
+                st.session_state.onboarding_result = result
+                st.session_state.analysis_done = True
+
+                # Infer and immediately apply configuration recommendation
+                rec = infer_problem_configuration(user_desc, result)
+                st.session_state.analysis_recommendation = rec
+                if rec:
+                    st.session_state["problem_key"] = rec["problem_key"]
+                    st.session_state["_ui_atype"] = rec["assignment_type"]
+                    st.session_state["_ui_variant"] = rec["variant_local"]
+                    st.session_state["assignment_type"] = rec["assignment_type"]
+                    st.session_state["assignment_variant"] = rec["assignment_variant"]
+
+                # Reset any prior validation so user re-confirms the new config
+                st.session_state.config_validated = False
+                st.session_state.data_step = 1
+                st.session_state.solution = None
+                st.session_state.ai_summary = None
+
+                st.rerun()
+
             except Exception as exc:
                 st.error(f"Erreur lors de l'appel au modèle IA : {exc}")
 
     if st.session_state.get("onboarding_result"):
         st.markdown("**Guidage IA**")
         theme.ai_block(st.session_state.onboarding_result)
-
-    st.markdown("")
-    st.markdown(
-        '<p class="ui-hint">→ Sélectionnez votre problème dans la barre latérale '
-        'et cliquez sur <strong>Valider la configuration</strong> pour commencer.</p>',
-        unsafe_allow_html=True,
-    )
+        st.markdown("")
+        st.markdown(
+            '<p class="ui-hint">✓ Configuration proposée dans la barre latérale. '
+            'Vous pouvez la modifier, puis cliquer sur '
+            '<strong>Valider la configuration</strong>.</p>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown("")
+        st.markdown(
+            '<p class="ui-hint">→ Décrivez votre problème ci-dessus. '
+            'L\'IA proposera automatiquement une configuration dans la barre latérale.</p>',
+            unsafe_allow_html=True,
+        )
 
 
 def _render_data_workflow():
