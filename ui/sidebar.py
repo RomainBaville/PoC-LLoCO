@@ -106,6 +106,13 @@ def _render_config_panel():
 # ── Guide panel — shown after validation ────────────────────────────────────
 
 def _render_guide_panel():
+    # Guard: if required keys were lost (hot reload, session reset), fall back to config panel
+    if not st.session_state.get("problem_key") or not st.session_state.get("assignment_type") \
+            or not st.session_state.get("assignment_variant"):
+        st.session_state.config_validated = False
+        st.rerun()
+        return
+
     # Configuration summary
     theme.section_label("Configuration active")
 
