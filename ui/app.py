@@ -45,6 +45,10 @@ st.session_state.setdefault("onboarding_result", None)
 st.session_state.setdefault("solve_error", None)
 st.session_state.setdefault("analysis_done", False)
 st.session_state.setdefault("analysis_recommendation", None)
+# Config fields start as None — only populated after AI analysis
+st.session_state.setdefault("problem_key", None)
+st.session_state.setdefault("assignment_type", None)
+st.session_state.setdefault("assignment_variant", None)
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 render_sidebar()
@@ -362,8 +366,6 @@ def _render_onboarding():
                 st.session_state.analysis_recommendation = rec
                 if rec:
                     st.session_state["problem_key"] = rec["problem_key"]
-                    st.session_state["_ui_atype"] = rec["assignment_type"]
-                    st.session_state["_ui_variant"] = rec["variant_local"]
                     st.session_state["assignment_type"] = rec["assignment_type"]
                     st.session_state["assignment_variant"] = rec["assignment_variant"]
 

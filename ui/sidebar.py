@@ -61,55 +61,97 @@ def _render_model_picker():
 
 # ── Config panel — shown before validation ───────────────────────────────────
 
+_PLACEHOLDER = "__placeholder__"
+_PLACEHOLDER_PROBLEM = "Sélection automatique après analyse"
+_PLACEHOLDER_TYPE = "—"
+_PLACEHOLDER_VARIANT = "—"
+
+
 def _render_config_panel():
+    analysis_done = st.session_state.get("analysis_done", False)
+
     st.markdown("## Configuration")
 
+    # ── Problème ─────────────────────────────────────
     theme.section_label("Problème")
-    st.selectbox(
-        "Problème",
-        options=list(PROBLEM_REGISTRY.keys()),
-        format_func=lambda k: PROBLEM_REGISTRY[k].label,
-        label_visibility="collapsed",
-        key="problem_key",
-    )
+    problem_options = [_PLACEHOLDER] + list(PROBLEM_REGISTRY.keys())
+    current_problem = st.session_state.get("problem_key")
+    problem_index = problem_options.index(current_problem) if current_problem in problem_options else 0
 
-    theme.section_label("Type & Formulation")
-    assignment_type = st.selectbox(
-        "Type",
-        options=list(ASSIGNMENT_TYPES.keys()),
-        format_func=lambda k: ASSIGNMENT_TYPES[k].label,
+    selected_problem = st.selectbox(
+        "Problème",
+        options=problem_options,
+        index=problem_index,
+        format_func=lambda k: _PLACEHOLDER_PROBLEM if k == _PLACEHOLDER else PROBLEM_REGISTRY[k].label,
         label_visibility="collapsed",
-        key="_ui_atype",
+        disabled=not analysis_done,
     )
+    st.session_state.problem_key = None if selected_problem == _PLACEHOLDER else selected_problem
+
+    # ── Type ──────────────────────────────────────────
+    theme.section_label("Type & Formulation")
+    type_options = [_PLACEHOLDER] + list(ASSIGNMENT_TYPES.keys())
+    current_type = st.session_state.get("assignment_type")
+    type_index = type_options.index(current_type) if current_type in type_options else 0
+
+    selected_type = st.selectbox(
+        "Type",
+        options=type_options,
+        index=type_index,
+        format_func=lambda k: _PLACEHOLDER_TYPE if k == _PLACEHOLDER else ASSIGNMENT_TYPES[k].label,
+        label_visibility="collapsed",
+        disabled=not analysis_done,
+    )
+    assignment_type = None if selected_type == _PLACEHOLDER else selected_type
     st.session_state.assignment_type = assignment_type
 
-    atype_def = ASSIGNMENT_TYPES[assignment_type]
-    variant_reg = import_module(atype_def.registry_module)
-    variants = variant_reg.VARIANTS
+    # ── Formulation ───────────────────────────────────
+    if assignment_type:
+        atype_def = ASSIGNMENT_TYPES[assignment_type]
+        variant_reg = import_module(atype_def.registry_module)
+        variants = variant_reg.VARIANTS
 
-    variant_local = st.selectbox(
-        "Formulation",
-        options=list(variants.keys()),
-        format_func=lambda k: variants[k].label,
-        label_visibility="collapsed",
-        key="_ui_variant",
-    )
-    st.session_state.assignment_variant = f"{assignment_type}_{variant_local}"
+        variant_options = [_PLACEHOLDER] + list(variants.keys())
+        current_variant_full = st.session_state.get("assignment_variant") or ""
+        # Extract local key: "skills_coverage" → "coverage"
+        current_variant_local = current_variant_full.split("_", 1)[1] if "_" in current_variant_full else None
+        variant_index = variant_options.index(current_variant_local) if current_variant_local in variant_options else 0
 
-    # Recommendation hint
-    rec = st.session_state.get("analysis_recommendation")
-    if rec:
-        rec_variant_label = variants.get(rec.get("variant_local", ""), None)
-        if rec_variant_label:
+        selected_variant = st.selectbox(
+            "Formulation",
+            options=variant_options,
+            index=variant_index,
+            format_func=lambda k: _PLACEHOLDER_VARIANT if k == _PLACEHOLDER else variants[k].label,
+            label_visibility="collapsed",
+            disabled=not analysis_done,
+        )
+        variant_local = None if selected_variant == _PLACEHOLDER else selected_variant
+        st.session_state.assignment_variant = (
+            f"{assignment_type}_{variant_local}" if variant_local else None
+        )
+
+        # Recommendation hint
+        rec = st.session_state.get("analysis_recommendation")
+        if rec and rec.get("variant_local") in variants:
+            rec_label = variants[rec["variant_local"]].label
             st.markdown(
-                f'<p class="ui-hint">💡 Recommandation IA : '
-                f'<strong>{rec_variant_label.label}</strong></p>',
+                f'<p class="ui-hint">💡 Recommandation IA : <strong>{rec_label}</strong></p>',
                 unsafe_allow_html=True,
             )
+    else:
+        st.selectbox(
+            "Formulation",
+            options=[_PLACEHOLDER],
+            format_func=lambda k: _PLACEHOLDER_VARIANT,
+            label_visibility="collapsed",
+            disabled=True,
+        )
+        st.session_state.assignment_variant = None
 
+    # ── Validate button ───────────────────────────────
     st.markdown("")
     can_validate = (
-        st.session_state.get("analysis_done")
+        analysis_done
         and st.session_state.get("problem_key")
         and st.session_state.get("assignment_type")
         and st.session_state.get("assignment_variant")
