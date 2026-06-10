@@ -12,13 +12,29 @@ import streamlit as st
 
 import ui.theme as theme
 from ui.sidebar import render as render_sidebar
-from ui.utils import build_results_zip, generate_ai_summary, log_step
+from ui.utils import build_results_zip, log_step
 from ui.problems.assignment.skills.builder import build_problem
 from infrastructure.registry import DATA_SOURCE_REGISTRY
 from llm.onboarding_prompt import build_onboarding_prompt
+from llm.session_prompt import build_session_summary_prompt
 from llm.client import ask_llm_request
 from llm.session_model import OptimizationSession
 from solvers.assignment.registry import ASSIGNMENT_SOLVER_GROUPS
+
+
+def _llm_ask(prompt: str) -> str:
+    """Dispatch LLM call to the right backend based on the selected model."""
+    source = st.session_state.get("llm_source", "ollama")
+    model_name = st.session_state.llm_model_name
+
+    if source == "akkodis":
+        from ui.akkodis_client import ask as akkodis_ask
+        return akkodis_ask(prompt, model_name)
+    else:
+        import llm.client as _llm
+        _llm.LLM_SERVER_URL = st.session_state.llm_url
+        _llm.LLM_MODEL_NAME = model_name
+        return ask_llm_request(prompt)
 
 _DATA_DIR = "data"
 _LOADER_KEY = "csv_two_tables"
@@ -95,15 +111,14 @@ if solve_triggered:
                 f"{len(solution)} {st.session_state.left_label.lower()} assigné(s)."
             ),
         )
-        if st.session_state.get("llm_url") and st.session_state.get("llm_model_name"):
-            import llm.client as _llm
-            _llm.LLM_SERVER_URL = st.session_state.llm_url
-            _llm.LLM_MODEL_NAME = st.session_state.llm_model_name
+        if st.session_state.get("llm_model_name"):
             try:
                 with st.spinner("Analyse IA en cours…"):
-                    st.session_state.ai_summary = generate_ai_summary(session)
-            except Exception:
-                st.session_state.ai_summary = "_Résumé IA indisponible (erreur lors de l'appel au modèle)._"
+                    st.session_state.ai_summary = _llm_ask(
+                        build_session_summary_prompt(session)
+                    )
+            except Exception as exc:
+                st.session_state.ai_summary = f"_Résumé IA indisponible : {exc}_"
         else:
             st.session_state.ai_summary = "_Aucun modèle IA sélectionné._"
 
@@ -143,18 +158,16 @@ def _render_onboarding():
     if st.button("Analyser", type="primary"):
         if not user_desc.strip():
             st.warning("Saisissez une description avant d'analyser.")
-        elif not st.session_state.get("llm_url"):
+        elif not st.session_state.get("llm_model_name"):
             st.warning("Sélectionnez un modèle IA dans la barre latérale.")
         else:
-            import llm.client as _llm
-            _llm.LLM_SERVER_URL = st.session_state.llm_url
-            _llm.LLM_MODEL_NAME = st.session_state.llm_model_name
             try:
                 with st.spinner("Analyse en cours…"):
-                    prompt = build_onboarding_prompt(user_desc)
-                    st.session_state.onboarding_result = ask_llm_request(prompt)
-            except Exception:
-                st.error("Erreur lors de l'appel au modèle IA.")
+                    st.session_state.onboarding_result = _llm_ask(
+                        build_onboarding_prompt(user_desc)
+                    )
+            except Exception as exc:
+                st.error(f"Erreur lors de l'appel au modèle IA : {exc}")
 
     if st.session_state.get("onboarding_result"):
         st.markdown("**Guidage IA**")

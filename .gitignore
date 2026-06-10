@@ -1,3 +1,10 @@
 __pycache__/
 models/
 llama_cpp/
+.venv/
+
+# API keys — never commit
+.api_key.txt
+api_key.txt
+*.key
+.env

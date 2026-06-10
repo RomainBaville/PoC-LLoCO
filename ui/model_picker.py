@@ -26,7 +26,7 @@ class ModelInfo:
     label: str        # displayed in the selectbox
     api_url: str      # OpenAI-compatible completions endpoint
     model_name: str   # model name sent in the API payload
-    source: str       # "ollama" | "llama-server"
+    source: str       # "ollama" | "llama-server" | "akkodis"
 
 
 def _discover_ollama() -> list[ModelInfo]:
@@ -78,9 +78,25 @@ def _discover_llama_server() -> list[ModelInfo]:
     ]
 
 
+def _discover_akkodis() -> list[ModelInfo]:
+    from ui.akkodis_client import find_api_key, AKKODIS_MODELS, _BASE_URL
+    if not find_api_key():
+        return []
+    return [
+        ModelInfo(
+            key=f"akkodis::{model_id}",
+            label=label,
+            api_url=_BASE_URL.format(model=model_id),
+            model_name=model_id,
+            source="akkodis",
+        )
+        for model_id, label in AKKODIS_MODELS
+    ]
+
+
 def discover() -> list[ModelInfo]:
-    """Return all locally available models across all backends."""
-    return _discover_ollama() + _discover_llama_server()
+    """Return all available models across all backends."""
+    return _discover_akkodis() + _discover_ollama() + _discover_llama_server()
 
 
 def get_by_key(key: str) -> Optional[ModelInfo]:

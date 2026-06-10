@@ -76,10 +76,12 @@ def render() -> bool:
                 m = model_options[selected_key]
                 st.session_state.llm_url = m.api_url
                 st.session_state.llm_model_name = m.model_name
+                st.session_state.llm_source = m.source
                 active_label = m.label
             else:
                 st.session_state.llm_url = None
                 st.session_state.llm_model_name = None
+                st.session_state.llm_source = None
                 active_label = None
         else:
             st.session_state.llm_url = None
