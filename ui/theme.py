@@ -234,7 +234,7 @@ def render_topbar(active_model: str | None = None):
             '</div>'
         )
     else:
-        right_html = '<span class="ui-topbar-badge">PoC</span>'
+        right_html = '<span class="ui-topbar-badge">PoC-LLoCO</span>'
 
     st.markdown(
         '<div class="ui-topbar">'
