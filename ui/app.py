@@ -172,11 +172,11 @@ def _do_solve():
 
         session = OptimizationSession(
             problem_family="Assignment",
+            problem_type=st.session_state.get("assignment_type", ""),
             problem_variant=st.session_state.assignment_variant,
             steps=st.session_state.journey,
             data_description="Source : CSV",
             solver_name=solver_def.label,
-            solver_type="Constraint Programming",
             result_summary=(
                 f"{len(solution)} {st.session_state.left_label.lower()} assigné(s)."
             ),
