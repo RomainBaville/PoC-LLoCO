@@ -13,6 +13,7 @@ from solvers.assignment.cp_model.constraints.generic_constraints import (
 )
 
 from solvers.assignment.cp_model.constraints.logical_constraints import apply_logical_constraints
+from solvers.assignment.cp_model.constraints.skills_constraints import apply_skill_constraints
 from solvers.assignment.cp_model.constraints.costs_contraints import apply_cost_constraints
 
 class ORToolsAssignmentSolver( Solver ):
@@ -39,6 +40,7 @@ class ORToolsAssignmentSolver( Solver ):
         apply_left_constraints( model, x, problem )
         apply_right_constraints( model, x, problem )
         apply_logical_constraints( model, x, problem )
+        apply_skill_constraints( model, x, problem )
         apply_cost_constraints( model, x, problem )
 
         # --------------------------------------------------
@@ -63,6 +65,6 @@ class ORToolsAssignmentSolver( Solver ):
             if solver.Value( x[ l, r ] ) == 1:
                 if l not in result:
                     result[ l ] = []
-                result[ l ]. append( r )
+                result[ l ].append( r )
 
         return result

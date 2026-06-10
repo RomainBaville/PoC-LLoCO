@@ -3,41 +3,40 @@
 # SPDX-FileContributor: Romain Baville
 
 import streamlit as st
+from typing_extensions import Optional
 
 from domain.objective import Objective
 from ui.assignment.builder import build_val_dict
 
 def use_costs( state ):
-    state.use_costs = st.checkbox( "Use feature to constrain left entity assignment (e.g. Costs)" )
-    if state.use_costs:
-        state.cost_label = st.text_input(
-            "Feature label (e.g. Costs)", "Costs"
-        )
+    state.use_costs = st.checkbox( "Use costs to constrain left entity assignment (e.g. Salary)" )
+
 
 def map_costs( state ):
-    state.costs_label = st.multiselect(
-        f"Columns identifying { st.session_state.cost_label }",
+    costs_label = st.multiselect(
+        f"Columns identifying costs",
         state.left_cols,
     )
+    state.costs_label = { cost_label: None for cost_label in costs_label }
+    state.costs_val = build_val_dict( state.left_entities, state.costs_label.keys(), state.left_rows )
 
-    limit_costs_label = {}
-    for cost in state.costs_label:
-        use_costs_limit = st.checkbox( f"Use a right entity limit for { cost } (e.g. Budget for Salary)" )
-        if use_costs_limit:
-            limit_costs_label[ cost ] = st.selectbox( f" What is the limit for the { state.cost_label } { cost }", state.right_cols )
+    use_costs_limit = st.checkbox( f"Use a limit for at least for one cost per left entities" )
+    if use_costs_limit:
+        for cost in state.costs_label:
+            state.costs_label[ cost ] = st.selectbox( f" What is the limit for { cost }", [ None ]+ state.right_cols )
 
-    state.costs_val = build_val_dict( state.left_entities, state.costs_label, state.left_rows )
-    state.limit_costs_label = None if limit_costs_label == {} else limit_costs_label
+        limit_costs_label: list[ Optional[ float ] ] = list( state.costs_label.values() )
+        nb_none: int = limit_costs_label.count( None )
+        for _ in range( nb_none ):
+            limit_costs_label.remove( None )
 
-    if state.limit_costs_label is not None:
-        limit_costs_val = build_val_dict( state.right_entities, state.limit_costs_label.values(), state.right_rows )
-    else:
-        limit_costs_val = None
-
-    st.session_state.limit_costs_val = limit_costs_val
+        if len( limit_costs_label ) > 0:
+            state.limit_costs_val = build_val_dict( state.right_entities, limit_costs_label, state.right_rows )
+        else:
+            state.limit_costs_val = None
 
 
 def costs_strategy( state ):
     state.costs_objective = {}
     for cost in state.costs_label:
-        state.costs_objective[ cost ] = st.selectbox( f" What is the objective with the { state.cost_label } { cost }", Objective )
+        state.costs_objective[ cost ] = st.selectbox( f" What is the objective with { cost }", Objective )

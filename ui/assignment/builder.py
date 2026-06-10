@@ -44,12 +44,13 @@ def build_problem( state ):
     if state.use_skills:
         skills_config = SkillsConfig(
             skills_label = state.skills_label,
-            left_skills_val = state.left_skills_val,
-            right_skills_val = state.right_skills_val,
+            skills_val = state.skills_val,
+            requirement_skills_val = state.requirement_skills_val,
             skills_objective = state.skills_objective,
-            skills_weight = state.skills_weight,
             skills_reward_function = state.skills_reward_function,
             skills_penalty_function = state.skills_penalty_function,
+            skills_weight = state.skills_weight,
+            min_requirement_skills_val = None,
         )
     else:
         skills_config = None
@@ -60,8 +61,9 @@ def build_problem( state ):
             costs_label = state.costs_label,
             costs_val = state.costs_val,
             costs_objective = state.costs_objective,
-            limit_costs_label = state.limit_costs_label,
             limit_costs_val = state.limit_costs_val,
+            limit_entities_costs_val = None,
+            limit_assignment_costs_val = None,
         )
     else:
         costs_config = None

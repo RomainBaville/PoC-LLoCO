@@ -14,12 +14,12 @@ from domain.assignment.skills.skills_penalty_functions import PenaltyFunctions
 class SkillsConfig:
     skills_label: list[ str ]
 
-    left_skills_val: dict[ list[ str ], float ]
-    right_skills_val: dict[ list[ str ], float ]
+    skills_val: dict[ list[ str ], float ]
+    requirement_skills_val: dict[ list[ str ], float ]
 
-    skills_objective: Objective = Objective.MAXIMIZE
+    skills_objective: Objective
+    skills_reward_function: RewardFunction
+    skills_penalty_function: PenaltyFunctions
 
     skills_weight: Optional[ dict[ str, float ] ] = None
-
-    skills_reward_function: RewardFunction = RewardFunction.MIN
-    skills_penalty_function: PenaltyFunctions = PenaltyFunctions.NONE
+    min_requirement_skills_val: Optional[ dict[ list[ str ], float ] ] = None

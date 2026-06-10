@@ -10,22 +10,18 @@ from domain.assignment.skills.skills_penalty_functions import PenaltyFunctions
 from ui.assignment.builder import build_val_dict
 
 def use_skills( state ):
-    state.use_skills = st.checkbox( "Use feature to compare between entites (e.g. Skills)" )
-    if state.use_skills:
-        state.skill_label = st.text_input(
-            "Feature label (e.g. Skills)", "Skills"
-        )
+    state.use_skills = st.checkbox( "Use skills to compare between entites (e.g. python_level)" )
 
 def map_skills( state ):
     state.skills_label = st.multiselect(
-        f"Columns identifying { st.session_state.skill_label }",
+        f"Columns identifying skills",
         state.left_cols,
     )
-    state.left_skills_val = build_val_dict( state.left_entities, state.skills_label, state.left_rows )
-    state.right_skills_val = build_val_dict( state.right_entities, state.skills_label, state.right_rows )
+    state.skills_val = build_val_dict( state.left_entities, state.skills_label, state.left_rows )
+    state.requirement_skills_val = build_val_dict( state.right_entities, state.skills_label, state.right_rows )
 
 def skills_strategy( state ):
-    state.skills_objective = st.selectbox( f" What is the objective with the { state.skill_label }", Objective )
+    state.skills_objective = st.selectbox( f" What is the objective with skills", Objective )
 
     state.skills_reward_function = st.selectbox(
         "Reward function",
@@ -37,10 +33,10 @@ def skills_strategy( state ):
         PenaltyFunctions,
     )
 
-    use_skill_weights = st.checkbox( f"Use { state.skill_label } weights" )
-    if use_skill_weights:
+    use_skills_weight = st.checkbox( f"Use skills weight" )
+    if use_skills_weight:
         state.skills_weight = {}
-        for skill_label in st.session_state.skills_label:
-            state.skills_weight[ skill_label ] = st.number_input( f"Weight for { skill_label }", value=1.0 )
+        for skill in state.skills_label:
+            state.skills_weight[ skill ] = st.number_input( f"Weight for { skill }", value=1.0 )
     else:
         state.skills_weight = None
