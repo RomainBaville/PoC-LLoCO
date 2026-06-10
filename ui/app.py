@@ -49,6 +49,9 @@ st.session_state.setdefault("analysis_recommendation", None)
 st.session_state.setdefault("problem_key", None)
 st.session_state.setdefault("assignment_type", None)
 st.session_state.setdefault("assignment_variant", None)
+# Data-workflow labels (used in results rendering)
+st.session_state.setdefault("left_label", "Personnes")
+st.session_state.setdefault("right_label", "Projets")
 
 # ── Sidebar + top bar ────────────────────────────────────────────────────────
 render_sidebar()
