@@ -61,9 +61,11 @@ def build_problem( state ):
             costs_label = state.costs_label,
             costs_val = state.costs_val,
             costs_objective = state.costs_objective,
-            limit_costs_val = state.limit_costs_val,
-            limit_entities_costs_val = None,
-            limit_assignment_costs_val = None,
+            limit_costs_entities_label = state.limit_costs_entities_label,
+            limit_costs_entities_val = state.limit_costs_entities_val,
+            limit_all_costs_entities_val = state.limit_all_costs_entities_val,
+            limit_costs_all_entities_val = state.limit_costs_all_entities_val,
+            limit_all_costs_all_entities_val = state.limit_all_costs_all_entities_val,
         )
     else:
         costs_config = None

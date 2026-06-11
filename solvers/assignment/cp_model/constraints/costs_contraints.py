@@ -5,18 +5,21 @@
 def apply_cost_constraints( model, x, problem ):
     if problem.use_costs:
         costs_config = problem.costs_config
-        if costs_config.limit_costs_val is not None:
-            costs_label = costs_label.keys()
-            for ( right, limit_cost_label ), limit_val in costs_config.limit_costs_val.items():
-                i = 0
-                while limit_cost_label not in costs_config.costs_label[ costs_label[ i ] ]:
-                    i += 1
-                cost_label = costs_label[ i ]
-                model.Add( sum( costs_config.costs_val[ left, cost_label ] * x[ left, right ] for left in problem.left_entities ) <= int( limit_val ) )
+        if costs_config.limit_costs_entities_val is not None:
+            for ( right, limit_cost_entities_label ), limit_cost_entities_val in costs_config.limit_costs_val.items():
+                cost_entities_limited_label = costs_config.limit_costs_entities_label[ limit_cost_entities_label ]
+                model.Add( sum( costs_config.costs_val[ left, cost_entities_limited_label ] * x[ left, right ] for left in problem.left_entities ) <= int( limit_cost_entities_val ) )
 
-        if costs_config.limit_entities_costs_val is not None:
-            for right, limit_val in costs_config.limit_entities_costs_val.items():
-                model.Add( sum( costs_config.costs_val[ left, cost_label ] * x[ left, right ] for cost_label in costs_config.costs_label for left in problem.left_entities ) )
 
-        if costs_config.limit_assignment_costs_val is not None:
-            model.Add( sum( costs_config.costs_val[ left, cost ] * x[ left, right ] for cost in costs_config.costs_label for left, right in x ) )
+        if costs_config.limit_all_costs_entities_val is not None:
+            for right, limit_all_costs_entity_val in costs_config.limit_all_costs_entities_val.items():
+                model.Add( sum( costs_config.costs_val[ left, cost_label ] * x[ left, right ] for cost_label in costs_config.costs_label for left in problem.left_entities ) <= int( limit_all_costs_entity_val ) )
+
+
+        if costs_config.limit_costs_all_entities_val is not None:
+            for cost_all_entities_limited_label, limit_cost_all_entities_val in costs_config.limit_costs_all_entities_val.items():
+                model.Add( sum( costs_config.costs_val[ left, cost_all_entities_limited_label ] * x[ left, right ] for left, right in x ) <= int( limit_cost_all_entities_val ) )
+
+
+        if costs_config.limit_all_costs_all_entities_val is not None:
+            model.Add( sum( costs_config.costs_val[ left, cost ] * x[ left, right ] for cost in costs_config.costs_label for left, right in x ) <= int( costs_config.limit_all_costs_all_entities_val ) )
