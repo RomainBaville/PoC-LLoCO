@@ -22,4 +22,5 @@ class SkillsConfig:
     skills_penalty_function: PenaltyFunctions
 
     skills_weight: Optional[ dict[ str, float ] ] = None
+    min_requirement_skills_label : Optional[ dict[ str, str ] ] = None
     min_requirement_skills_val: Optional[ dict[ list[ str ], float ] ] = None

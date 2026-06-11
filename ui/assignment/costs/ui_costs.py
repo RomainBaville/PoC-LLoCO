@@ -3,13 +3,12 @@
 # SPDX-FileContributor: Romain Baville
 
 import streamlit as st
-from typing_extensions import Optional
 
 from domain.objective import Objective
 from ui.assignment.builder import build_val_dict, build_extrema_dict
 
 def use_costs( state ):
-    state.use_costs = st.checkbox( "Use costs to constrain left entity assignment (e.g. Salary)" )
+    state.use_costs = st.checkbox( "Use costs to associate entities with score optimization or constraints (e.g. Salary, Budget ...)" )
 
 
 def map_costs( state ):
@@ -27,7 +26,7 @@ def map_costs( state ):
             for id, limit_costs_entities_col in enumerate( limit_costs_entities_cols ):
                 with limit_costs_entities_col:
                     cost_entities_limited_label = costs_entities_limited_label[ id ]
-                    limit_cost_entities_label = st.selectbox( f" Select the column identifying the cost limit for the { cost_entities_limited_label } in the { state.right_label }", state.right_cols )
+                    limit_cost_entities_label = st.selectbox( f"Select the column identifying the cost limit for the { cost_entities_limited_label } in the { state.right_label }", state.right_cols )
                     state.limit_costs_entities_label[ limit_cost_entities_label ] = cost_entities_limited_label
 
             state.limit_costs_entities_val = build_val_dict( state.right_entities, state.limit_costs_entities_label, state.right_rows )

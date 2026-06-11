@@ -50,7 +50,8 @@ def build_problem( state ):
             skills_reward_function = state.skills_reward_function,
             skills_penalty_function = state.skills_penalty_function,
             skills_weight = state.skills_weight,
-            min_requirement_skills_val = None,
+            min_requirement_skills_label = state.min_requirement_skills_label,
+            min_requirement_skills_val = state.min_requirement_skills_val,
         )
     else:
         skills_config = None
