@@ -4,11 +4,19 @@
 
 def apply_logical_constraints( model, x, problem ):
     if problem.left_mutual_exclusions is not None:
-        for r in problem.right_entities:
-            for l_exclusion in problem.left_mutual_exclusions:
-                model.Add( sum( x[ l, r ] for l in l_exclusion ) <= 1 )
+        for right_label in problem.right_labels:
+            for left_mutual_exclusion in problem.left_mutual_exclusions:
+                model.Add(
+                    sum(
+                        x[ left_label, right_label ] for left_label in left_mutual_exclusion
+                    ) < 1
+                )
 
     if problem.right_mutual_exclusions is not None:
-        for l in problem.left_entities:
-            for r_exclusion in problem.right_mutual_exclusions:
-                model.Add( sum( x[ l, r ] for r in r_exclusion ) <= 1 )
+        for left_label in problem.left_labels:
+            for right_mutual_exclusion in problem.right_mutual_exclusions:
+                model.Add(
+                    sum(
+                        x[ left_label, right_label ] for right_label in right_mutual_exclusion
+                    ) < 1
+                )

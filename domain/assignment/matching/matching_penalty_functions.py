@@ -6,38 +6,38 @@ import math
 from enum import Enum
 from typing_extensions import Self, Callable
 
-def no_penalty( left: float, right: float ) -> float:
-    return 0
+def no_penalty( left_val: float, right_val: float ) -> float:
+    return 0.
 
 
-def score_shortfall( left: float, right: float ) -> float:
-    return -max( 0, right - left )
+def score_shortfall( left_val: float, right_val: float ) -> float:
+    return -max( 0., right_val - left_val )
 
 
-def score_absdiff( left: float, right: float ) -> float:
-    return -abs( left - right )
+def score_absdiff( left_val: float, right_val: float ) -> float:
+    return -abs( left_val - right_val )
 
 
-def score_relative_shortfall( left: float, right: float ) -> float:
-    if right == 0:
-        return 0
-    return -max( 0, ( right - left ) / right )
+def score_relative_shortfall( left_val: float, right_val: float ) -> float:
+    if right_val == 0:
+        return 0.
+    return -max( 0., ( right_val - left_val ) / right_val )
 
 
-def score_squared_diff( left: float, right: float ) -> float:
-    return -( left - right ) ** 2
+def score_squared_diff( left_val: float, right_val: float ) -> float:
+    return -( left_val - right_val ) ** 2
 
 
-def score_shortfall_squared( left: float, right: float ) -> float:
-    return -( max( 0, right - left ) ** 2 )
+def score_shortfall_squared( left_val: float, right_val: float ) -> float:
+    return -( max( 0., right_val - left_val ) ** 2 )
 
 
-def score_overqualification( left: float, right: float ) -> float:
-    return -max( 0, left - right )
+def score_overqualification( left_val: float, right_val: float ) -> float:
+    return -max( 0., left_val - right_val )
 
 
-def score_log_shortfall( left: float, right: float ) -> float:
-    return -math.log( 1 + max( 0, right - left ) )
+def score_log_shortfall( left_val: float, right_val: float ) -> float:
+    return -math.log( 1. + max( 0., right_val - left_val ) )
 
 
 class PenaltyFunctions( Enum ):
@@ -57,5 +57,5 @@ class PenaltyFunctions( Enum ):
     def __str__( self: Self ) -> str:
         return self.name
 
-    def __call__( self: Self, left: float, right: float ) -> float:
-        return self.func( left, right )
+    def __call__( self: Self, left_val: float, right_val: float ) -> float:
+        return self.func( left_val, right_val )

@@ -5,23 +5,19 @@
 from ortools.sat.python import cp_model
 
 from solvers.base import Solver
-from domain.assignment.scoring import compute
+from domain.assignment.base import AssignmentProblem
 
-from solvers.assignment.cp_model.constraints.generic_constraints import (
-    apply_left_constraints,
-    apply_right_constraints,
-)
-
+from solvers.assignment.cp_model.constraints.generic_constraints import apply_generic_constraints
 from solvers.assignment.cp_model.constraints.logical_constraints import apply_logical_constraints
-from solvers.assignment.cp_model.constraints.skills_constraints import apply_skill_constraints
-from solvers.assignment.cp_model.constraints.costs_contraints import apply_cost_constraints
+from solvers.assignment.cp_model.constraints.matching_constraints import apply_matching_constraints
+from solvers.assignment.cp_model.constraints.ressources_contraints import apply_ressources_constraints
 
 class ORToolsAssignmentSolver( Solver ):
     """
     Generic OR-Tools CP-SAT solver for assignment problems.
     """
 
-    def solve( self, problem ):
+    def solve( self, problem: AssignmentProblem ):
 
         model = cp_model.CpModel()
 
@@ -29,24 +25,27 @@ class ORToolsAssignmentSolver( Solver ):
         # Variables
         # --------------------------------------------------
         x = {
-            ( l, r ): model.NewBoolVar( f"x_{ l }_{ r }" )
-            for l in problem.left_entities
-            for r in problem.right_entities
+            ( left_label, right_label ): model.NewBoolVar( f"x_{ left_label }_{ right_label }" )
+            for left_label in problem.left_labels
+            for right_label in problem.right_labels
         }
 
         # --------------------------------------------------
         # Constraints
         # --------------------------------------------------
-        apply_left_constraints( model, x, problem )
-        apply_right_constraints( model, x, problem )
+        apply_generic_constraints( model, x, problem )
         apply_logical_constraints( model, x, problem )
-        apply_skill_constraints( model, x, problem )
-        apply_cost_constraints( model, x, problem )
+        apply_matching_constraints( model, x, problem )
+        apply_ressources_constraints( model, x, problem )
 
         # --------------------------------------------------
         # Objective
         # --------------------------------------------------
-        model.Maximize( sum( compute( problem, l, r ) * x[ l, r ] for l, r in x ) )
+        model.Maximize(
+            sum(
+                problem.compute_score( left_label, right_label ) * x[ left_label, right_label ] for left_label, right_label in x
+            )
+        )
 
         # --------------------------------------------------
         # Solve
@@ -61,10 +60,10 @@ class ORToolsAssignmentSolver( Solver ):
         # Extract solution
         # --------------------------------------------------
         result = {}
-        for ( l, r ) in x:
-            if solver.Value( x[ l, r ] ) == 1:
-                if l not in result:
-                    result[ l ] = []
-                result[ l ].append( r )
+        for ( left_label, right_label ) in x:
+            if solver.Value( x[ left_label, right_label ] ) == 1:
+                if left_label not in result:
+                    result[ left_label ] = []
+                result[ left_label ].append( right_label )
 
         return result

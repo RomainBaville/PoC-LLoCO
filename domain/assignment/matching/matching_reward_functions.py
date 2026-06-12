@@ -7,35 +7,34 @@ from enum import Enum
 from typing_extensions import Self, Callable
 
 
-# Reward
-def score_min( left: float, right: float ) -> float:
-    return min( left, right )
+def score_min( left_val: float, right_val: float ) -> float:
+    return min( left_val, right_val )
 
 
-def score_product( left: float, right: float ) -> float:
-    return left * right
+def score_product( left_val: float, right_val: float ) -> float:
+    return left_val * right_val
 
 
-def score_ratio( left: float, right: float ) -> float:
-    if right == 0:
-        return 0
-    return min( left / right, 1 )
+def score_ratio( left_val: float, right_val: float ) -> float:
+    if right_val == 0:
+        return 0.
+    return min( left_val / right_val, 1 )
 
 
-def score_threshold( left: float, right: float ) -> float:
-    return 1 if left >= right else 0
+def score_threshold( left_val: float, right_val: float ) -> float:
+    return 1. if left_val >= right_val else 0.
 
 
-def score_sqrt_product( left: float, right: float ) -> float:
-    return math.sqrt( left * right )
+def score_sqrt_product( left_val: float, right_val: float ) -> float:
+    return math.sqrt( left_val * right_val )
 
 
-def score_log_product( left: float, right: float ) -> float:
-    return math.log( 1 + left * right )
+def score_log_product( left_val: float, right_val: float ) -> float:
+    return math.log( 1 + left_val * right_val )
 
 
-def score_soft_min( left: float, right: float ) -> float:
-    return ( left * right ) / ( left + right + 1e-6 )
+def score_soft_min( left_val: float, right_val: float ) -> float:
+    return ( left_val * right_val ) / ( left_val + right_val + 1e-6 )
 
 
 class RewardFunctions( Enum ):
@@ -54,5 +53,5 @@ class RewardFunctions( Enum ):
     def __str__( self: Self ) -> str:
         return self.name
 
-    def __call__( self: Self, left: float, right: float ) -> float:
-        return self.func( left, right )
+    def __call__( self: Self, left_val: float, right_val: float ) -> float:
+        return self.func( left_val, right_val )

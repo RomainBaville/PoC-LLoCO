@@ -2,43 +2,37 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-def apply_left_constraints( model, x, problem ):
-    for l in problem.left_entities:
-        # ---------------------------------------
-        # MAX assignments per left
-        # ---------------------------------------
-        if problem.max_assignments_per_left is not None:
-            max_cap = problem.max_assignments_per_left[ l ]
+def apply_generic_constraints( model, x, problem ):
+    for left_label in problem.left_labels:
+        if problem.max_assignments is not None:
+            max_assi = int( problem.max_assignments[ left_label ] )
             model.Add(
-                sum( x[ l, r ] for r in problem.right_entities ) <= max_cap
+                sum(
+                    x[ left_label, right_label ] for right_label in problem.right_labels
+                ) <= max_assi
             )
 
-        # ---------------------------------------
-        # MIN assignments per left
-        # ---------------------------------------
-        if problem.min_assignments_per_left is not None:
-            min_cap = problem.min_assignments_per_left[ l ]
+        if problem.min_assignments is not None:
+            min_assi = int( problem.min_assignments_per_left[ left_label ] )
             model.Add(
-                sum( x[ l, r ] for r in problem.right_entities ) >= min_cap
+                sum(
+                    x[ left_label, right_label ] for right_label in problem.right_labels
+                ) >= min_assi
             )
 
-
-def apply_right_constraints( model, x, problem ):
-    for r in problem.right_entities:
-        # ---------------------------------------
-        # MAX capacities
-        # ---------------------------------------
-        if problem.max_capacities_per_right is not None:
-            max_cap = problem.max_capacities_per_right[ r ]
+    for right_label in problem.right_entities:
+        if problem.max_capacities is not None:
+            max_cap = int( problem.max_capacities[ right_label ] )
             model.Add(
-                sum( x[ l, r ] for l in problem.left_entities ) <= max_cap
+                sum(
+                    x[ left_label, right_label ] for left_label in problem.left_labels
+                ) <= max_cap
             )
 
-        # ---------------------------------------
-        # MIN capacities
-        # ---------------------------------------
-        if problem.min_capacities_per_right is not None:
-            min_cap = problem.min_capacities_per_right[ r ]
+        if problem.min_capacities is not None:
+            min_cap = int( problem.min_capacities[ right_label ] )
             model.Add(
-                sum( x[ l, r ] for l in problem.left_entities ) >= min_cap
+                sum(
+                    x[ left_label, right_label ] for left_label in problem.left_labels
+                ) >= min_cap
             )
