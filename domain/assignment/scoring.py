@@ -2,27 +2,27 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-def compute( problem, left, right ):
+def compute( problem, left_label, right_label ):
         total: float = 0
 
-        if problem.use_skills:
-            skills_config = problem.skills_config
-            for skill in skills_config.skills_label:
-                skill_val = skills_config.skills_val[ ( left, skill ) ]
-                requirement_skill_val = skills_config.requirement_skills_val[ ( right, skill ) ]
+        if problem.use_matching:
+            matching_config = problem.matching_config
+            for matching_label in matching_config.labels:
+                left_val = matching_config.left_vals[ ( left_label, matching_label ) ]
+                right_val = matching_config.right_vals[ ( right_label, matching_label ) ]
 
-                skills_weight: float = 1
-                if skills_config.skills_weight is not None:
-                    skills_weight = skills_config.skills_weight[ skill ]
+                matching_weight: float = 1.
+                if matching_config.weights is not None:
+                    matching_weight = matching_config.weights[ matching_label ]
 
-                reward: float = skills_config.skills_reward_function( skill_val, requirement_skill_val )
-                penalty: float = skills_config.skills_penalty_function( skill_val, requirement_skill_val )
+                reward: float = matching_config.reward_function( left_val, right_val )
+                penalty: float = matching_config.penalty_function( left_val, right_val )
 
-                total += skills_config.skills_objective.value * skills_weight * ( reward + penalty )
+                total += matching_config.objective.value * matching_weight * ( reward + penalty )
 
-        if problem.use_costs:
-            costs_config = problem.costs_config
-            for cost in costs_config.costs_label:
-                total += costs_config.costs_objective[ cost ].value * costs_config.costs_val[ ( left, cost ) ]
+        if problem.use_single:
+            single_config = problem.single_config
+            for label in single_config.labels:
+                total += single_config.objectives[ label ].value * single_config.vals[ ( left_label, label ) ]
 
         return total

@@ -4,26 +4,28 @@
 
 from dataclasses import dataclass
 from typing import Optional
-from domain.assignment.skills.skills_config import SkillsConfig
-from domain.assignment.costs.costs_config import CostsConfig
+from domain.assignment.matching.matching_config import MatchingConfig
+from domain.assignment.single.single_config import SingleConfig
 
 
 @dataclass
 class AssignmentProblem:
-    left_entities: list[ str ]
-    right_entities: list[ str ]
+    left_labels: list[ str ]
+    right_labels: list[ str ]
 
-    min_assignments_per_left: Optional[ dict[ str, int ] ] = None
-    max_assignments_per_left: Optional[ dict[ str, int ] ] = None
+    # Scoring
+    use_matching: bool = False
+    matching_config: Optional[ MatchingConfig ] = None
 
-    min_capacities_per_right: Optional[ dict[ str, int ] ] = None
-    max_capacities_per_right: Optional[ dict[ str, int ] ] = None
+    use_single: bool = False
+    single_config: Optional[ SingleConfig ] = None
+
+    # Global constraints
+    max_assignments: Optional[ dict[ str, int ] ] = None
+    min_assignments: Optional[ dict[ str, int ] ] = None
+
+    max_capacities: Optional[ dict[ str, int ] ] = None
+    min_capacities: Optional[ dict[ str, int ] ] = None
 
     left_mutual_exclusions: Optional[ list[ list[ str ] ] ] = None
     right_mutual_exclusions: Optional[ list[ list[ str ] ] ] = None
-
-    use_skills: bool = False
-    skills_config: Optional[ SkillsConfig ] = None
-
-    use_costs: bool = False
-    costs_config: Optional[ CostsConfig ] = None

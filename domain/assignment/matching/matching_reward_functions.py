@@ -38,7 +38,7 @@ def score_soft_min( left: float, right: float ) -> float:
     return ( left * right ) / ( left + right + 1e-6 )
 
 
-class RewardFunction( Enum ):
+class RewardFunctions( Enum ):
     """Enum for reward functions."""
     MIN: Callable[ [ float, float ], float ] = ( score_min, )
     PRODUCT: Callable[ [ float, float ], float ] = ( score_product, )
