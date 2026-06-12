@@ -6,9 +6,9 @@ def apply_cost_constraints( model, x, problem ):
     if problem.use_costs:
         costs_config = problem.costs_config
         if costs_config.limit_costs_entities_val is not None:
-            for ( right, limit_cost_entities_label ), limit_cost_entities_val in costs_config.limit_costs_val.items():
+            for ( right, limit_cost_entities_label ), limit_cost_entities_val in costs_config.limit_costs_entities_val.items():
                 cost_entities_limited_label = costs_config.limit_costs_entities_label[ limit_cost_entities_label ]
-                model.Add( sum( costs_config.costs_val[ left, cost_entities_limited_label ] * x[ left, right ] for left in problem.left_entities ) <= int( limit_cost_entities_val ) )
+                model.Add( sum( int( costs_config.costs_val[ left, cost_entities_limited_label ] ) * x[ left, right ] for left in problem.left_entities ) <= int( limit_cost_entities_val ) )
 
 
         if costs_config.limit_all_costs_entities_val is not None:
