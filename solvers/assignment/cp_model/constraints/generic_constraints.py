@@ -13,14 +13,14 @@ def apply_generic_constraints( model, x, problem ):
             )
 
         if problem.min_assignments is not None:
-            min_assi = int( problem.min_assignments_per_left[ left_label ] )
+            min_assi = int( problem.min_assignments[ left_label ] )
             model.Add(
                 sum(
                     x[ left_label, right_label ] for right_label in problem.right_labels
                 ) >= min_assi
             )
 
-    for right_label in problem.right_entities:
+    for right_label in problem.right_labels:
         if problem.max_capacities is not None:
             max_cap = int( problem.max_capacities[ right_label ] )
             model.Add(

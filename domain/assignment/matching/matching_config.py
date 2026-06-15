@@ -29,12 +29,12 @@ class MatchingConfig:
         weights (Optional[dict[str, float]]): The dictionary with the variables weights used in the computation of the score matching:
             - keys (str): The label of the variable used in the computation of the score matching with a weight.
             - values (float): The value of the weight.
-        max_vals (Optional[dict[str, float]]): The dictionary whit the maximum variables values accepted for the assignment of the left entities by the right entities:
-            - keys (str): The variable label.
-            - value (float): The maximum value accepted for the variable.
-        min_vals (Optional[dict[str, float]]): The dictionary whit the minimum variables values accepted for the assignment of the left entities by the right entities:
-            - keys (str): The variable label.
-            - value (float): The minimum value accepted for the variable.
+        max_vals (Optional[dict[list[str], float]]): The dictionary whit the maximum variables values accepted for the assignment of the left entities by the right entities:
+            - keys (list[str]): The right entity label, the left constraints variable label.
+            - value (float): The maximum value accepted by the right entity for the left variable.
+        min_vals (Optional[dict[list[str], float]]): The dictionary whit the minimum variables values accepted for the assignment of the left entities by the right entities:
+            - keys (list[str]): The right entity label, the left constraints variable label.
+            - value (float): The minimum value accepted by the right entity for the left variable.
     """
     labels: list[ str ]
     left_vals: dict[ list[ str ], float ]
@@ -48,5 +48,5 @@ class MatchingConfig:
     # Constraints
     weights: Optional[ dict[ str, float ] ] = None
 
-    max_vals: Optional[ dict[ str, float ] ] = None
-    min_vals: Optional[ dict[ str, float ] ] = None
+    max_vals: Optional[ dict[ list[ str ], float ] ] = None
+    min_vals: Optional[ dict[ list[ str ], float ] ] = None

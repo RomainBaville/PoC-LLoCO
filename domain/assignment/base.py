@@ -103,12 +103,12 @@ class AssignmentProblem:
                 score += self.matching_config.objective.value * matching_weight * ( reward + penalty )
 
         if self.use_ressources:
-            for label in self.ressources_config.labels:
+            for ressource_label in self.ressources_config.labels:
                 weight: float = 1.
                 if self.ressources_config.weights is not None:
-                    if label in self.ressources_config.weights:
-                        weight = self.ressources_config.weights[ label ]
+                    if ressource_label in self.ressources_config.weights:
+                        weight = self.ressources_config.weights[ ressource_label ]
 
-                score += self.ressources_config.objectives[ label ].value * weight * self.ressources_config.vals[ ( left_label, label ) ]
+                score += self.ressources_config.objectives[ ressource_label ].value * weight * self.ressources_config.vals[ ( left_label, ressource_label ) ]
 
         return score
