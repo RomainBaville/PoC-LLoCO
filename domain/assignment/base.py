@@ -11,8 +11,8 @@ class AssignmentProblem:
 
     def __init__(
         self: Self,
-        left_labels: list[ str ],
-        right_labels: list[ str ],
+        left_labels: tuple[ str, ...],
+        right_labels: tuple[ str, ...],
         use_matching: bool = False,
         matching_config: Optional[ MatchingConfig ] = None,
         use_ressources: bool = False,
@@ -21,18 +21,18 @@ class AssignmentProblem:
         min_assignments: Optional[ dict[ str, float ] ] = None,
         max_capacities: Optional[ dict[ str, float ] ] = None,
         min_capacities: Optional[ dict[ str, float ] ] = None,
-        left_mutual_exclusions: Optional[ list[ list[ str ] ] ] = None,
-        right_mutual_exclusions: Optional[ list[ list[ str ] ] ] = None,
+        left_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None,
+        right_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None,
     ) -> None:
         """Class to deals with assignment problem.
 
         Args:
-            left_labels (list[str]): The list of the left entities labels to associate.
-            right_labels (list[str]): The list of the right entities labels to associate.
-            use_matching (bool): True if the problem needs to match left and right entities (e.g. skills, production ...):
+            left_labels (tuple[str, ...]): The left entities labels to associate.
+            right_labels (tuple[str, ...]): The right entities labels to associate.
+            use_matching (bool): True if the problem optimization score uses left and right entities matching (e.g. skills, production ...):
                 Defaults to False.
             matching_config (Optional[MatchingConfig]): The configuration of the matching to make.
-            use_ressources (bool): True if the problem needs to optimize left entities ressources (e.g. salary, time ...):
+            use_ressources (bool): True if the problem optimisation score uses left entities ressources (e.g. salary, time ...):
                 Defaults to False.
             ressources_config (Optional[RessourcesConfig]): The configuration of the ressources to use.
             max_assignments (Optional[dict[str, float]]): The dictionary whit the maximum assignments accepted per left entities:
@@ -47,11 +47,11 @@ class AssignmentProblem:
             min_capacities (Optional[dict[str, float]]): The dictionary whit the minimum capacities accepted per right entities:
                 - keys (str): The right entity label.
                 - value (float): The minimum capacities accepted by the right entity.
-            left_mutual_exclusions (Optional[list[list[str]]]): The list of left entities groups that can't be associated together.
-            right_mutual_exclusions (Optional[list[list[str]]]): The list of right entities groups that can't be assigned together.
+            left_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): The groups of left entities labels that can't be associated together.
+            right_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): The groups of right entities labels that can't be assigned together.
         """
-        self.left_labels: list[ str ] = left_labels
-        self.right_labels: list[ str ] = right_labels
+        self.left_labels: tuple[ str, ...] = left_labels
+        self.right_labels: tuple[ str, ... ] = right_labels
 
         # Scoring
         self.use_matching: bool = use_matching
@@ -68,8 +68,8 @@ class AssignmentProblem:
         self.min_capacities: Optional[ dict[ str, float ] ] = min_capacities
 
         # Logical constraints
-        self.left_mutual_exclusions: Optional[ list[ list[ str ] ] ] = left_mutual_exclusions
-        self.right_mutual_exclusions: Optional[ list[ list[ str ] ] ] = right_mutual_exclusions
+        self.left_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = left_mutual_exclusions
+        self.right_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = right_mutual_exclusions
 
     def compute_score(
         self: Self,
