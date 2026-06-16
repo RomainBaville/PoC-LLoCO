@@ -5,72 +5,66 @@
 import streamlit as st
 
 from domain.objective import Objective
-from ui.assignment.builder import build_val_dict, build_extrema_dict
-
-def use_costs( state ):
-    state.use_costs = st.checkbox( "Use costs to associate entities with score optimization or constraints (e.g. Salary, Budget ...)" )
+from ui.assignment.builder import build_val_dict
 
 
-def map_costs( state ):
-    state.costs_label = st.multiselect( "Select columns identifying your costs", state.left_cols, )
-    state.costs_val = build_val_dict( state.left_entities, state.costs_label, state.left_rows )
+def map_ressources( state ):
+    state.ressources_labels = st.multiselect( "Select columns identifying your ressources", state.left_cols, )
+    state.ressources_vals = build_val_dict( state.left_labels, state.ressources_labels, state.left_rows )
 
 
-    use_limit_costs_entities = st.checkbox( f"Is there a limit per costs per { state.right_label }" )
-    if use_limit_costs_entities:
-        costs_entities_limited_label = st.multiselect( f"Select costs of { state.left_label } with a limit per { state.right_label }", state.costs_label )
-        nb_costs_entities_limited = len( costs_entities_limited_label )
-        if nb_costs_entities_limited > 0:
-            state.limit_costs_entities_label = {}
-            limit_costs_entities_cols = st.columns( nb_costs_entities_limited )
-            for id, limit_costs_entities_col in enumerate( limit_costs_entities_cols ):
-                with limit_costs_entities_col:
-                    cost_entities_limited_label = costs_entities_limited_label[ id ]
-                    limit_cost_entities_label = st.selectbox( f"Select the column identifying the cost limit for the { cost_entities_limited_label } in the { state.right_label }", state.right_cols )
-                    state.limit_costs_entities_label[ limit_cost_entities_label ] = cost_entities_limited_label
-
-            state.limit_costs_entities_val = build_val_dict( state.right_entities, state.limit_costs_entities_label, state.right_rows )
-        else:
-            state.limit_costs_entities_label = None
-            state.limit_costs_entities_val = None
-    else:
-        state.limit_costs_entities_label = None
-        state.limit_costs_entities_val = None
+def ressources_strategy( state ):
+    state.ressoucres_objectives = {}
+    for ressource_label in state.ressources_labels:
+        state.ressoucres_objectives[ ressource_label ] = st.selectbox( f"Select the objective for { ressource_label }", Objective )
 
 
-    use_limit_all_costs_entities = st.checkbox( f"Is there a limit for all costs per { state.right_label }" )
-    if use_limit_all_costs_entities:
-        limit_all_costs_entities_label = st.selectbox( f"Select the column identifying the cost limit per { state.right_label } for all costs of { state.left_label }", state.right_cols )
-        state.limit_all_costs_entities_val = build_extrema_dict( state.right_entities_col_id, state.right_rows, extrema_col_label=limit_all_costs_entities_label )
-    else:
-        state.limit_all_costs_entities_val = None
+def ressources_constraints( state ):
+    extrema = [ "maximum", "minimum" ]
+    extrema_vals_cols = st.columns( 2 )
+    extrema_vals = [ None, None ]
+    for id, extrema_vals_col in enumerate( extrema_vals_cols ):
+        with extrema_vals_col:
+            use_extrema_vals = st.checkbox( f"Is there ressources with a { extrema[ id ] } constraint per { state.right_labels }" )
+            if use_extrema_vals:
+                constrainning_variables_labels = st.multiselect( f"Select all variables in the { state.right_entities } used as { extrema[ id ] } constraint", state.right_cols )
+                constrainning_ressources_labels_map = {}
+                for constrainning_variable_label in constrainning_variables_labels:
+                    constrainning_ressources_labels_map[ constrainning_variable_label ] = st.multiselect( f"Select ressources constrainning by { constrainning_variable_label }", state.ressources_labels )
+
+                vals: dict[ list[ str ], float ] = {}
+                for right_row in state.right_rows:
+                    right_label: str = right_row[ state.right_entities_col_id ]
+                    for constraint_label, ressources_labels in constrainning_ressources_labels_map.items():
+                        key = [ right_label ]
+                        key.extend( ressources_labels )
+                        vals[ tuple(key) ] = float( right_row[ constraint_label ] )
+
+                extrema_vals[ id ] = vals
+            else:
+                extrema_vals[ id ] = None
+
+    state.ressoucres_max_vals = extrema_vals[ 0 ]
+    state.ressoucres_min_vals = extrema_vals[ 1 ]
+    print(state.ressoucres_max_vals, "max_vals")
+    print(state.ressoucres_min_vals, "min_vals")
 
 
-    use_limit_costs_all_entities = st.checkbox( f"Is there a limit per costs for all { state.right_label }" )
-    if use_limit_costs_all_entities:
-        costs_all_entities_limited_label = st.multiselect( f"Select costs of { state.left_label } with a limit for all {state.right_label }", state.costs_label )
-        nb_costs_all_entities_limited = len( costs_all_entities_limited_label )
-        if nb_costs_all_entities_limited > 0:
-            costs_all_entities_limited_cols = st.columns( nb_costs_all_entities_limited )
-            state.limit_costs_all_entities_val = {}
-            for id, costs_all_entities_limited_col in enumerate( costs_all_entities_limited_cols ):
-                with costs_all_entities_limited_col:
-                    cost_all_entities_limited_label = costs_all_entities_limited_label[ id ]
-                    state.limit_costs_all_entities_val[ cost_all_entities_limited_label ] = st.number_input( f"Set the limit for all { state.right_label } for the { cost_all_entities_limited_label }", value=1. )
-        else:
-            state.limit_costs_all_entities_val = None
-    else:
-        state.limit_costs_all_entities_val = None
+    extrema_vals_global_cols = st.columns( 2 )
+    extrema_vals_global = [ None, None ]
+    for id, extrema_vals_global_col in enumerate( extrema_vals_global_cols ):
+        with extrema_vals_global_col :
+            use_extrema_vals_global = st.checkbox( f"Is there group of ressources with a { extrema[ id ] } constraint for all { state.right_labels }" )
+            if use_extrema_vals_global:
+                nb_group = st.number_input( "How many group of ressources are constrained", value=1 )
+                extrema_vals_global[ id ] = {}
+                for group in range( nb_group ):
+                    a = st.multiselect( "Select the ressources constrained by the same minimum value for all right entities", state.ressources_labels )
+                    b = st.number_input( f"Set the minimum value constrainning in the same time { a } for all { state.right_label }", value=1 )
+                    extrema_vals_global[ id ][ a ] = b
+            else:
+                extrema_vals_global[ id ] = None
 
 
-    use_limit_all_costs_all_entities = st.checkbox( f"Is there a limit for all costs of {state.left_label } for all { state.right_label }" )
-    if use_limit_all_costs_all_entities:
-        state.limit_all_costs_all_entities_val = st.number_input( f"Set the limit for all costs of { state.left_label } for all { state.right_label }", value=1 )
-    else:
-        state.limit_all_costs_all_entities_val = None
-
-
-def costs_strategy( state ):
-    state.costs_objective = {}
-    for cost in state.costs_label:
-        state.costs_objective[ cost ] = st.selectbox( f"Select the objective for { cost }", Objective )
+    state.ressoucres_max_vals_global = extrema_vals_global[ 0 ]
+    state.ressoucres_min_vals_global = extrema_vals_global[ 1 ]

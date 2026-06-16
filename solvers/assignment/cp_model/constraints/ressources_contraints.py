@@ -2,26 +2,33 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-def apply_ressources_constraints( model, x, problem ):
-    if problem.use_costs:
-        ressources_config = problem.ressources_config
+from domain.assignment.base import AssignmentProblem
+from domain.assignment.ressources.ressources_config import RessourcesConfig
+
+def apply_ressources_constraints( model, x, problem: AssignmentProblem ):
+    if problem.use_ressources:
+        ressources_config: RessourcesConfig = problem.ressources_config
         if ressources_config.max_vals is not None:
-            for right_label in problem.right_labels:
-                for ressources_labels, max_val in ressources_config.max_vals.items():
-                    model.Add(
-                        sum(
-                            int( ressources_config.vals[ left_label, ressource_label ] ) * x[ left_label, right_label ] for ressource_label in ressources_labels for left_label in problem.left_entities
-                        ) <= int( max_val )
-                    )
+            for key in ressources_config.max_vals:
+                right_label = key[ 0 ]
+                ressources_labels = key[ 1: ]
+                max_val = int( ressources_config.max_vals[ key ] )
+                model.Add(
+                    sum(
+                        int( ressources_config.vals[ left_label, ressource_label ] ) * x[ left_label, right_label ] for ressource_label in ressources_labels for left_label in problem.left_labels
+                    ) <= max_val
+                )
 
         if ressources_config.min_vals is not None:
-            for right_label in problem.right_labels:
-                for ressources_labels, min_val in ressources_config.min_vals.items():
-                    model.Add(
-                        sum(
-                            int( ressources_config.vals[ left_label, ressource_label ] ) * x[ left_label, right_label ] for ressource_label in ressources_labels for left_label in problem.left_entities
-                        ) <= int( min_val )
-                    )
+            for key in ressources_config.min_vals:
+                right_label = key[ 0 ]
+                ressources_labels = key[ 1: ]
+                min_val = int( ressources_config.min_vals[ key ] )
+                model.Add(
+                    sum(
+                        int( ressources_config.vals[ left_label, ressource_label ] ) * x[ left_label, right_label ] for ressource_label in ressources_labels for left_label in problem.left_labels
+                    ) <= min_val
+                )
 
         if ressources_config.max_vals_global is not None:
             for ressources_labels, max_val_global in ressources_config.max_vals_global.items():

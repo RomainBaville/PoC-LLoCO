@@ -9,11 +9,6 @@ from domain.assignment.matching.matching_reward_functions import RewardFunctions
 from domain.assignment.matching.matching_penalty_functions import PenaltyFunctions
 from ui.assignment.builder import build_val_dict
 
-
-def use_matching( state ):
-    state.use_matching = st.checkbox( "Use a matching between the two entities variables to evaluate the association score (e.g. python_level, english_level ...)" )
-
-
 def map_matching( state ):
     state.matching_labels = st.multiselect(
         f"Select columns identifying the variable to match between { state.left_entities } and { state.right_entities }",

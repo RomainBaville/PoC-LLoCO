@@ -16,8 +16,8 @@ from infrastructure.registry import DATA_SOURCE_REGISTRY
 from ui.assignment.builder import build_entities, build_extrema_dict, build_problem
 # from llm.session_model import OptimizationSession
 from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
-from ui.assignment.matching.ui_matching import use_matching, map_matching, matching_strategy, matching_constraints
-# from ui.assignment.costs.ui_costs import use_costs, map_costs, costs_strategy
+from ui.assignment.matching.ui_matching import map_matching, matching_strategy, matching_constraints
+from ui.assignment.ressources.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
 
 DATA_DIR = "data"
 
@@ -77,9 +77,9 @@ def render( step: int ):
     if step == 4:
         st.header( "How to assigned entities" )
 
-        use_matching( st.session_state )
-        # use_costs( st.session_state )
-        st.session_state.use_ressources = False
+        st.session_state.use_matching = st.checkbox( "Use a matching between the two entities variables to evaluate the association score (e.g. python_level, english_level ...)" )
+
+        st.session_state.use_ressources = st.checkbox( "Use ressources to optimize the association score (e.g. Salary, years_of_experiances ...)" )
 
         navigation_buttons()
         st.stop()
@@ -126,8 +126,8 @@ def render( step: int ):
         if st.session_state.use_matching:
             map_matching( st.session_state )
 
-        # if st.session_state.use_costs:
-        #     map_costs( st.session_state )
+        if st.session_state.use_ressources:
+            map_ressources( st.session_state )
 
         # -----------------------------
         # 3. LEFT ASSIGNMENT
@@ -281,8 +281,9 @@ def render( step: int ):
             matching_strategy( st.session_state )
             matching_constraints( st.session_state )
 
-        # if st.session_state.use_costs:
-        #     costs_strategy( st.session_state )
+        if st.session_state.use_ressources:
+            ressources_strategy( st.session_state )
+            ressources_constraints( st.session_state )
 
         navigation_buttons()
         st.stop()

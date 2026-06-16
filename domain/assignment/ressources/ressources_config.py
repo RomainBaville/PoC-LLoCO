@@ -25,11 +25,11 @@ class RessourcesConfig:
             - keys (str): The label of the ressource used in the score computation with a weight.
             - values (float): The value of the weight.
         max_vals (Optional[dict[list[str], float]]): The dictionary whit the maximum ressources values accepted per right entities:
-            - keys (list[str]): The ressource label.
-            - value (float): The maximum value accepted for the ressources per right entities.
+            - keys (list[str]): The right entity label, ressources labels constrainted.
+            - value (float): The maximum value accepted for the ressources listed for the right entity.
         min_vals (Optional[dict[list[str], float]]): The dictionary whit the minimum ressources values accepted per right entities:
-            - keys (list[str]): The list of the ressources labels constrainted at once.
-            - value (float): The minimum value accepted for the ressources per right entities.
+            - keys (list[str]): The right entity label, ressources labels constrainted.
+            - value (float): The minimum value accepted for the ressources listed for the right entity.
         max_vals_global (Optional[dict[list[str], float]]): The dictionary whit the maximum ressources values accepted for all the right entities:
             - keys (list[str]): The list of the ressources labels constrainted at once.
             - value (float): The minimum value accepted for the ressources for all the right entities.
