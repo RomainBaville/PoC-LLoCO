@@ -11,7 +11,7 @@ from ui.assignment.builder import build_val_dict
 
 def map_matching( state ):
     state.matching_labels = st.multiselect(
-        f"Select columns identifying the variable to match between { state.left_entities } and { state.right_entities }",
+        f"Select columns identifying variables to match between { state.left_entities } and { state.right_entities }",
         set( state.left_cols ).intersection( set( state.right_cols ) ),
     )
     state.matching_left_vals = build_val_dict( state.left_labels, state.matching_labels, state.left_rows )

@@ -13,7 +13,7 @@ def build_entities( entity_col_id, rows ):
         entity = row[ entity_col_id ]
         entities.append( entity )
 
-    return entities
+    return tuple( entities )
 
 
 def build_extrema_dict( entity_col_id, rows, extrema_col_label=None, extrema=None ):

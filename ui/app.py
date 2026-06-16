@@ -95,7 +95,7 @@ problem_key = st.session_state.problem_type
 
 if problem_key in PROBLEM_REGISTRY:
     problem_def = PROBLEM_REGISTRY[ problem_key ]
-    problem_def.render_fn( st.session_state.step )
+    problem_def.render_fn( st.session_state )
 
 else:
     st.error("Unknown problem type")
