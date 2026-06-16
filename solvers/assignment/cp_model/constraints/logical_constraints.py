@@ -2,7 +2,9 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-def apply_logical_constraints( model, x, problem ):
+from domain.assignment.base import AssignmentProblem
+
+def apply_logical_constraints( model, x, problem: AssignmentProblem ):
     if problem.left_mutual_exclusions is not None:
         for right_label in problem.right_labels:
             for left_mutual_exclusion in problem.left_mutual_exclusions:

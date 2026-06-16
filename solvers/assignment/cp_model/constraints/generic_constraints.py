@@ -2,7 +2,9 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-def apply_generic_constraints( model, x, problem ):
+from domain.assignment.base import AssignmentProblem
+
+def apply_generic_constraints( model, x, problem: AssignmentProblem ):
     for left_label in problem.left_labels:
         if problem.max_assignments is not None:
             max_assi = int( problem.max_assignments[ left_label ] )
