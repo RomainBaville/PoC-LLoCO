@@ -77,10 +77,11 @@ def build_problem( state ):
             labels = state.ressources_labels,
             vals = state.ressources_vals,
             objectives = state.ressoucres_objectives,
-            max_vals = state.ressoucres_max_vals,
-            min_vals = state.ressoucres_min_vals,
-            max_vals_global = state.ressoucres_max_vals_global,
-            min_vals_global = state.ressoucres_min_vals_global,
+            weights = state.ressources_weights,
+            max_vals = state.constraints_max_vals,
+            min_vals = state.constraints_min_vals,
+            max_global_vals = state.constraints_max_global_vals,
+            min_global_vals = state.constraints_min_global_vals,
         )
 
     problem: AssignmentProblem = AssignmentProblem(

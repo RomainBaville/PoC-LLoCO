@@ -48,23 +48,23 @@ def matching_strategy( state ):
 
 def matching_constraints( state ):
     extrema: tuple[ str, str ] = ( "maximum", "minimum" )
-    constraints_cols = st.columns( 2 )
-    constraints_vals: list[ Optional[ dict[ tuple[ str, str ], float ] ] ] = [ None, None ]
-    for id, constraints_col in enumerate( constraints_cols ):
-        with constraints_col:
-            use_constraints_vals: bool = st.checkbox( f"Is there variables constrained by a { extrema[ id ] } value" )
-            if use_constraints_vals:
-                constraints_variables_labels: tuple[ str ] = tuple( st.multiselect( f"Select variables constrained by a { extrema[ id ] } value", state.matching_labels ) )
-                if len( constraints_variables_labels ) > 0:
-                    constrainning_variables_labels: dict[ str, str ]  = {}
-                    for constraints_variable_label in constraints_variables_labels:
-                        constrainning_variables_labels[ constraints_variable_label ] = st.selectbox( f"Select the column identifying the constrainning variable with the { extrema[ id ] } values of the { constraints_variable_label }", state.right_cols )
+    matching_extrema_cols = st.columns( 2 )
+    matching_extrema_vals: list[ Optional[ dict[ tuple[ str, str ], float ] ] ] = [ None, None ]
+    for id, matching_extrema_col in enumerate( matching_extrema_cols ):
+        with matching_extrema_col:
+            use_matching_extrema_vals: bool = st.checkbox( f"Is there variables constrained by a { extrema[ id ] } value ?" )
+            if use_matching_extrema_vals:
+                variables_labels: tuple[ str ] = tuple( st.multiselect( f"Select variables constrained by a { extrema[ id ] } value", state.matching_labels ) )
+                if len( variables_labels ) > 0:
+                    matching_extrema_variables_labels: dict[ str, str ]  = {}
+                    for variable_label in variables_labels:
+                        matching_extrema_variables_labels[ variable_label ] = st.selectbox( f"Select the column identifying the constrainning variable with the { extrema[ id ] } values of the { variable_label }", state.right_cols )
 
-                    constraints_vals[ id ] = build_vals( state.right_entities_col_label, constrainning_variables_labels, state.right_rows )
+                    matching_extrema_vals[ id ] = build_vals( state.right_entities_col_label, matching_extrema_variables_labels, state.right_rows )
                 else:
-                    constraints_vals[ id ] = None
+                    matching_extrema_vals[ id ] = None
             else:
-                constraints_vals[ id ] = None
+                matching_extrema_vals[ id ] = None
 
-    state.matching_max_vals = constraints_vals[ 0 ]
-    state.matching_min_vals = constraints_vals[ 1 ]
+    state.matching_max_vals = matching_extrema_vals[ 0 ]
+    state.matching_min_vals = matching_extrema_vals[ 1 ]

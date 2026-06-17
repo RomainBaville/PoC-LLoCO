@@ -18,7 +18,7 @@ from ui.assignment.builder import build_entities_labels, build_generic_constrain
 # from llm.session_model import OptimizationSession
 from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
 from ui.assignment.matching.ui_matching import map_matching, matching_strategy, matching_constraints
-# from ui.assignment.ressources.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
+from ui.assignment.ressources.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
 
 DATA_DIR = "data"
 
@@ -120,8 +120,8 @@ def render( state ):
         if state.use_matching:
             map_matching( state )
 
-        # if state.use_ressources:
-        #     map_ressources( state )
+        if state.use_ressources:
+            map_ressources( state )
 
         navigation_buttons()
         st.stop()
@@ -135,8 +135,8 @@ def render( state ):
         if state.use_matching:
             matching_strategy( state )
 
-        # if state.use_ressources:
-        #     ressources_strategy( state )
+        if state.use_ressources:
+            ressources_strategy( state )
 
         navigation_buttons()
         st.stop()
@@ -243,8 +243,8 @@ def render( state ):
         if state.use_matching:
             matching_constraints( state )
 
-        # if state.use_ressources:
-        #     ressources_constraints( state )
+        if state.use_ressources:
+            ressources_constraints( state )
 
         navigation_buttons()
         st.stop()

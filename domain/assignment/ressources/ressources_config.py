@@ -30,10 +30,10 @@ class RessourcesConfig:
         min_vals (Optional[dict[tuple[str, ...], float]]): The dictionary whit the minimum ressources values accepted per right entities:
             - keys (tuple[str, ...]): The right entity label, the ressources labels constrainted.
             - value (float): The minimum value accepted for the ressources listed for the right entity.
-        max_vals_global (Optional[dict[tuple[str, ...], float]]): The dictionary whit the maximum ressources values accepted for all the right entities:
+        max_global_vals (Optional[dict[tuple[str, ...], float]]): The dictionary whit the maximum ressources values accepted for all the right entities:
             - keys (tuple[str, ...]): The ressources labels constrainted at once.
             - value (float): The maximum value accepted for the ressources listed for all the right entities.
-        min_vals_global (Optional[dict[tuple[str, ...], float]]): The dictionary whit the minimum ressources values accepted for all the right entities:
+        min_global_vals (Optional[dict[tuple[str, ...], float]]): The dictionary whit the minimum ressources values accepted for all the right entities:
             - keys (tuple[str, ...]): The ressources labels constrainted at once.
             - value (float): The minimum value accepted for the ressources listed for all the right entities.
 
@@ -50,5 +50,5 @@ class RessourcesConfig:
     max_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
     min_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
 
-    max_vals_global: Optional[ dict[ tuple[ str, ...], float ] ] = None
-    min_vals_global: Optional[ dict[ tuple[ str, ...], float ] ] = None
+    max_global_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
+    min_global_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
