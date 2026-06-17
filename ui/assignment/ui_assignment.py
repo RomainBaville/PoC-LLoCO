@@ -5,6 +5,7 @@
 import os
 import streamlit as st
 from importlib import import_module
+from typing import Any, Optional
 
 from ui.utils import (
     navigation_buttons,
@@ -13,7 +14,7 @@ from ui.utils import (
     # build_results_zip,
 )
 from infrastructure.registry import DATA_SOURCE_REGISTRY
-from ui.assignment.builder import build_entities, build_extrema_dict, build_problem
+from ui.assignment.builder import build_entities_labels, build_generic_constraints, build_problem
 # from llm.session_model import OptimizationSession
 from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
 from ui.assignment.matching.ui_matching import map_matching, matching_strategy, matching_constraints
@@ -24,16 +25,16 @@ DATA_DIR = "data"
 
 def render( state ):
     # ==================================================
-    # STEP 1 — Naming entities
+    # STEP 1 — Naming entities types
     # ==================================================
     if state.step == 1:
-        st.header( "Define your left and right entities" )
+        st.header( "Define your left and right entities types" )
 
-        state.left_entities = st.text_input(
-            "Set the label of the left entity (e.g. Candidates)", "Candidates"
+        state.left_entities_type = st.text_input(
+            "Set the type of the left entity (e.g. Candidates)", "Candidates"
         )
-        state.right_entities = st.text_input(
-            "Set the label of the right entity (e.g. Targets)", "Targets"
+        state.right_entities_type = st.text_input(
+            "Set the type of the right entity (e.g. Targets)", "Targets"
         )
 
         navigation_buttons()
@@ -43,7 +44,7 @@ def render( state ):
     # STEP 2 — Score parameters
     # ==================================================
     if state.step == 2:
-        st.header( "How to compute the score to associate entities" )
+        st.header( f"How to compute the score to associate { state.left_entities_type, state.right_entities_type }" )
 
         state.use_matching = st.checkbox( "Use a scoring optimization involving a score computation from a matching between left and right variables sharing the same label (e.g. python_level, english_level, ...)" )
 
@@ -70,8 +71,8 @@ def render( state ):
                 f for f in os.listdir( DATA_DIR ) if f.endswith( ".csv" )
             )
 
-            left_csv = st.selectbox( f"{ state.left_entities } dataset", csv_files )
-            right_csv = st.selectbox( f"{ state.right_entities } dataset", csv_files )
+            left_csv = st.selectbox( f"{ state.left_entities_type } dataset", csv_files )
+            right_csv = st.selectbox( f"{ state.right_entities_type } dataset", csv_files )
 
             loader = DATA_SOURCE_REGISTRY[
                 state.data_source
@@ -98,18 +99,18 @@ def render( state ):
         # -----------------------------
         st.subheader( f"1. Identify entities" )
 
-        state.left_entities_col_id = st.selectbox(
-            f"Columns identifying { state.left_entities }",
+        state.left_entities_col_label = st.selectbox(
+            f"Columns identifying { state.left_entities_type }",
             state.left_cols
         )
 
-        state.right_entities_col_id = st.selectbox(
-            f"Column identifying { state.right_entities }",
+        state.right_entities_col_label = st.selectbox(
+            f"Column identifying { state.right_entities_type }",
             state.right_cols
         )
 
-        state.left_labels = build_entities( state.left_entities_col_id, state.left_rows )
-        state.right_labels = build_entities( state.right_entities_col_id, state.right_rows )
+        state.left_labels = build_entities_labels( state.left_entities_col_label, state.left_rows )
+        state.right_labels = build_entities_labels( state.right_entities_col_label, state.right_rows )
 
         # -----------------------------
         # 2. Scoring variables
@@ -143,134 +144,88 @@ def render( state ):
     # STEP 6 — Constraints
     # ==================================================
     if state.step == 6:
-        st.header( "Define association constraints" )
+        st.header( "Define constraints" )
+        labels: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( state.left_labels, state.right_labels )
+        entities_types: tuple[ str, str ] = ( state.left_entities_type, state.right_entities_type )
+        entities_cols: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( state.left_cols, state.right_cols )
+        entities_rows: tuple[ dict[ str, Any ], dict[ str, Any ] ] = ( state.left_rows, state.right_rows )
+        entities_col_label: tuple[ str, str ] = ( state.left_entities_col_label, state.right_entities_col_label )
 
         # -----------------------------
         # 1. Generic constraints
         # -----------------------------
-
-        # Assignments constraints
-        st.subheader( f"1.1. Assignment constraints for { state.left_entities }" )
-
-        extrema = [ "minimum", "maximum" ]
-        assignments_cols = st.columns( 2 )
-        assignments_per_left = [ None, None ]
-
-        for id, col in enumerate( assignments_cols ):
-            with col:
-                assignment_mode = st.radio(
-                    f"Define { extrema[ id ] } assignments per { state.left_entities }",
-                    [
-                        "Use data column",
-                        f"Set manually for each { state.left_entities }",
-                        f"Set manually for all { state.left_entities } at once",
-                        f"No { extrema[ id ] } assignment",
-                    ],
-                )
-
-                if assignment_mode == "Use data column":
-                    left_col_label = st.selectbox(
-                        f"Column identifying { extrema[ id ] } assignments",
-                        state.left_cols,
-                        index=len( state.left_cols ) - 1
-                    )
-                    assignments_per_left[ id ] = build_extrema_dict( state.left_entities_col_id, state.left_rows, extrema_col_label=left_col_label )
-
-                elif assignment_mode == f"Set manually for each { state.left_entities }":
-                    assignments_per_left[ id ] = {}
-                    for left_entity in state.left_labels:
-                        assignments_per_left[ id ][ left_entity ] = st.number_input(
-                            f"{ extrema[ id ] } assignments for { left_entity }",
-                            min_value=1,
-                            max_value=len( state.right_rows ),
+        st.subheader( "1. Generic constraints" )
+        extrema: tuple[ str, str ] = ( "maximum", "minimum" )
+        constraint_type: tuple[ str, str ] = ( "assignments", "capacities" )
+        generic_constraints: list[ list[ Optional[ dict[ str, float ] ] ] ] = [ [ None, None ], [ None, None ] ]
+        for i in range( 2 ):
+            generic_constraints_cols = st.columns( 2 )
+            for id, generic_constraints_col in enumerate( generic_constraints_cols ):
+                with generic_constraints_col:
+                    use_generic_constraints = st.checkbox( f"Is there { extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }" )
+                    if use_generic_constraints:
+                        mode = st.radio(
+                            f"How to define the { extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }",
+                            [
+                                "With data column",
+                                f"Setting it manually for each { entities_types[ i ] }",
+                                f"Setting it manually for all { entities_types[ i ] } at once",
+                            ],
                         )
 
-                elif assignment_mode == f"Set manually for all { state.left_entities } at once":
-                    left_number = st.number_input(
-                        f"{ extrema[ id ] } assignments per { state.left_entities }",
-                        min_value=1,
-                        max_value=len( state.right_rows ),
-                    )
-                    assignments_per_left[ id ] = build_extrema_dict( state.left_entities_col_id, state.left_rows, extrema=left_number )
+                        if mode == "With data column":
+                            generic_constraints_col_label = st.selectbox(
+                                f"Column identifying { extrema[ id ] } { constraint_type[ i ] }",
+                                entities_cols[ i ],
+                                index=len( entities_cols[ i ] ) - 1
+                            )
+                            generic_constraints[ i ][ id ] = build_generic_constraints( entities_col_label[ i ], entities_rows[ i ], generic_constraints_col_label = generic_constraints_col_label )
 
-                else:
-                    assignments_per_left[ id ] = None
+                        elif mode == f"Setting it manually for each { entities_types[ i ] }":
+                            generic_constraints[ i ][ id ] = {}
+                            for entity in labels[ i ]:
+                                generic_constraints[ i ][ id ][ entity ] = st.number_input(
+                                    f"{ extrema[ id ] } { constraint_type[ i ] } for { entity }",
+                                    min_value=1 - id,
+                                    max_value=len( entities_rows[ 1 - i ] ),
+                                )
 
-        state.min_assignments = assignments_per_left[ 0 ]
-        state.max_assignments = assignments_per_left[ 1 ]
+                        elif mode == f"Setting it manually for all { entities_types[ i ] } at once":
+                            generic_constraints_val = st.number_input(
+                                f"{ extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }",
+                                min_value=1,
+                                max_value=len( entities_rows[ 1 - i ] ),
+                            )
+                            generic_constraints[ i ][ id ] = build_generic_constraints( entities_col_label[ i ], entities_rows[ i ], generic_constraints_val = generic_constraints_val )
 
-        # Capacities constraints
-        st.subheader( f"1.2. Capacity constraints for { state.right_entities }" )
+                    else:
+                        generic_constraints[ i ][ id ] = None
 
-        capacities_cols = st.columns( 2 )
-        capacities_per_right = [ None, None ]
-
-        for id, col in enumerate( capacities_cols ):
-            with col:
-                capacity_mode = st.radio(
-                    f"Define { extrema[ id ] } capacities per { state.right_entities }",
-                    [
-                        "Use data column",
-                        f"Set manually for each { state.right_entities }",
-                        f"Set manually for all { state.right_entities } at once",
-                        f"No { extrema[ id ] } capacity",
-                    ],
-                )
-
-                if capacity_mode == "Use data column":
-                    right_col_label = st.selectbox(
-                        f"Column identifying { extrema[ id ] } capacities",
-                        state.right_cols,
-                        index=len( state.right_cols ) - 1
-                    )
-                    capacities_per_right[ id ] = build_extrema_dict( state.right_entities_col_id, state.right_rows, extrema_col_label=right_col_label )
-
-                elif capacity_mode == f"Set manually for each { state.right_entities }":
-                    capacities_per_right[ id ] = {}
-                    for right_entity in state.right_labels:
-                        capacities_per_right[ id ][ right_entity ] = st.number_input(
-                            f"{ extrema[ id ] } capacities for { right_entity }",
-                            min_value=1,
-                            max_value=len( state.left_rows ),
-                        )
-
-                elif capacity_mode == f"Set manually for all { state.right_entities } at once":
-                    right_number = st.number_input(
-                        f"{ extrema[ id ] } capacities per { state.right_entities }",
-                        min_value=1,
-                        max_value=len( state.left_rows ),
-                    )
-                    capacities_per_right[ id ] = build_extrema_dict( state.right_entities_col_id, state.right_rows, extrema=right_number )
-
-                else:
-                    capacities_per_right[ id ] = None
-
-        state.min_capacities = capacities_per_right[ 0 ]
-        state.max_capacities = capacities_per_right[ 1 ]
+        state.max_assignments = generic_constraints[ 0 ][ 0 ]
+        state.min_assignments = generic_constraints[ 0 ][ 1 ]
+        state.max_capacities = generic_constraints[ 1 ][ 0 ]
+        state.min_capacities = generic_constraints[ 1 ][ 1 ]
 
         # -----------------------------
         # 2. logical constraints
         # -----------------------------
         st.subheader( "2. Logical constraints" )
-        max_associations = [ state.max_capacities, state.max_assignments ]
-        entities = [ state.left_entities, state.right_entities ]
-        labels = [ state.left_labels, state.right_labels ]
-        mutual_exclusion = [ None, None ]
-
+        max_associations: tuple[ Optional[ dict[ str, float ] ], Optional[ dict[ str, float ] ] ] = ( state.max_capacities, state.max_assignments )
+        mutual_exclusion: list[ Optional[ list[ tuple[ str, ...] ] ] ] = [ None, None ]
         for i in range( 2 ):
             if max_associations[ i ] is None or max( max_associations[ i ].values() ) > 1:
-                define_mutual_exclusion = st.checkbox( f"Is there groups of { entities[ i ] } who can't be assigned to the same { entities[ 1 - i ] }" )
+                define_mutual_exclusion = st.checkbox( f"Is there groups of { entities_types[ i ] } who can't be assigned to the same { entities_types[ 1 - i ] }" )
                 if define_mutual_exclusion:
-                    nb_groups = st.number_input( f"How many group of { entities[ i ] } ?", 1 )
+                    nb_groups = st.number_input( f"How many group of { entities_types[ i ] } ?", 1 )
 
                     mutual_exclusion[ i ] = [ [] for _ in range( nb_groups ) ]
                     for group in range( nb_groups ):
-                        nb = st.number_input( f"How many { entities[ i ] } are conserned for the group { group + 1 } ?", 2 )
+                        nb = st.number_input( f"How many { entities_types[ i ] } are conserned for the group { group + 1 } ?", 2 )
                         mutual_exclusion[ i ][ group ] = [ None for _ in range( nb ) ]
                         exclusion_cols = st.columns( nb )
                         for id, col in enumerate( exclusion_cols ):
                             with col:
-                                mutual_exclusion[ i ][ group ][ id ] = tuple( st.selectbox( f"{ entities[ i ] } { id + 1 } for the group { group + 1 }", labels[ i ], index=id ) )
+                                mutual_exclusion[ i ][ group ][ id ] = tuple( st.selectbox( f"{ entities_types[ i ] } { id + 1 } for the group { group + 1 }", labels[ i ], index=id ) )
                 else:
                     mutual_exclusion[ i ] = None
             else:
@@ -325,8 +280,8 @@ def render( state ):
 
             state.solution_rows = [
                 {
-                    state.left_entities: l,
-                    state.right_entities: r,
+                    state.left_entities_type: l,
+                    state.right_entities_type: r,
                 }
                 for l, r in solution.items()
             ]
