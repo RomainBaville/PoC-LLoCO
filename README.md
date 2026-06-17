@@ -3,14 +3,13 @@
 This project is a **proof of concept (PoC)** for a generic optimization playground.
 It provides a **guided, UI‑driven workflow** to help users:
 
-1. Describe an optimization problem in natural language
+1. Describe an optimization problem in natural language (must be updated)
 2. Configure the problem step by step
 3. Select an appropriate solver
 4. Solve the problem
-5. Receive an **AI‑generated explanation and summary** of the results
+5. Receive an **AI‑generated explanation and summary** of the results (must be updated)
 
-The long‑term goal is to build a **solver‑agnostic and problem‑agnostic platform**
-for constraint optimization.
+The long‑term goal is to build a **solver‑agnostic and problem‑agnostic platform** for constraint optimization.
 
 ---
 
@@ -48,7 +47,7 @@ The LLM **never replaces the solver**: it acts as a **guidance and explanation l
 - Clean object-oriented architecture
 
 Currently implemented:
-- **Generic Assignment Problem** (bipartite assignment with requirements)
+- **Generic Assignment Problem** (bipartite assignment with requirements and constraints)
 
 ---
 
@@ -77,72 +76,73 @@ PoC-LLoCO/
 │
 ├── README.md
 │
-├── data/                             # Input datasets (CSV for now)
+├── data/
 │   └── ...
 │
-├── models/                           # Local LLM models (GGUF)
+├── models/
 │   └── ...
 │
-├── llama_cpp/                        # llama.cpp runtime & binaries
+├── llama_cpp/
 │   └── ...
 │
-├── ui/                               # Streamlit UI layer
-│   ├── app.py                        # Main Streamlit entry point
-│   ├── registry.py                   # Problem FAMILY registry (Assignment, etc.)
-│   ├── utils.py                      # Navigation, journey logging, AI helpers
+├── ui/
+│   ├── app.py
+│   ├── registry.py
+│   ├── utils.py
 │   │
-│   └── problems/
-│       ├── assignment/               # Assignment problem family
-│       │   ├── registry.py            # Assignment TYPES registry (skills, cost, …)
-│       │   ├── ui_router.py           # Assignment workflow router
-│       │   │
-│       │   ├── skills/                # Skill-based assignment TYPE
-│       │   │   ├── registry.py        # Skill VARIANTS registry (coverage, best_fit…)
-│       │   │   ├── builder.py         # Generic skills builder (registry-driven)
-│       │   │   ├── ui_coverage.py     # Coverage variant UI
-│       │   │   ├── ui_best_fit.py     # Best-fit variant UI
-│       │   │   ├── ui_team.py         # Team variant UI
-│       │   │   └── ui_portfolio.py    # Portfolio variant UI
+│   └── assignment/
+│       ├── matching/
+│       │   └── ui_matching.py
 │       │
-│       └── base.py                    # (Optional) base UI contracts
+│       ├── ressoucres/
+│       │   └── ui_ressources.py
+│       │
+│       ├── builder.py
+│       └── ui_assignment.py
 │
-├── domain/                           # Solver-agnostic mathematical models
-│   ├── base.py                       # Base DomainProblem
-│   ├── entity_registry.py            # Entity identity & uniqueness handling
+├── domain/
+│   ├── objective.py
 │   │
-│   └── assignment/                   # Assignment family (math side)
-│       ├── base.py                   # AssignmentBaseProblem
+│   └── assignment/
+│       ├── base.py
 │       │
-│       └── skills/                   # Skill-based assignment models
-│           ├── base.py               # SkillAssignmentProblem (dataclass!)
-│           ├── coverage.py           # SkillCoverageAssignment
-│           ├── best_fit.py           # SkillBestFitAssignment
-│           ├── team.py               # SkillTeamAssignment
-│           └── portfolio.py          # SkillPortfolioSelection
+│       ├── ressoucres/
+│       │   └── ressoucre_config.py
+│       │
+│       └── matching/
+│           ├── matching_config.py
+│           ├── matching_penalty_functions.py
+│           └── matching_reward_functions.py
 │
-├── solvers/                          # Solver layer (execution)
-│   ├── base.py                       # Solver interface
+├── solvers/
+│   ├── base.py
+│   ├── registry.py
 │   │
-│   └── assignment/                   # Assignment solvers
-│       ├── registry.py               # Assignment solver GROUPS (skills, cost…)
+│   └── assignment/
+│       ├── registry.py
 │       │
-│       └── skills/                   # Skill-based solvers
-│           ├── registry.py           # Skill solver registry (OR-Tools, etc.)
-│           └── ortools_cp_sat.py     # OR-Tools CP-SAT solver (variant-aware)
+│       └── cp_model/
+│           ├── constraints/
+│           │   └── generic_constraints.py
+│           │   └── logical_constraints.py
+│           │   └── matching_constraints.py
+│           │   └── ressources_constraints.py
+│           │
+│           └── ortools_cp_sat.py
 │
-├── infrastructure/                   # Data access layer
-│   ├── base_loader.py                # Abstract data loader
-│   ├── csv_loader.py                 # CSV loader
-│   └── registry.py                   # Data source registry
+├── infrastructure/
+│   ├── base_loader.py
+│   ├── csv_loader.py
+│   └── registry.py
 │
-├── llm/                              # LLM integration layer
-│   ├── client.py                     # LLM client (llama.cpp)
-│   ├── session_model.py              # OptimizationSession dataclass
-│   ├── session_prompt.py             # Solver-aware summary prompt
-│   ├── onboarding_context.py         # Registry-driven onboarding context
-│   └── onboarding_prompt.py          # Onboarding prompt builder
+├── llm/
+│   ├── client.py
+│   ├── session_model.py
+│   ├── session_prompt.py
+│   ├── onboarding_context.py
+│   └── onboarding_prompt.py
 │
-└── requirements.txt                  # Python dependencies
+└── requirements.txt
 ```
 
 ---
