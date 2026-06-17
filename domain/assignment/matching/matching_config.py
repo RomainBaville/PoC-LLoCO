@@ -45,8 +45,8 @@ class MatchingConfig:
     reward_function: RewardFunctions
     penalty_function: PenaltyFunctions
 
-    # Constraints
     weights: Optional[ dict[ str, float ] ] = None
 
+    # Constraints
     max_vals: Optional[ dict[ tuple[ str, str ], float ] ] = None
     min_vals: Optional[ dict[ tuple[ str, str ], float ] ] = None

@@ -18,7 +18,7 @@ from ui.assignment.builder import build_entities_labels, build_generic_constrain
 # from llm.session_model import OptimizationSession
 from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
 from ui.assignment.matching.ui_matching import map_matching, matching_strategy, matching_constraints
-from ui.assignment.ressources.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
+# from ui.assignment.ressources.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
 
 DATA_DIR = "data"
 
@@ -62,7 +62,6 @@ def render( state ):
         for ds in DATA_SOURCE_REGISTRY.values():
             if st.button(ds.label):
                 state.data_source = ds.key
-                state.step += 1
 
             st.caption(ds.description)
 
@@ -71,8 +70,8 @@ def render( state ):
                 f for f in os.listdir( DATA_DIR ) if f.endswith( ".csv" )
             )
 
-            left_csv = st.selectbox( f"{ state.left_entities_type } dataset", csv_files )
-            right_csv = st.selectbox( f"{ state.right_entities_type } dataset", csv_files )
+            left_csv: str = st.selectbox( f"{ state.left_entities_type } dataset", csv_files )
+            right_csv: str = st.selectbox( f"{ state.right_entities_type } dataset", csv_files )
 
             loader = DATA_SOURCE_REGISTRY[
                 state.data_source
@@ -85,8 +84,10 @@ def render( state ):
                 os.path.join( DATA_DIR, right_csv )
             )
 
-        navigation_buttons()
-        st.stop()
+            navigation_buttons()
+            st.stop()
+
+        navigation_buttons( show_next=False )
 
     # ==================================================
     # STEP 4 — Mapping
@@ -119,8 +120,8 @@ def render( state ):
         if state.use_matching:
             map_matching( state )
 
-        if state.use_ressources:
-            map_ressources( state )
+        # if state.use_ressources:
+        #     map_ressources( state )
 
         navigation_buttons()
         st.stop()
@@ -134,8 +135,8 @@ def render( state ):
         if state.use_matching:
             matching_strategy( state )
 
-        if state.use_ressources:
-            ressources_strategy( state )
+        # if state.use_ressources:
+        #     ressources_strategy( state )
 
         navigation_buttons()
         st.stop()
@@ -162,9 +163,9 @@ def render( state ):
             generic_constraints_cols = st.columns( 2 )
             for id, generic_constraints_col in enumerate( generic_constraints_cols ):
                 with generic_constraints_col:
-                    use_generic_constraints = st.checkbox( f"Is there { extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }" )
+                    use_generic_constraints: bool = st.checkbox( f"Is there { extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }" )
                     if use_generic_constraints:
-                        mode = st.radio(
+                        mode: str = st.radio(
                             f"How to define the { extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }",
                             [
                                 "With data column",
@@ -174,10 +175,10 @@ def render( state ):
                         )
 
                         if mode == "With data column":
-                            generic_constraints_col_label = st.selectbox(
+                            generic_constraints_col_label: str = st.selectbox(
                                 f"Column identifying { extrema[ id ] } { constraint_type[ i ] }",
                                 entities_cols[ i ],
-                                index=len( entities_cols[ i ] ) - 1
+                                index = len( entities_cols[ i ] ) - 1
                             )
                             generic_constraints[ i ][ id ] = build_generic_constraints( entities_col_label[ i ], entities_rows[ i ], generic_constraints_col_label = generic_constraints_col_label )
 
@@ -186,15 +187,15 @@ def render( state ):
                             for entity in labels[ i ]:
                                 generic_constraints[ i ][ id ][ entity ] = st.number_input(
                                     f"{ extrema[ id ] } { constraint_type[ i ] } for { entity }",
-                                    min_value=1 - id,
-                                    max_value=len( entities_rows[ 1 - i ] ),
+                                    min_value = 1. - id,
+                                    max_value = float( len( entities_rows[ 1 - i ] ) ),
                                 )
 
                         elif mode == f"Setting it manually for all { entities_types[ i ] } at once":
-                            generic_constraints_val = st.number_input(
+                            generic_constraints_val: float = st.number_input(
                                 f"{ extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }",
-                                min_value=1,
-                                max_value=len( entities_rows[ 1 - i ] ),
+                                min_value = 1.,
+                                max_value = float( len( entities_rows[ 1 - i ] ) ),
                             )
                             generic_constraints[ i ][ id ] = build_generic_constraints( entities_col_label[ i ], entities_rows[ i ], generic_constraints_val = generic_constraints_val )
 
@@ -214,18 +215,19 @@ def render( state ):
         mutual_exclusion: list[ Optional[ list[ tuple[ str, ...] ] ] ] = [ None, None ]
         for i in range( 2 ):
             if max_associations[ i ] is None or max( max_associations[ i ].values() ) > 1:
-                define_mutual_exclusion = st.checkbox( f"Is there groups of { entities_types[ i ] } who can't be assigned to the same { entities_types[ 1 - i ] }" )
+                define_mutual_exclusion: bool = st.checkbox( f"Is there groups of { entities_types[ i ] } who can't be assigned to the same { entities_types[ 1 - i ] }" )
                 if define_mutual_exclusion:
-                    nb_groups = st.number_input( f"How many group of { entities_types[ i ] } ?", 1 )
+                    nb_groups: int = st.number_input( f"How many group of { entities_types[ i ] } ?", 1 )
 
                     mutual_exclusion[ i ] = [ [] for _ in range( nb_groups ) ]
                     for group in range( nb_groups ):
-                        nb = st.number_input( f"How many { entities_types[ i ] } are conserned for the group { group + 1 } ?", 2 )
-                        mutual_exclusion[ i ][ group ] = [ None for _ in range( nb ) ]
-                        exclusion_cols = st.columns( nb )
+                        nb_entities: int = st.number_input( f"How many { entities_types[ i ] } are conserned for the group { group + 1 } ?", 2 )
+                        mutual_exclusion[ i ][ group ] = [ None for _ in range( nb_entities ) ]
+                        exclusion_cols = st.columns( nb_entities )
                         for id, col in enumerate( exclusion_cols ):
                             with col:
-                                mutual_exclusion[ i ][ group ][ id ] = tuple( st.selectbox( f"{ entities_types[ i ] } { id + 1 } for the group { group + 1 }", labels[ i ], index=id ) )
+                                mutual_exclusion[ i ][ group ][ id ] = st.selectbox( f"{ entities_types[ i ] } { id + 1 } for the group { group + 1 }", labels[ i ], index = id )
+                        mutual_exclusion[ i ][ group ] = tuple( mutual_exclusion[ i ][ group ] )
                 else:
                     mutual_exclusion[ i ] = None
             else:
@@ -241,8 +243,8 @@ def render( state ):
         if state.use_matching:
             matching_constraints( state )
 
-        if state.use_ressources:
-            ressources_constraints( state )
+        # if state.use_ressources:
+        #     ressources_constraints( state )
 
         navigation_buttons()
         st.stop()

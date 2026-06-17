@@ -2,20 +2,22 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from typing import Optional
+
 import streamlit as st
 
 from domain.objective import Objective
 from domain.assignment.matching.matching_reward_functions import RewardFunctions
 from domain.assignment.matching.matching_penalty_functions import PenaltyFunctions
-from ui.assignment.builder import build_val_dict
+from ui.assignment.builder import build_vals
 
 def map_matching( state ):
-    state.matching_labels = st.multiselect(
-        f"Select columns identifying variables to match between { state.left_entities } and { state.right_entities }",
+    state.matching_labels = tuple( st.multiselect(
+        f"Select columns identifying variables to match between { state.left_entities_type } and { state.right_entities_type }",
         set( state.left_cols ).intersection( set( state.right_cols ) ),
-    )
-    state.matching_left_vals = build_val_dict( state.left_labels, state.matching_labels, state.left_rows )
-    state.matching_right_vals = build_val_dict( state.right_labels, state.matching_labels, state.right_rows )
+    ) )
+    state.matching_left_vals = build_vals( state.left_entities_col_label, state.matching_labels, state.left_rows )
+    state.matching_right_vals = build_vals( state.right_entities_col_label, state.matching_labels, state.right_rows )
 
 
 def matching_strategy( state ):
@@ -31,34 +33,34 @@ def matching_strategy( state ):
         PenaltyFunctions,
     )
 
-
-def matching_constraints( state ):
-    use_matching_weights = st.checkbox( f"Is there varibales to match with weights" )
+    use_matching_weights: bool = st.checkbox( "Is there varibales to match with weights" )
     if use_matching_weights:
-        matching_labels: list[ str ] = st.multiselect( "Select the variables with a weight", state.matching_labels )
+        matching_labels: tuple[ str, ...] = tuple( st.multiselect( "Select the variables with a weight", state.matching_labels ) )
         if len( matching_labels ) > 0:
             state.matching_weights = {}
             for matching_label in matching_labels:
-                state.matching_weights[ matching_label ] = st.number_input( f"Weight for { matching_label }", value=1.0 )
+                state.matching_weights[ matching_label ] = st.number_input( f"Weight for { matching_label }", value = 1.0 )
         else:
             state.matching_weights = None
     else:
         state.matching_weights = None
 
-    extrema = [ "maximum", "minimum" ]
-    cols = st.columns( 2 )
-    constraints_vals = [ None, None ]
-    for id, col in enumerate( cols ):
-        with col:
-            use_constraints_vals = st.checkbox( f"Is there variables with a { extrema[ id ] } value constraint" )
-            if use_constraints_vals:
-                constraints_labels = st.multiselect( f"Select variables with a { extrema[ id ] } value constraint", state.matching_labels )
-                if len( constraints_labels ) > 0:
-                    constrainning_labels = {}
-                    for constraint_label in constraints_labels:
-                        constrainning_labels[ constraint_label ] = st.selectbox( f"Select the column identifying the variable with the { extrema[ id ] } values constraint the { constraint_label } in the { state.right_entities }", state.right_cols )
 
-                    constraints_vals[ id ] = build_val_dict( state.right_labels, constrainning_labels, state.right_rows )
+def matching_constraints( state ):
+    extrema: tuple[ str, str ] = ( "maximum", "minimum" )
+    constraints_cols = st.columns( 2 )
+    constraints_vals: list[ Optional[ dict[ tuple[ str, str ], float ] ] ] = [ None, None ]
+    for id, constraints_col in enumerate( constraints_cols ):
+        with constraints_col:
+            use_constraints_vals: bool = st.checkbox( f"Is there variables constrained by a { extrema[ id ] } value" )
+            if use_constraints_vals:
+                constraints_variables_labels: tuple[ str ] = tuple( st.multiselect( f"Select variables constrained by a { extrema[ id ] } value", state.matching_labels ) )
+                if len( constraints_variables_labels ) > 0:
+                    constrainning_variables_labels: dict[ str, str ]  = {}
+                    for constraints_variable_label in constraints_variables_labels:
+                        constrainning_variables_labels[ constraints_variable_label ] = st.selectbox( f"Select the column identifying the constrainning variable with the { extrema[ id ] } values of the { constraints_variable_label }", state.right_cols )
+
+                    constraints_vals[ id ] = build_vals( state.right_entities_col_label, constrainning_variables_labels, state.right_rows )
                 else:
                     constraints_vals[ id ] = None
             else:

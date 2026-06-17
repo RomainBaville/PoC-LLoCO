@@ -44,9 +44,9 @@ class RessourcesConfig:
     # Scoring config
     objectives: dict[ str, Objective ]
 
-    # Constraints
     weights: Optional[ dict[ str, float ] ] = None
 
+    # Constraints
     max_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
     min_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
 

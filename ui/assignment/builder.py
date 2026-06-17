@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-from typing import Optional, Any
+from typing import Optional
 from domain.assignment.base import AssignmentProblem
 from domain.assignment.matching.matching_config import MatchingConfig
 from domain.assignment.ressources.ressources_config import RessourcesConfig
@@ -9,7 +9,7 @@ from domain.assignment.ressources.ressources_config import RessourcesConfig
 
 def build_entities_labels(
     entity_col_label: str,
-    entity_rows: dict[ str, Any ],
+    entity_rows: tuple[ dict[ str, str ], ...],
 ) -> tuple[ str, ...]:
     entities_labels: list[ str ] = []
     for entity_row in entity_rows:
@@ -20,7 +20,7 @@ def build_entities_labels(
 
 def build_generic_constraints(
     entity_col_label: str,
-    entity_rows: dict[ str, Any ],
+    entity_rows: tuple[ dict[ str, str ], ...],
     generic_constraints_col_label: Optional[ str ] = None,
     generic_constraints_val: Optional[ float ] = None,
 ) -> dict[ str, float ]:
@@ -29,24 +29,29 @@ def build_generic_constraints(
         if generic_constraints_col_label is None and generic_constraints_val is not None:
             generic_constraints[ entity_row[ entity_col_label ] ] = generic_constraints_val
         elif generic_constraints_val is None and generic_constraints_col_label is not None:
-            generic_constraints[ entity_row[ entity_col_label ] ] = entity_row[ generic_constraints_col_label ]
+            generic_constraints[ entity_row[ entity_col_label ] ] = float( entity_row[ generic_constraints_col_label ] )
 
     return generic_constraints
 
 
-def build_val_dict( entities: list[ str ], features_label: list[ str ] | dict[ str, str ], rows ):
-    val_dict: dict[ list[ str ], float ] = {}
-    for i, row in enumerate( rows ):
-        entity: str = entities[ i ]
-        for feature in features_label:
+def build_vals(
+    entity_col_label: str,
+    variables_labels: tuple[ str, ... ] | dict[ str, str ],
+    entity_rows: tuple[ dict[ str, str ], ...],
+) -> dict[ tuple[ str, str ], float ]:
+    vals: dict[ tuple[ str, str ], float ] = {}
+    for entity_row in entity_rows:
+        for variable_label in variables_labels:
+            val: float
             try:
-                val_dict[ ( entity, features_label[ feature ] ) ] = float( row[ feature ] )
+                val = float( entity_row[ variables_labels[ variable_label ] ] )
             except:
-                val_dict[ ( entity, feature ) ] = float( row[ feature ] )
+                val = float( entity_row[ variable_label ] )
 
+            entity_label: str = entity_row[ entity_col_label ]
+            vals[ ( entity_label, variable_label ) ] = val
 
-    return val_dict
-
+    return vals
 
 
 def build_problem( state ):
