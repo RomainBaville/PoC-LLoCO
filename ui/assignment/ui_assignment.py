@@ -44,7 +44,7 @@ def render( state ):
     # STEP 2 — Score parameters
     # ==================================================
     if state.step == 2:
-        st.header( f"How to compute the score to associate { state.left_entities_type, state.right_entities_type }" )
+        st.header( f"How to compute the score to associate { state.left_entities_type} and { state.right_entities_type }" )
 
         state.use_matching = st.checkbox( "Use a scoring optimization involving a score computation from a matching between left and right variables sharing the same label (e.g. python_level, english_level, ...)" )
 
@@ -66,28 +66,30 @@ def render( state ):
             st.caption(ds.description)
 
         if state.data_source == "csv_two_tables":
-            csv_files = sorted(
-                f for f in os.listdir( DATA_DIR ) if f.endswith( ".csv" )
+            st.subheader( "Upload CSV files" )
+
+            left_file = st.file_uploader(
+                f"{ state.left_entities_type } dataset",
+                type = [ "csv" ],
+                key = "left_csv"
             )
 
-            left_csv: str = st.selectbox( f"{ state.left_entities_type } dataset", csv_files )
-            right_csv: str = st.selectbox( f"{ state.right_entities_type } dataset", csv_files )
-
-            loader = DATA_SOURCE_REGISTRY[
-                state.data_source
-            ].loader_factory()
-
-            state.left_cols, state.left_rows = loader.load(
-                os.path.join( DATA_DIR, left_csv )
-            )
-            state.right_cols, state.right_rows = loader.load(
-                os.path.join( DATA_DIR, right_csv )
+            right_file = st.file_uploader(
+                f"{ state.right_entities_type } dataset",
+                type = [ "csv" ],
+                key = "right_csv"
             )
 
-            navigation_buttons()
-            st.stop()
+            loader = DATA_SOURCE_REGISTRY[state.data_source].loader_factory()
 
-        navigation_buttons( show_next=False )
+            if left_file and right_file:
+                state.left_cols, state.left_rows = loader.load( left_file )
+                state.right_cols, state.right_rows = loader.load( right_file )
+
+                navigation_buttons()
+                st.stop()
+
+        navigation_buttons(show_next=False)
 
     # ==================================================
     # STEP 4 — Mapping
