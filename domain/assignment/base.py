@@ -23,6 +23,7 @@ class AssignmentProblem:
         min_capacities: Optional[ dict[ str, float ] ] = None,
         left_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None,
         right_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None,
+        mutual_implications: Optional[ dict[ str, tuple[ str, ...] ] ] = None,
     ) -> None:
         """Class to deals with assignment problem.
 
@@ -47,8 +48,11 @@ class AssignmentProblem:
             min_capacities (Optional[dict[str, float]]): The dictionary whit the minimum capacities accepted per right entities:
                 - keys (str): The right entity label.
                 - value (float): The minimum capacities accepted by the right entity.
-            left_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): The groups of left entities labels that can't be associated together.
-            right_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): The groups of right entities labels that can't be assigned together.
+            left_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): Groups of left entities labels that can't be associated together.
+            right_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): Groups of right entities labels that can't be assigned together.
+            mutual_implications (Optional[dict[str, tuple[str, ...]]]): Groups of associations who forced other associations:
+                - keys (str): The left labels with an implication.
+                - values (tuple[str, ...]): Groups of left labels foced.
         """
         self.left_labels: tuple[ str, ...] = left_labels
         self.right_labels: tuple[ str, ... ] = right_labels
@@ -70,6 +74,7 @@ class AssignmentProblem:
         # Logical constraints
         self.left_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = left_mutual_exclusions
         self.right_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = right_mutual_exclusions
+        self.mutual_implications: Optional[ dict[ str, tuple[ str, ...] ] ] = mutual_implications
 
     def compute_score(
         self: Self,

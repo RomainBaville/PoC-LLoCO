@@ -238,6 +238,23 @@ def render( state ):
         state.left_mutual_exclusions = tuple( mutual_exclusion[ 0 ] ) if mutual_exclusion[ 0 ] is not None else None
         state.right_mutual_exclusions = tuple( mutual_exclusion[ 1 ] ) if mutual_exclusion[ 1 ] is not None else None
 
+        state.mutual_implications = None
+        use_mutual_implications: bool = st.checkbox( f"Use mutual implications")
+        if use_mutual_implications:
+            state.mutual_implications = {}
+            left_labels: tuple[ str, ... ] = tuple( st.multiselect( "selcte the left label focring association", state.left_labels ) )
+            if len(left_labels)>0:
+                for left_label in left_labels:
+                    left_forced_labels: tuple[ str, ... ] = tuple( st.multiselect(f"selcet the foced left label for the laft label{left_label}", state.left_labels) )
+                    if len(left_forced_labels)>0:
+                        state.mutual_implications[left_label] = left_forced_labels
+                    elif left_label in state.mutual_implications:
+                        del state.mutual_implications[ left_label]
+            else:
+                state.mutual_implications = None
+        else:
+            state.mutual_implications = None
+
         # -----------------------------
         # 2. Scoring variables constraints
         # -----------------------------

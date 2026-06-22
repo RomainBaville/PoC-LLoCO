@@ -54,7 +54,7 @@ def matching_constraints( state ):
         with matching_extrema_col:
             use_matching_extrema_vals: bool = st.checkbox( f"Is there variables constrained by a { extrema[ id ] } value ?" )
             if use_matching_extrema_vals:
-                variables_labels: tuple[ str ] = tuple( st.multiselect( f"Select variables constrained by a { extrema[ id ] } value", state.matching_labels ) )
+                variables_labels: tuple[ str, ...] = tuple( st.multiselect( f"Select variables constrained by a { extrema[ id ] } value", state.matching_labels ) )
                 if len( variables_labels ) > 0:
                     matching_extrema_variables_labels: dict[ str, str ]  = {}
                     for variable_label in variables_labels:

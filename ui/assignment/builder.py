@@ -97,6 +97,7 @@ def build_problem( state ):
         min_capacities = state.min_capacities,
         left_mutual_exclusions = state.left_mutual_exclusions,
         right_mutual_exclusions = state.right_mutual_exclusions,
+        mutual_implications = state.mutual_implications,
     )
 
     return problem

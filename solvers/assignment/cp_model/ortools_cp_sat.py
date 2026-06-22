@@ -24,26 +24,37 @@ class ORToolsAssignmentSolver( Solver ):
         # --------------------------------------------------
         # Variables
         # --------------------------------------------------
-        x = {
-            ( left_label, right_label ): model.NewBoolVar( f"x_{ left_label }_{ right_label }" )
+        is_assigned: dict[ tuple[ str, str ], bool ] = {
+            ( left_label, right_label ): model.NewBoolVar( f"is_assigned_{ left_label }_{ right_label }" )
             for left_label in problem.left_labels
             for right_label in problem.right_labels
         }
 
+        max_quantity = 100
+        quantity = {
+            ( left_label, right_label ): model.NewIntVar( 0, max_quantity, f"quantity_{ left_label }_{ right_label }" )
+            for left_label in problem.left_labels
+            for right_label in problem.right_labels
+        }
+        for left_label in problem.left_labels:
+            for right_label in problem.right_labels:
+                model.Add( quantity[ left_label, right_label ] == 0 ).OnlyEnforceIf( is_assigned[ left_label, right_label ].Not() )
+                model.Add( quantity[ left_label, right_label ] >= 1 ).OnlyEnforceIf( is_assigned[ left_label, right_label ] )
+
         # --------------------------------------------------
         # Constraints
         # --------------------------------------------------
-        apply_generic_constraints( model, x, problem )
-        apply_logical_constraints( model, x, problem )
-        apply_matching_constraints( model, x, problem )
-        apply_ressources_constraints( model, x, problem )
+        apply_generic_constraints( model, is_assigned, problem )
+        apply_logical_constraints( model, is_assigned, problem )
+        apply_matching_constraints( model, is_assigned, problem )
+        apply_ressources_constraints( model, quantity, problem )
 
         # --------------------------------------------------
         # Objective
         # --------------------------------------------------
         model.Maximize(
             sum(
-                problem.compute_score( left_label, right_label ) * x[ left_label, right_label ] for left_label, right_label in x
+                problem.compute_score( left_label, right_label ) * quantity[ left_label, right_label ] for left_label, right_label in quantity
             )
         )
 
@@ -60,10 +71,11 @@ class ORToolsAssignmentSolver( Solver ):
         # Extract solution
         # --------------------------------------------------
         result = {}
-        for ( left_label, right_label ) in x:
-            if solver.Value( x[ left_label, right_label ] ) == 1:
+        for ( left_label, right_label ) in quantity:
+            if solver.Value( quantity[ left_label, right_label ] ) >= 1:
                 if left_label not in result:
                     result[ left_label ] = []
+                result[ left_label ].append( str(solver.Value( quantity[ left_label, right_label ] )) )
                 result[ left_label ].append( right_label )
 
         return result
