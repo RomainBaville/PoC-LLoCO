@@ -17,13 +17,21 @@ class AssignmentProblem:
         matching_config: Optional[ MatchingConfig ] = None,
         use_ressources: bool = False,
         ressources_config: Optional[ RessourcesConfig ] = None,
-        max_assignments: Optional[ dict[ str, float ] ] = None,
-        min_assignments: Optional[ dict[ str, float ] ] = None,
-        max_capacities: Optional[ dict[ str, float ] ] = None,
-        min_capacities: Optional[ dict[ str, float ] ] = None,
+        max_several_assignments: Optional[ dict[ str, float ] ] = None,
+        min_several_assignments: Optional[ dict[ str, float ] ] = None,
+        max_assignments: Optional[ dict[ tuple[ str, str ], float ] ] = None,
+        min_assignments: Optional[ dict[ tuple[ str, str ], float ] ] = None,
+        max_assignments_global: Optional[ dict[ str, float ] ] = None,
+        min_assignments_global: Optional[ dict[ str, float ] ] = None,
+        max_several_capacities: Optional[ dict[ str, float ] ] = None,
+        min_several_capacities: Optional[ dict[ str, float ] ] = None,
+        max_capacities: Optional[ dict[ tuple[ str, str ], float ] ] = None,
+        min_capacities: Optional[ dict[ tuple[ str, str ], float ] ] = None,
+        max_capacities_global: Optional[ dict[ str, float ] ] = None,
+        min_capacities_global: Optional[ dict[ str, float ] ] = None,
         left_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None,
         right_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None,
-        mutual_implications: Optional[ dict[ str, tuple[ str, ...] ] ] = None,
+        implications: Optional[ dict[ tuple[ str, str ], tuple[ tuple[ str, str, Optional[ float ] ], ...] ] ] = None,
     ) -> None:
         """Class to deals with assignment problem.
 
@@ -36,23 +44,47 @@ class AssignmentProblem:
             use_ressources (bool): True if the problem optimisation score uses left entities ressources (e.g. salary, time ...):
                 Defaults to False.
             ressources_config (Optional[RessourcesConfig]): The configuration of the ressources to use.
-            max_assignments (Optional[dict[str, float]]): The dictionary whit the maximum assignments accepted per left entities:
+            max_several_assignments (Optional[dict[str, float]]): The dictionary with the maximum number of several right entities, a left entity can be assigned:
                 - keys (str): The left entity label.
-                - value (float): The maximum assignments accepted by the left entity.
-            min_assignments (Optional[dict[str, float]]): The dictionary whit the minimum assignments accepted per left entities:
+                - values (float): The maximum number of several right entities allowed.
+            min_several_assignments (Optional[dict[str, float]]): The dictionary with the minimum number of several right entities, a left entity can be assigned:
                 - keys (str): The left entity label.
-                - value (float): The minimum assignments accepted by the left entity.
-            max_capacities (Optional[dict[str, float]]): The dictionary whit the maximum capacities accepted per right entities:
+                - values (float): The minimum number of several right entities allowed.
+            max_assignments (Optional[dict[tuple[str, str], float]]): The dictionary whit the maximum number of assignments allowed by left entities per right entities:
+                - keys (tuple[str, str]): The left and right entity labels.
+                - value (float): The maximum number of assignments allowed by the left entity for the right entity.
+            min_assignments (Optional[dict[tuple[str, str], float]]): The dictionary whit the minimum number of assignments allowed by left entities per right entities:
+                - keys (tuple[str, str]): The left and right entity labels.
+                - value (float): The minimum number of assignments allowed by the left entity for the right entity.
+            max_assignments_global (Optional[dict[str, float]]): The dictionary whit the maximum number of assignments allowed per left entities:
+                - keys (str): The left entity label.
+                - value (float): The maximum number of assignments allowed for the left entity.
+            min_assignments_global (Optional[dict[str, float]]): The dictionary whit the minimum number of assignments allowed per left entities:
+                - keys (str): The left entity label.
+                - value (float): The minimum number of assignments allowed for the left entity.
+            max_several_capacities (Optional[dict[str, float]]): The dictionary with the maximum number of several left entities, a right entity can handled:
                 - keys (str): The right entity label.
-                - value (float): The maximum capacities accepted by the right entity.
-            min_capacities (Optional[dict[str, float]]): The dictionary whit the minimum capacities accepted per right entities:
+                - values (float): The maximum number of several left entities allowed.
+            min_several_capacities (Optional[dict[str, float]]): The dictionary with the minimum number of several left entities, a right entity can handled:
                 - keys (str): The right entity label.
-                - value (float): The minimum capacities accepted by the right entity.
-            left_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): Groups of left entities labels that can't be associated together.
-            right_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): Groups of right entities labels that can't be assigned together.
-            mutual_implications (Optional[dict[str, tuple[str, ...]]]): Groups of associations who forced other associations:
-                - keys (str): The left labels with an implication.
-                - values (tuple[str, ...]): Groups of left labels foced.
+                - values (float): The minimum number of several left entities allowed.
+            max_capacities (Optional[dict[tuple[str, str], float]]): The dictionary whit the maximum number of assignments allowed by right entities per left entities:
+                - keys (tuple[str, str]): The left and right entity labels.
+                - value (float): The maximum number of assignments allowed by the right entity for the left entity.
+            min_capacities (Optional[dict[tuple[str, str], float]]): The dictionary whit the minimum number of assignments allowed by right entities per left entities:
+                - keys (tuple[str, str]): The left and right entity labels.
+                - value (float): The minimum number of assignments allowed by the right entity for the left entity.
+            max_capacities_global (Optional[dict[str, float]]): The dictionary whit the maximum number of assignments allowed per right entities:
+                - keys (str): The right entity label.
+                - value (float): The maximum number of assignments allowed for the right entity.
+            min_capacities_global (Optional[dict[str, float]]): The dictionary whit the minimum number of assignments allowed per right entities:
+                - keys (str): The right entity label.
+                - value (float): The minimum number of assignments allowed for the right entity.
+            left_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): Groups of left entity labels that can't be associated together.
+            right_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]): Groups of right entity labels that can't be assigned together.
+            implications (Optional[dict[tuple[str, str], tuple[tuple[str, str, Optional[float]], ...]]]): The dictionary with the implication of an association:
+                - keys (tuple[str, str]): The left and right entity labels of the association with an implication.
+                - values (tuple[tuple[str, str, Optional[float]], ...]]): The several left and rigth label of the implicated association with the number of forced associations.
         """
         self.left_labels: tuple[ str, ...] = left_labels
         self.right_labels: tuple[ str, ... ] = right_labels
@@ -64,56 +96,82 @@ class AssignmentProblem:
         self.use_ressources: bool = use_ressources
         self.ressources_config: Optional[ RessourcesConfig ] = ressources_config
 
-        # Generic constraints
-        self.max_assignments: Optional[ dict[ str, float ] ] = max_assignments
-        self.min_assignments: Optional[ dict[ str, float ] ] = min_assignments
+        # Quantity constraints
+        self.max_several_assignments: Optional[ dict[ str, float ] ] = max_several_assignments
+        self.min_several_assignments: Optional[ dict[ str, float ] ] = min_several_assignments
 
-        self.max_capacities: Optional[ dict[ str, float ] ] = max_capacities
-        self.min_capacities: Optional[ dict[ str, float ] ] = min_capacities
+        self.max_assignments: Optional[ dict[ tuple[ str, str ], float ] ] = max_assignments
+        self.min_assignments: Optional[ dict[ tuple[ str, str ], float ] ] = min_assignments
+
+        self.max_assignments_global: Optional[ dict[ str, float ] ] = max_assignments_global
+        self.min_assignments_global: Optional[ dict[ str, float ] ] = min_assignments_global
+
+        self.max_several_capacities: Optional[ dict[ str, float ] ] = max_several_capacities
+        self.min_several_capacities: Optional[ dict[ str, float ] ] = min_several_capacities
+
+        self.max_capacities: Optional[ dict[ tuple[ str, str ], float ] ] = max_capacities
+        self.min_capacities: Optional[ dict[ tuple[ str, str ], float ] ] = min_capacities
+
+        self.max_capacities_global: Optional[ dict[ str, float ] ] = max_capacities_global
+        self.min_capacities_global: Optional[ dict[ str, float ] ] = min_capacities_global
+
+
 
         # Logical constraints
         self.left_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = left_mutual_exclusions
         self.right_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = right_mutual_exclusions
-        self.mutual_implications: Optional[ dict[ str, tuple[ str, ...] ] ] = mutual_implications
 
-    def compute_score(
+        self.implications: Optional[ dict[ tuple[ str, str ], tuple[ tuple[ str, str, Optional[ float ] ], ...] ] ] = implications
+
+    def compute_matching_score(
         self: Self,
         left_label: str,
         right_label: str,
     ) -> float:
-        """Compute the assignment score for the problem for one left entity to one right entity.
+        """Compute the matching score for the problem for one left entity to one right entity.
 
         Args:
             left_label (str): The label of the left entity to evaluate.
             right_label (str): The label of the right entity to evaluate.
 
         Returns:
-            score (float): The assignment score for the left and right entities of the problem.
+            float: The matching score for the left and right entities of the problem.
         """
-        score: float = 0
-
+        matching_score: float = 0
         if self.use_matching:
+            matching_objective: int = self.matching_config.objective.value
             for matching_label in self.matching_config.labels:
-                left_val = self.matching_config.left_vals[ ( left_label, matching_label ) ]
-                right_val = self.matching_config.right_vals[ ( right_label, matching_label ) ]
+                left_val: float = self.matching_config.left_vals[ ( left_label, matching_label ) ]
+                right_val: float = self.matching_config.right_vals[ ( right_label, matching_label ) ]
 
-                matching_weight: float = 1.
-                if self.matching_config.weights is not None:
-                    if matching_label in self.matching_config.weights:
-                        matching_weight = self.matching_config.weights[ matching_label ]
-
+                matching_weight: float = self.matching_config.weights[ matching_label ]
                 reward: float = self.matching_config.reward_function( left_val, right_val )
                 penalty: float = self.matching_config.penalty_function( left_val, right_val )
 
-                score += self.matching_config.objective.value * matching_weight * ( reward + penalty )
+                matching_score +=  matching_objective * matching_weight * ( reward + penalty )
+
+        return matching_score
+
+    def compute_ressources_score(
+        self: Self,
+        left_label: str,
+    ) -> float:
+        """Compute the ressources score for one left entity of the problem.
+
+        Args:
+            left_label (str): The label of the left entity to evaluate.
+
+        Returns:
+            float: The ressources score for the left entity of the problem.
+        """
+        ressources_score: float = 0
 
         if self.use_ressources:
             for ressource_label in self.ressources_config.labels:
-                weight: float = 1.
-                if self.ressources_config.weights is not None:
-                    if ressource_label in self.ressources_config.weights:
-                        weight = self.ressources_config.weights[ ressource_label ]
+                val: float = self.ressources_config.vals[ ( left_label, ressource_label ) ]
+                ressource_weight: float = self.ressources_config.weights[ ressource_label ]
+                ressource_objective: int = self.ressources_config.objectives[ ressource_label ].value
 
-                score += self.ressources_config.objectives[ ressource_label ].value * weight * self.ressources_config.vals[ ( left_label, ressource_label ) ]
+                ressources_score += ressource_objective * ressource_weight * val
 
-        return score
+        return ressources_score

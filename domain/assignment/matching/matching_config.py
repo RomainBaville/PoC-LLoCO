@@ -24,11 +24,11 @@ class MatchingConfig:
             - keys (tuple[str, str]): The right entitiy label, the variable label.
             - values (float): The right value used in the computation of the matching socre.
         objective (Objective): The objective of the score matching (maximize or minimize).
-        reward_function (RewardFunctions): The reward function used in the computation of the matching score.
-        penalty_function (PenaltyFunctions): The penalty function used in the computation of the matching score.
-        weights (Optional[dict[str, float]]): The dictionary with the variables weights used in the computation of the score:
+        weights (dict[str, float]): The dictionary with the variables weights used in the computation of the score:
             - keys (str): The label of the variable with a weight.
             - values (float): The value of the weight.
+        reward_function (RewardFunctions): The reward function used in the computation of the matching score.
+        penalty_function (PenaltyFunctions): The penalty function used in the computation of the matching score.
         max_vals (Optional[dict[tuple[str, str], float]]): The dictionary whit the maximum variables values accepted for the assignment of the left entities by the right entities:
             - keys (tuple[str, str]): The right entity label, the left variable label.
             - value (float): The maximum value accepted by the right entity for the left variable.
@@ -42,10 +42,9 @@ class MatchingConfig:
 
     # Scoring config
     objective: Objective
+    weights: dict[ str, float ]
     reward_function: RewardFunctions
     penalty_function: PenaltyFunctions
-
-    weights: Optional[ dict[ str, float ] ] = None
 
     # Constraints
     max_vals: Optional[ dict[ tuple[ str, str ], float ] ] = None

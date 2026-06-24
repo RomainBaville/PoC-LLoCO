@@ -64,9 +64,9 @@ def build_problem( state ):
             left_vals = state.matching_left_vals,
             right_vals = state.matching_right_vals,
             objective = state.matching_objective,
+            weights = state.matching_weights,
             reward_function = state.reward_function,
             penalty_function = state.penalty_function,
-            weights = state.matching_weights,
             max_vals = state.matching_max_vals,
             min_vals = state.matching_min_vals,
         )
@@ -91,13 +91,13 @@ def build_problem( state ):
         matching_config = matching_config,
         use_ressources = state.use_ressources,
         ressources_config = ressources_config,
-        max_assignments = state.max_assignments,
-        min_assignments = state.min_assignments,
-        max_capacities = state.max_capacities,
-        min_capacities = state.min_capacities,
+        max_assignments_global = state.max_assignments,
+        min_assignments_global = state.min_assignments,
+        max_capacities_global = state.max_capacities,
+        min_capacities_global = state.min_capacities,
         left_mutual_exclusions = state.left_mutual_exclusions,
         right_mutual_exclusions = state.right_mutual_exclusions,
-        mutual_implications = state.mutual_implications,
+        implications = state.mutual_implications,
     )
 
     return problem
