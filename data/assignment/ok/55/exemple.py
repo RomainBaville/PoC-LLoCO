@@ -16,7 +16,7 @@ from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.constraints.logicals_constraints import LogicalsConstraints
 from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
-from solvers.assignment.cp_model.ortools_cp_sat import ORToolsAssignmentSolver
+from solvers.assignment.cp_model.ortools_cp_sat import solve_assignment_problem
 
 
 # Base
@@ -106,8 +106,7 @@ problem: AssignmentProblem = AssignmentProblem(
     constraints_config=constraints_config
 )
 
-test: ORToolsAssignmentSolver = ORToolsAssignmentSolver()
 
-solutions = test.solve( problem )
+solutions = solve_assignment_problem( problem )
 
-print(solutions)
+print( solutions )

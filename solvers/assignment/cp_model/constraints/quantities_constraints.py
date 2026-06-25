@@ -51,6 +51,56 @@ def apply_quantities_constraints(
                     ) >= min_left_entities
                 )
 
-        if not quantities_constraints.multiple_same_assignment:
+        if quantities_constraints.multiple_same_assignment:
+            if quantities_constraints.max_same_assignments is not None:
+                for ( left_label, right_label ), max_same_assignments in quantities_constraints.max_same_assignments.items():
+                    model.add(
+                        quantities_variable[ left_label, right_label ] <= int( max_same_assignments )
+                    )
+
+            if quantities_constraints.min_same_assignments is not None:
+                for ( left_label, right_label ), min_same_assignments in quantities_constraints.min_same_assignments.items():
+                    model.add(
+                        quantities_variable[ left_label, right_label ] >= int( min_same_assignments )
+                    )
+
+            if quantities_constraints.max_assignments is not None:
+                for left_label in problem.left_labels:
+                    max_assignments: int = int( quantities_constraints.max_assignments[ left_label ] )
+                    model.add(
+                        sum(
+                            quantities_variable[ left_label, right_label ] for right_label in problem.right_labels
+                        ) <= max_assignments
+                    )
+
+            if quantities_constraints.min_assignments is not None:
+                for left_label in problem.left_labels:
+                    min_assignments: int = int( quantities_constraints.min_assignments[ left_label ] )
+                    model.add(
+                        sum(
+                            quantities_variable[ left_label, right_label ] for right_label in problem.right_labels
+                        ) >= min_assignments
+                    )
+
+            if quantities_constraints.max_capacities is not None:
+                for right_label in problem.right_labels:
+                    max_capacities: int = int( quantities_constraints.max_capacities[ right_label ] )
+                    model.add(
+                        sum(
+                            quantities_variable[ left_label, right_label ] for left_label in problem.left_labels
+                        ) <= max_capacities
+                    )
+
+            if quantities_constraints.min_capacities is not None:
+                for right_label in problem.right_labels:
+                    min_capacities: int = int( quantities_constraints.min_capacities[ right_label ] )
+                    model.add(
+                        sum(
+                            quantities_variable[ left_label, right_label ] for left_label in problem.left_labels
+                        ) >= min_capacities
+                    )
+        else:
             for left_label, right_label in quantities_variable:
-                model.add( quantities_variable[ left_label, right_label ] <= 1 )
+                model.add(
+                    quantities_variable[ left_label, right_label ] <= 1
+                )
