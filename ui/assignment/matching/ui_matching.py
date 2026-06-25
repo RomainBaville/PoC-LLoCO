@@ -7,8 +7,8 @@ from typing import Optional
 import streamlit as st
 
 from domain.objective import Objective
-from domain.assignment.matching.matching_reward_functions import RewardFunctions
-from domain.assignment.matching.matching_penalty_functions import PenaltyFunctions
+from domain.assignment.score.matching_reward_functions import RewardFunctions
+from domain.assignment.score.matching_penalty_functions import PenaltyFunctions
 from ui.assignment.builder import build_vals
 
 def map_matching( state ):

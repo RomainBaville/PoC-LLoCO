@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from typing import Optional
 
 from domain.objective import Objective
-from domain.assignment.matching.matching_reward_functions import RewardFunctions
-from domain.assignment.matching.matching_penalty_functions import PenaltyFunctions
+from domain.assignment.score.matching_reward_functions import RewardFunctions
+from domain.assignment.score.matching_penalty_functions import PenaltyFunctions
 
 
 @dataclass

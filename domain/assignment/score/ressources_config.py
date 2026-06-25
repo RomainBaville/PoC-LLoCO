@@ -40,10 +40,7 @@ class RessourcesConfig:
     """
     labels: tuple[ str, ...]
     vals: dict[ tuple[ str, str ], float ]
-
-    # Scoring config
     objectives: dict[ str, Objective ]
-
     weights: Optional[ dict[ str, float ] ] = None
 
     # Constraints

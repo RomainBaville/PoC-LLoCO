@@ -11,21 +11,21 @@ sys.path.append( str( ROOT_DIR ) )
 
 from domain.objective import Objective
 from domain.assignment.base import AssignmentProblem
-from domain.assignment.ressources.ressources_config import RessourcesConfig
+from domain.assignment.score.score_config import ScoreConfig
+from domain.assignment.score.ressources_config import RessourcesConfig
+from domain.assignment.constraints.constraints_config import ConstraintsConfig
+from domain.assignment.constraints.logicals_constraints import LogicalsConstraints
+from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
 from solvers.assignment.cp_model.ortools_cp_sat import ORToolsAssignmentSolver
 
-left = [ "Calculus", "OperationsResearch", "DataStructures", "ManagementStatistics", "ComputerSimulation", "ComputerProgramming", "Forecasting" ]
-right = [ "Student" ]
-implications = {
-    ( "DataStructures", "Student" ): ( ( "ComputerProgramming", "Student", 1 ), ),
-    ( "ComputerSimulation", "Student" ): ( ( "ComputerProgramming", "Student", 1 ), ),
-    ( "ManagementStatistics", "Student" ): ( ( "Calculus", "Student", 1 ), ),
-    ( "Forecasting", "Student" ): ( ( "ManagementStatistics", "Student", 1 ), ),
-}
 
+# Base
+left_labels = [ "Calculus", "OperationsResearch", "DataStructures", "ManagementStatistics", "ComputerSimulation", "ComputerProgramming", "Forecasting" ]
+right_labels = [ "Student" ]
 
+# Score
 labels = [ "Mathematics", "ComputerScience", "OperationsResearch" ]
-val = {
+vals = {
     ( "Calculus", "Mathematics" ): 1,
     ( "Calculus", "ComputerScience" ): 0,
     ( "Calculus", "OperationsResearch" ): 0,
@@ -63,32 +63,47 @@ min_val = {
     ( "Student", "ComputerScience" ): 2,
     ( "Student", "OperationsResearch" ): 2,
 }
-
-max_capacities = {
-    ( "Calculus", "Student" ): 1,
-    ( "OperationsResearch", "Student" ): 1,
-    ( "DataStructures", "Student" ): 1,
-    ( "ManagementStatistics", "Student" ): 1,
-    ( "ComputerSimulation", "Student" ): 1,
-    ( "ComputerProgramming", "Student" ): 1,
-    ( "Forecasting", "Student" ): 1,
-}
-
-ressouces_config: RessourcesConfig = RessourcesConfig(
+use_ressources = True
+ressouces_config = RessourcesConfig(
     labels=labels,
-    vals=val,
+    vals=vals,
     objectives=objectives,
     weights=weights,
     min_vals=min_val,
 )
+score_config = ScoreConfig(
+    use_ressources=use_ressources,
+    ressources_config=ressouces_config,
+)
+
+# Constraints
+use_quantities_constraints = True
+multiple_same_assignment = False
+quantities_constraints = QuantitiesConstraints(
+    multiple_same_assignment=multiple_same_assignment,
+)
+use_logical_constraints = True
+implications = {
+    ( "DataStructures", "Student" ): ( ( "ComputerProgramming", "Student", 1 ), ),
+    ( "ComputerSimulation", "Student" ): ( ( "ComputerProgramming", "Student", 1 ), ),
+    ( "ManagementStatistics", "Student" ): ( ( "Calculus", "Student", 1 ), ),
+    ( "Forecasting", "Student" ): ( ( "ManagementStatistics", "Student", 1 ), ),
+}
+logicals_constraints = LogicalsConstraints(
+    implications=implications,
+)
+constraints_config = ConstraintsConfig(
+    use_logicals_constraints=use_logical_constraints,
+    logicals_constraints=logicals_constraints,
+    use_quantities_constraints=use_quantities_constraints,
+    quantities_constraints=quantities_constraints,
+)
 
 problem: AssignmentProblem = AssignmentProblem(
-    left_labels=left,
-    right_labels=right,
-    use_ressources=True,
-    ressources_config=ressouces_config,
-    implications=implications,
-    max_capacities=max_capacities,
+    left_labels=left_labels,
+    right_labels=right_labels,
+    score_config=score_config,
+    constraints_config=constraints_config
 )
 
 test: ORToolsAssignmentSolver = ORToolsAssignmentSolver()

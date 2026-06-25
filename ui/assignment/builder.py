@@ -3,8 +3,8 @@
 # SPDX-FileContributor: Romain Baville
 from typing import Optional
 from domain.assignment.base import AssignmentProblem
-from domain.assignment.matching.matching_config import MatchingConfig
-from domain.assignment.ressources.ressources_config import RessourcesConfig
+from domain.assignment.score.matching_config import MatchingConfig
+from domain.assignment.score.ressources_config import RessourcesConfig
 
 
 def build_entities_labels(
