@@ -30,16 +30,16 @@ class QuantitiesConstraints:
             min_same_assignments (Optional[dict[tuple[str, str], float]]): The dictionary whit the minimum number of assignments allowed by left entities per right entities:
                 - keys (tuple[str, str]): The left and right entity labels.
                 - value (float): The minimum number of assignments allowed by the left entity for the right entity.
-            max_assignments (Optional[dict[str, float]]): The dictionary whit the maximum number of assignments allowed per left entities:
+            max_right_assignments (Optional[dict[str, float]]): The dictionary whit the maximum number of assignments allowed per left entities:
                 - keys (str): The left entity label.
                 - value (float): The maximum number of assignments allowed for the left entity.
-            min_assignments (Optional[dict[str, float]]): The dictionary whit the minimum number of assignments allowed per left entities:
+            min_right_assignments (Optional[dict[str, float]]): The dictionary whit the minimum number of assignments allowed per left entities:
                 - keys (str): The left entity label.
                 - value (float): The minimum number of assignments allowed for the left entity.
-            max_capacities (Optional[dict[str, float]]): The dictionary whit the maximum number of assignments allowed per right entities:
+            max_left_assignments (Optional[dict[str, float]]): The dictionary whit the maximum number of assignments allowed per right entities:
                 - keys (str): The right entity label.
                 - value (float): The maximum number of assignments allowed for the right entity.
-            min_capacities (Optional[dict[str, float]]): The dictionary whit the minimum number of assignments allowed per right entities:
+            min_left_assignments (Optional[dict[str, float]]): The dictionary whit the minimum number of assignments allowed per right entities:
                 - keys (str): The right entity label.
                 - value (float): The minimum number of assignments allowed for the right entity.
         """
@@ -51,11 +51,12 @@ class QuantitiesConstraints:
 
         multiple_same_assignment: bool = False
 
+        # To configure if multiple_same_assignment is True
         max_same_assignments: Optional[ dict[ tuple[ str, str ], float ] ] = None
         min_same_assignments: Optional[ dict[ tuple[ str, str ], float ] ] = None
 
-        max_assignments: Optional[ dict[ str, float ] ] = None
-        min_assignments: Optional[ dict[ str, float ] ] = None
+        max_right_assignments: Optional[ dict[ str, float ] ] = None
+        min_right_assignments: Optional[ dict[ str, float ] ] = None
 
-        max_capacities: Optional[ dict[ str, float ] ] = None
-        min_capacities: Optional[ dict[ str, float ] ] = None
+        max_left_assignments: Optional[ dict[ str, float ] ] = None
+        min_left_assignments: Optional[ dict[ str, float ] ] = None

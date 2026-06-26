@@ -24,5 +24,5 @@ class ConstraintsConfig:
         use_quantities_constraints: bool = False
         quantities_constraints: Optional[ QuantitiesConstraints ] = None
 
-        use_logicals_constraints: bool = True
+        use_logicals_constraints: bool = False
         logicals_constraints: Optional[ LogicalsConstraints ] = None

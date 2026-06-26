@@ -3,10 +3,9 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from typing import Type
+from typing_extensions import Callable
 
-from solvers.base import Solver
-from solvers.assignment.cp_model.ortools_cp_sat import ORToolsAssignmentSolver
+from solvers.assignment.cp_model.ortools_cp_sat import solve_assignment_problem
 
 
 @dataclass
@@ -14,7 +13,7 @@ class SolverDefinition:
     key: str
     label: str
     description: str
-    solver_class: Type[ Solver ]
+    solver_fn: Callable
 
 
 SOLVERS = {
@@ -24,6 +23,6 @@ SOLVERS = {
         description=(
             "Constraint Programming solver suitable for assignment problems with configurable behavior."
         ),
-        solver_class=ORToolsAssignmentSolver,
+        solver_fn=solve_assignment_problem,
     ),
 }

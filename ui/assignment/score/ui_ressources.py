@@ -20,18 +20,13 @@ def ressources_strategy( state ):
     for ressource_label in state.ressources_labels:
         state.ressoucres_objectives[ ressource_label ] = st.selectbox( f"Select the objective for { ressource_label }", Objective )
 
+    state.ressources_weights = { ressource_label: 1. for ressource_label in state.ressources_labels }
     use_ressources_weights: bool = st.checkbox( "Is there ressources with weights" )
     if use_ressources_weights:
         ressources_labels: tuple[ str, ...] = tuple( st.multiselect( "Select the ressources with a weight", state.ressources_labels ) )
         if len( ressources_labels ) > 0:
-            state.ressources_weights = {}
             for ressource_label in ressources_labels:
-                state.ressources_weights[ ressource_label ] = st.number_input( f"Weight for { ressource_label }", value = 1.0 )
-        else:
-            state.ressources_weights = None
-    else:
-        state.ressources_weights = None
-
+                state.ressources_weights[ ressource_label ] = st.number_input( f"Weight for { ressource_label }", value = 1. )
 
 def ressources_constraints( state ):
     extrema: tuple[ str, str ] = ( "maximum", "minimum" )

@@ -8,7 +8,7 @@ from ortools.sat.python.cp_model import CpModel
 from domain.assignment.base import AssignmentProblem
 from domain.assignment.constraints.logicals_constraints import LogicalsConstraints
 
-def apply_logical_constraints( model: CpModel, x, problem: AssignmentProblem ):
+def apply_logical_constraints( model: CpModel, x, q, problem: AssignmentProblem ):
     logicals_constraints: Optional[ LogicalsConstraints ] = problem.constraints_config.logicals_constraints
     if logicals_constraints is not None:
         if logicals_constraints.left_mutual_exclusions is not None:
@@ -31,5 +31,6 @@ def apply_logical_constraints( model: CpModel, x, problem: AssignmentProblem ):
 
         if logicals_constraints.implications is not None:
             for ( left_label, right_label ), a in logicals_constraints.implications.items():
-                for ( left_forced_label, right_forced_label, _ ) in a:
+                for ( left_forced_label, right_forced_label, nb_implications ) in a:
                     model.add_implication( x[ left_label, right_label ], x[ left_forced_label, right_forced_label ] )
+                    model.add( q[ left_forced_label, right_forced_label ] >= int( nb_implications ) * q[ left_label, right_label ] )

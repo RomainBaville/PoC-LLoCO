@@ -33,17 +33,13 @@ def matching_strategy( state ):
         PenaltyFunctions,
     )
 
+    state.matching_weights = { matching_label: 1. for matching_label in state.matching_labels }
     use_matching_weights: bool = st.checkbox( "Is there varibales to match with weights" )
     if use_matching_weights:
         matching_labels: tuple[ str, ...] = tuple( st.multiselect( "Select the variables with a weight", state.matching_labels ) )
         if len( matching_labels ) > 0:
-            state.matching_weights = {}
             for matching_label in matching_labels:
-                state.matching_weights[ matching_label ] = st.number_input( f"Weight for { matching_label }", value = 1.0 )
-        else:
-            state.matching_weights = None
-    else:
-        state.matching_weights = None
+                state.matching_weights[ matching_label ] = st.number_input( f"Weight for { matching_label }", value = 1. )
 
 
 def matching_constraints( state ):

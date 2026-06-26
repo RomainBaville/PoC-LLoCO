@@ -22,13 +22,12 @@ class AssignmentProblem:
         Args:
             left_labels (tuple[str, ...]): The left entities labels to associate.
             right_labels (tuple[str, ...]): The right entities labels to associate.
-            quantities_constraints (QuantitiesConstraints): All the quantities constraints of the assignment problem.
+            score_config (ScoreConfig): The configuration of the score evaluation of the assignment problem.
+            constraints_config (ConstraintsConfig): The configuration of the constraints of the assignment problem.
         """
         self.left_labels: tuple[ str, ...] = left_labels
         self.right_labels: tuple[ str, ... ] = right_labels
-
         self.score_config: ScoreConfig = score_config
-
         self.constraints_config: ConstraintsConfig = constraints_config
 
     def compute_matching_score(

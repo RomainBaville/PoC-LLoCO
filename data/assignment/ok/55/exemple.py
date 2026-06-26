@@ -78,10 +78,7 @@ score_config = ScoreConfig(
 
 # Constraints
 use_quantities_constraints = True
-multiple_same_assignment = False
-quantities_constraints = QuantitiesConstraints(
-    multiple_same_assignment=multiple_same_assignment,
-)
+quantities_constraints = QuantitiesConstraints()
 use_logical_constraints = True
 implications = {
     ( "DataStructures", "Student" ): ( ( "ComputerProgramming", "Student", 1 ), ),

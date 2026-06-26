@@ -2,10 +2,8 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-import os
 import streamlit as st
 from importlib import import_module
-from typing import Any, Optional
 
 from ui.utils import (
     navigation_buttons,
@@ -14,11 +12,17 @@ from ui.utils import (
     # build_results_zip,
 )
 from infrastructure.registry import DATA_SOURCE_REGISTRY
-from ui.assignment.builder import build_entities_labels, build_generic_constraints, build_problem
+
 # from llm.session_model import OptimizationSession
-from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
-from ui.assignment.matching.ui_matching import map_matching, matching_strategy, matching_constraints
-from ui.assignment.ressources.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
+from solvers.assignment.registry import SOLVERS
+
+from ui.assignment.score.ui_matching import map_matching, matching_strategy, matching_constraints
+from ui.assignment.score.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
+
+from ui.assignment.constraints.ui_quantities_constraints import quantities_constraints
+from ui.assignment.constraints.ui_logicals_constraints import logicals_constraints
+
+from ui.assignment.builder import build_entities_labels, build_problem
 
 DATA_DIR = "data"
 
@@ -148,117 +152,25 @@ def render( state ):
     # ==================================================
     if state.step == 6:
         st.header( "Define constraints" )
-        labels: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( state.left_labels, state.right_labels )
-        entities_types: tuple[ str, str ] = ( state.left_entities_type, state.right_entities_type )
-        entities_cols: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( state.left_cols, state.right_cols )
-        entities_rows: tuple[ dict[ str, Any ], dict[ str, Any ] ] = ( state.left_rows, state.right_rows )
-        entities_col_label: tuple[ str, str ] = ( state.left_entities_col_label, state.right_entities_col_label )
 
         # -----------------------------
-        # 1. Generic constraints
+        # 1. Assignment constraints
         # -----------------------------
-        st.subheader( "1. Generic constraints" )
-        extrema: tuple[ str, str ] = ( "maximum", "minimum" )
-        constraint_type: tuple[ str, str ] = ( "assignments", "capacities" )
-        generic_constraints: list[ list[ Optional[ dict[ str, float ] ] ] ] = [ [ None, None ], [ None, None ] ]
-        for i in range( 2 ):
-            generic_constraints_cols = st.columns( 2 )
-            for id, generic_constraints_col in enumerate( generic_constraints_cols ):
-                with generic_constraints_col:
-                    use_generic_constraints: bool = st.checkbox( f"Is there { extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }" )
-                    if use_generic_constraints:
-                        mode: str = st.radio(
-                            f"How to define the { extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }",
-                            [
-                                "With data column",
-                                f"Setting it manually for each { entities_types[ i ] }",
-                                f"Setting it manually for all { entities_types[ i ] } at once",
-                            ],
-                        )
+        st.subheader( "1. Assignment constraints" )
 
-                        if mode == "With data column":
-                            generic_constraints_col_label: str = st.selectbox(
-                                f"Column identifying { extrema[ id ] } { constraint_type[ i ] }",
-                                entities_cols[ i ],
-                                index = len( entities_cols[ i ] ) - 1
-                            )
-                            generic_constraints[ i ][ id ] = build_generic_constraints( entities_col_label[ i ], entities_rows[ i ], generic_constraints_col_label = generic_constraints_col_label )
+        state.use_quantities_constraints = st.checkbox( "Is there quantities constraints in the problem (e.g. max number of employees per project)" )
+        state.use_logicals_constraints = st.checkbox( "Is there logicals constraints in the problem (e.g. if employee A is assigned to project I then employee B is assigned to project II)" )
 
-                        elif mode == f"Setting it manually for each { entities_types[ i ] }":
-                            generic_constraints[ i ][ id ] = {}
-                            for entity in labels[ i ]:
-                                generic_constraints[ i ][ id ][ entity ] = st.number_input(
-                                    f"{ extrema[ id ] } { constraint_type[ i ] } for { entity }",
-                                    min_value = 1. - id,
-                                    max_value = float( len( entities_rows[ 1 - i ] ) ),
-                                )
+        if state.use_quantities_constraints:
+            quantities_constraints( state )
 
-                        elif mode == f"Setting it manually for all { entities_types[ i ] } at once":
-                            generic_constraints_val: float = st.number_input(
-                                f"{ extrema[ id ] } { constraint_type[ i ] } per { entities_types[ i ] }",
-                                min_value = 1.,
-                                max_value = float( len( entities_rows[ 1 - i ] ) ),
-                            )
-                            generic_constraints[ i ][ id ] = build_generic_constraints( entities_col_label[ i ], entities_rows[ i ], generic_constraints_val = generic_constraints_val )
-
-                    else:
-                        generic_constraints[ i ][ id ] = None
-
-        state.max_assignments = generic_constraints[ 0 ][ 0 ]
-        state.min_assignments = generic_constraints[ 0 ][ 1 ]
-        state.max_capacities = generic_constraints[ 1 ][ 0 ]
-        state.min_capacities = generic_constraints[ 1 ][ 1 ]
-
-        # -----------------------------
-        # 2. logical constraints
-        # -----------------------------
-        st.subheader( "2. Logical constraints" )
-        max_associations: tuple[ Optional[ dict[ str, float ] ], Optional[ dict[ str, float ] ] ] = ( state.max_capacities, state.max_assignments )
-        mutual_exclusion: list[ Optional[ list[ tuple[ str, ...] ] ] ] = [ None, None ]
-        for i in range( 2 ):
-            if max_associations[ i ] is None or max( max_associations[ i ].values() ) > 1:
-                define_mutual_exclusion: bool = st.checkbox( f"Is there groups of { entities_types[ i ] } who can't be assigned to the same { entities_types[ 1 - i ] }" )
-                if define_mutual_exclusion:
-                    nb_groups: int = st.number_input( f"How many group of { entities_types[ i ] } ?", 1 )
-
-                    mutual_exclusion[ i ] = [ [] for _ in range( nb_groups ) ]
-                    for group in range( nb_groups ):
-                        nb_entities: int = st.number_input( f"How many { entities_types[ i ] } are conserned for the group { group + 1 } ?", 2 )
-                        mutual_exclusion[ i ][ group ] = [ None for _ in range( nb_entities ) ]
-                        exclusion_cols = st.columns( nb_entities )
-                        for id, col in enumerate( exclusion_cols ):
-                            with col:
-                                mutual_exclusion[ i ][ group ][ id ] = st.selectbox( f"{ entities_types[ i ] } { id + 1 } for the group { group + 1 }", labels[ i ], index = id )
-                        mutual_exclusion[ i ][ group ] = tuple( mutual_exclusion[ i ][ group ] )
-                else:
-                    mutual_exclusion[ i ] = None
-            else:
-                mutual_exclusion[ i ] = None
-
-        state.left_mutual_exclusions = tuple( mutual_exclusion[ 0 ] ) if mutual_exclusion[ 0 ] is not None else None
-        state.right_mutual_exclusions = tuple( mutual_exclusion[ 1 ] ) if mutual_exclusion[ 1 ] is not None else None
-
-        state.mutual_implications = None
-        use_mutual_implications: bool = st.checkbox( f"Use mutual implications")
-        if use_mutual_implications:
-            state.mutual_implications = {}
-            left_labels: tuple[ str, ... ] = tuple( st.multiselect( "selcte the left label focring association", state.left_labels ) )
-            if len(left_labels)>0:
-                for left_label in left_labels:
-                    left_forced_labels: tuple[ str, ... ] = tuple( st.multiselect(f"selcet the foced left label for the laft label{left_label}", state.left_labels) )
-                    if len(left_forced_labels)>0:
-                        state.mutual_implications[left_label] = left_forced_labels
-                    elif left_label in state.mutual_implications:
-                        del state.mutual_implications[ left_label]
-            else:
-                state.mutual_implications = None
-        else:
-            state.mutual_implications = None
+        if state.use_logicals_constraints:
+            logicals_constraints( state )
 
         # -----------------------------
         # 2. Scoring variables constraints
         # -----------------------------
-        st.subheader( "3. Scoring variables constraints" )
+        st.subheader( "2. Scoring variables constraints" )
         if state.use_matching:
             matching_constraints( state )
 
@@ -274,13 +186,12 @@ def render( state ):
     if state.step == 7:
         st.header( "Choose solver" )
 
-        solver_group = ASSIGNMENT_SOLVER_GROUPS[ "assignments" ]
-        solver_registry = import_module( solver_group.registry_module )
-
-        for _, solver in solver_registry.SOLVERS.items():
-            if st.button( solver.label ):
-                state.solver = solver
-                state.step += 1
+        solver_cols = st.columns( len( SOLVERS ) )
+        for solver_col, solver in zip( solver_cols, SOLVERS.values() ):
+            with solver_col:
+                if st.button( solver.label ):
+                    state.solver_key = solver.key
+                    state.step += 1
 
         navigation_buttons( show_next=False )
         st.stop()
@@ -295,25 +206,39 @@ def render( state ):
         # ---------------------------------
         # Solve
         # ---------------------------------
-        try:
-            with st.spinner( "Optimizing..." ):
-                solution = state.solver.solver_class().solve( problem )
+        if state.solver_key in SOLVERS:
+            try:
+                with st.spinner( "Optimizing..." ):
+                    solver_def = SOLVERS[ state.solver_key ]
+                    solution: dict[ str, list[ tuple[ str, int ] ] ] = solver_def.solver_fn( problem )
 
-            state.solution_rows = [
-                {
-                    state.left_entities_type: l,
-                    state.right_entities_type: r,
-                }
-                for l, r in solution.items()
-            ]
+                state.solution_rows = []
 
-            st.success( "Solution computed" )
-            st.table( state.solution_rows )
-        except RuntimeError as e:
-            st.error( e )
+                for left_label, assignments in solution.items():
+                    solution_row = {}
+                    solution_row[ state.left_entities_type ] = left_label
 
-            navigation_buttons( show_next=False )
-            st.stop()
+                    right_labels = ""
+                    nb_assignments = ""
+                    for right_label, nb_assignment in assignments:
+                        right_labels = f"{ right_labels } { right_label }"
+                        nb_assignments = f"{ nb_assignments } { nb_assignment }"
+
+                    if len( state.right_labels ) > 1:
+                        solution_row[ state.right_entities_type ] = right_labels
+
+                    if state.use_quantities_constraints and state.multiple_same_assignment:
+                        solution_row[ f"Number of assignments per { state.right_entities_type }" ] = nb_assignments
+
+                    state.solution_rows.append( solution_row )
+
+                st.success( "Solution computed" )
+                st.table( state.solution_rows )
+            except RuntimeError as e:
+                st.error( e )
+
+                navigation_buttons( show_next=False )
+                st.stop()
 
         # ---------------------------------
         # AI explanation
