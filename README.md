@@ -76,7 +76,7 @@ PoC-LLoCO/
 │
 ├── README.md
 │
-├── data/
+├── tests/ # several tests based on industrial OR problems
 │   └── ...
 │
 ├── models/
@@ -91,10 +91,14 @@ PoC-LLoCO/
 │   ├── utils.py
 │   │
 │   └── assignment/
-│       ├── matching/
-│       │   └── ui_matching.py
+│       ├── constraints/
+│       │   ├── builder.py
+│       │   ├── ui_logicals_constraints.py
+│       │   └── ui_quantities_constraints.py
 │       │
-│       ├── ressoucres/
+│       ├── score/
+│       │   ├── builder.py
+│       │   ├── ui_matching.py
 │       │   └── ui_ressources.py
 │       │
 │       ├── builder.py
@@ -106,10 +110,14 @@ PoC-LLoCO/
 │   └── assignment/
 │       ├── base.py
 │       │
-│       ├── ressoucres/
-│       │   └── ressoucre_config.py
+│       ├── constraints/
+│       │   ├── constraints_config.py
+│       │   ├── logicals_constraints.py
+│       │   └── quantities_constraints.py
 │       │
-│       └── matching/
+│       └── score/
+│           ├── score_config.py
+│           ├── ressources_config.py
 │           ├── matching_config.py
 │           ├── matching_penalty_functions.py
 │           └── matching_reward_functions.py
@@ -123,7 +131,7 @@ PoC-LLoCO/
 │       │
 │       └── cp_model/
 │           ├── constraints/
-│           │   └── generic_constraints.py
+│           │   └── quantities_constraints.py
 │           │   └── logical_constraints.py
 │           │   └── matching_constraints.py
 │           │   └── ressources_constraints.py
