@@ -29,6 +29,7 @@ class MatchingConfig:
             - values (float): The value of the weight.
         reward_function (RewardFunctions): The reward function used in the computation of the matching score.
         penalty_function (PenaltyFunctions): The penalty function used in the computation of the matching score.
+            Defaults to PenaltyFunction.NONE, e.g. no penalty.
         max_vals (Optional[dict[tuple[str, str], float]]): The dictionary whit the maximum variables values accepted for the assignment of the left entities by the right entities:
             - keys (tuple[str, str]): The right entity label, the left variable label.
             - value (float): The maximum value accepted by the right entity for the left variable.
@@ -44,7 +45,7 @@ class MatchingConfig:
     objective: Objective
     weights: dict[ str, float ]
     reward_function: RewardFunctions
-    penalty_function: PenaltyFunctions
+    penalty_function: PenaltyFunctions = PenaltyFunctions.NONE
 
     # Constraints
     max_vals: Optional[ dict[ tuple[ str, str ], float ] ] = None

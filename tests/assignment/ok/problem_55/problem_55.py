@@ -2,13 +2,6 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-import sys
-from pathlib import Path
-
-# --- make project root importable ---
-ROOT_DIR = Path( __file__ ).resolve().parents[ 4 ]
-sys.path.append( str( ROOT_DIR ) )
-
 from domain.objective import Objective
 from domain.assignment.base import AssignmentProblem
 from domain.assignment.score.score_config import ScoreConfig
@@ -16,7 +9,6 @@ from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.constraints.logicals_constraints import LogicalsConstraints
 from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
-from solvers.assignment.cp_model.ortools_cp_sat import solve_assignment_problem
 
 
 # Base
@@ -96,14 +88,16 @@ constraints_config = ConstraintsConfig(
     quantities_constraints=quantities_constraints,
 )
 
-problem: AssignmentProblem = AssignmentProblem(
+problem_55: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,
     constraints_config=constraints_config
 )
 
-
-solutions = solve_assignment_problem( problem )
-
-print( solutions )
+solution_55 = {
+    "Calculus": [ ( "Student", 1 ) ],
+    "OperationsResearch": [ ( "Student", 1 ) ],
+    "ComputerSimulation": [ ( "Student", 1 ) ],
+    "ComputerProgramming": [ ( "Student", 1 ) ],
+}
