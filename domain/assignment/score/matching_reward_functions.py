@@ -3,8 +3,9 @@
 # SPDX-FileContributor: Romain Baville
 
 import math
+from collections.abc import Callable
 from enum import Enum
-from typing_extensions import Self, Callable
+from typing import Self
 
 
 def score_min( left_val: float, right_val: float ) -> float:

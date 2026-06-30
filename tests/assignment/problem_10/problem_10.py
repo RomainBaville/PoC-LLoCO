@@ -2,14 +2,11 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from domain.objective import Objective
 from domain.assignment.base import AssignmentProblem
-from domain.assignment.score.score_config import ScoreConfig
-from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
-from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
-
-
+from domain.assignment.score.ressources_config import RessourcesConfig
+from domain.assignment.score.score_config import ScoreConfig
+from domain.objective import Objective
 """Problem description:
 A convenience supermarket is planning to open several chain stores in a newly built residential area in the northwest suburb of the city. For shopping convenience, the distance from any residential area to one of the chain stores should not exceed 800m. Table 5-1 shows the new residential areas and the residential areas within a radius of 800m from each of them.
 
@@ -35,7 +32,9 @@ left_labels: tuple[ str, ...] = ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "
 right_labels: tuple[ str, ...] = ( "Commerces", )
 
 # Score
-labels: tuple[ str, ...] = ( "A_800", "B_800", "C_800", "D_800", "E_800", "F_800", "G_800", "H_800", "I_800", "J_800", "K_800", "L_800" )
+labels: tuple[ str, ...] = (
+    "A_800", "B_800", "C_800", "D_800", "E_800", "F_800", "G_800", "H_800", "I_800", "J_800", "K_800", "L_800"
+)
 vals: dict[ tuple[ str, str ], float ] = {
     ( "A", "A_800" ): 1.,
     ( "A", "B_800" ): 0.,
@@ -49,7 +48,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "A", "J_800" ): 0.,
     ( "A", "K_800" ): 0.,
     ( "A", "L_800" ): 0.,
-
     ( "B", "A_800" ): 0.,
     ( "B", "B_800" ): 1.,
     ( "B", "C_800" ): 0.,
@@ -62,7 +60,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "B", "J_800" ): 0.,
     ( "B", "K_800" ): 0.,
     ( "B", "L_800" ): 0.,
-
     ( "C", "A_800" ): 1.,
     ( "C", "B_800" ): 0.,
     ( "C", "C_800" ): 1.,
@@ -75,7 +72,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "C", "J_800" ): 0.,
     ( "C", "K_800" ): 0.,
     ( "C", "L_800" ): 0.,
-
     ( "D", "A_800" ): 0.,
     ( "D", "B_800" ): 0.,
     ( "D", "C_800" ): 0.,
@@ -88,7 +84,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "D", "J_800" ): 1.,
     ( "D", "K_800" ): 0.,
     ( "D", "L_800" ): 0.,
-
     ( "E", "A_800" ): 1.,
     ( "E", "B_800" ): 0.,
     ( "E", "C_800" ): 0.,
@@ -101,7 +96,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "E", "J_800" ): 0.,
     ( "E", "K_800" ): 0.,
     ( "E", "L_800" ): 0.,
-
     ( "F", "A_800" ): 0.,
     ( "F", "B_800" ): 0.,
     ( "F", "C_800" ): 0.,
@@ -114,7 +108,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "F", "J_800" ): 1.,
     ( "F", "K_800" ): 1.,
     ( "F", "L_800" ): 0.,
-
     ( "G", "A_800" ): 1.,
     ( "G", "B_800" ): 0.,
     ( "G", "C_800" ): 1.,
@@ -127,7 +120,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "G", "J_800" ): 0.,
     ( "G", "K_800" ): 0.,
     ( "G", "L_800" ): 0.,
-
     ( "H", "A_800" ): 1.,
     ( "H", "B_800" ): 1.,
     ( "H", "C_800" ): 1.,
@@ -140,7 +132,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "H", "J_800" ): 0.,
     ( "H", "K_800" ): 0.,
     ( "H", "L_800" ): 0.,
-
     ( "I", "A_800" ): 1.,
     ( "I", "B_800" ): 1.,
     ( "I", "C_800" ): 1.,
@@ -153,7 +144,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "I", "J_800" ): 0.,
     ( "I", "K_800" ): 0.,
     ( "I", "L_800" ): 0.,
-
     ( "J", "A_800" ): 0.,
     ( "J", "B_800" ): 0.,
     ( "J", "C_800" ): 0.,
@@ -166,7 +156,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "J", "J_800" ): 1.,
     ( "J", "K_800" ): 1.,
     ( "J", "L_800" ): 1.,
-
     ( "K", "A_800" ): 0.,
     ( "K", "B_800" ): 0.,
     ( "K", "C_800" ): 0.,
@@ -179,7 +168,6 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "K", "J_800" ): 1.,
     ( "K", "K_800" ): 1.,
     ( "K", "L_800" ): 1.,
-
     ( "L", "A_800" ): 0.,
     ( "L", "B_800" ): 0.,
     ( "L", "C_800" ): 0.,
@@ -237,26 +225,23 @@ min_vals: dict[ tuple[ str, ...], float ] = {
 }
 
 ressource_config: RessourcesConfig = RessourcesConfig(
-    labels = labels,
-    vals = vals,
-    objectives = objectives,
-    weights = weights,
-    min_vals = min_vals,
+    labels=labels,
+    vals=vals,
+    objectives=objectives,
+    weights=weights,
+    min_vals=min_vals,
 )
 
-score_config: ScoreConfig = ScoreConfig(
-    use_ressources = True,
-    ressources_config = ressource_config
-)
+score_config: ScoreConfig = ScoreConfig( use_ressources=True, ressources_config=ressource_config )
 
 # constraints
 constraints_config: ConstraintsConfig = ConstraintsConfig()
 
 problem_10: AssignmentProblem = AssignmentProblem(
-    left_labels = left_labels,
-    right_labels = right_labels,
-    score_config = score_config,
-    constraints_config = constraints_config,
+    left_labels=left_labels,
+    right_labels=right_labels,
+    score_config=score_config,
+    constraints_config=constraints_config,
 )
 solution_10: dict[ list[ tuple[ str, int ] ] ] = {
     "B": [ ( "Commerces", 1 ) ],

@@ -13,10 +13,10 @@ class AssignmentSolverGroup:
 
 
 ASSIGNMENT_SOLVER_GROUPS = {
-    "assignments": AssignmentSolverGroup(
+    "assignments":
+    AssignmentSolverGroup(
         key="assignments",
         description="Solvers for assignment problems",
         registry_module="solvers.assignment.registry",
     ),
-
 }

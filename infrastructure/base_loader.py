@@ -3,10 +3,10 @@
 # SPDX-FileContributor: Romain Baville
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Tuple
 
 
-class DataLoader(ABC):
+class DataLoader( ABC ):
+
     @abstractmethod
-    def load(self, source) -> Tuple[List[str], List[Dict[str, str]]]:
+    def load( self, source ) -> tuple[ list[ str ], list[ dict[ str, str ] ] ]:
         ...

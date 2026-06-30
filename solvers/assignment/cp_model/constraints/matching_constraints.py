@@ -5,6 +5,7 @@
 from domain.assignment.base import AssignmentProblem
 from domain.assignment.score.matching_config import MatchingConfig
 
+
 def apply_matching_constraints( model, x, problem: AssignmentProblem ):
     if problem.score_config.use_matching:
         matching_config: MatchingConfig = problem.score_config.matching_config

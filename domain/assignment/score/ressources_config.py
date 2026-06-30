@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from typing import Optional
 
 from domain.objective import Objective
 
@@ -44,8 +43,8 @@ class RessourcesConfig:
     weights: dict[ str, float ]
 
     # Constraints
-    max_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
-    min_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
+    max_vals: dict[ tuple[ str, ...], float ] | None = None
+    min_vals: dict[ tuple[ str, ...], float ] | None = None
 
-    max_global_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
-    min_global_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
+    max_global_vals: dict[ tuple[ str, ...], float ] | None = None
+    min_global_vals: dict[ tuple[ str, ...], float ] | None = None

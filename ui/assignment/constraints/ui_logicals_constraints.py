@@ -3,7 +3,7 @@
 # SPDX-FileContributor: Romain Baville
 
 import streamlit as st
-from typing import Optional
+
 
 def logicals_constraints( state ) -> None:
     st.subheader( "Logicals constraints" )
@@ -16,22 +16,24 @@ def logicals_constraints( state ) -> None:
 
     labels: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( state.left_labels, state.right_labels )
     entities_types: tuple[ str, str ] = ( state.left_entities_type, state.right_entities_type )
-    max_associations: tuple[ Optional[ dict[ str, float ] ], Optional[ dict[ str, float ] ] ] = ( state.max_left_entities, state.max_right_entities )
-    mutual_exclusion: list[ Optional[ list[ tuple[ str, ...] ] ] ] = [ None, None ]
+    max_associations: tuple[ dict[ str, float ] | None,
+                             dict[ str, float ] | None ] = ( state.max_left_entities, state.max_right_entities )
+    mutual_exclusion: list[ list[ tuple[ str, ...] ] | None ] = [ None, None ]
 
-    for side in range( 2 ): # Left then right
-        if ( max_associations[ side ] is None or max( max_associations[ side ].values() ) > 1 ) and len( labels[ side ] ) > 1: # Only if an entity can be assigned to several
-            define_mutual_exclusion: bool = st.checkbox( f"Is there groups of { entities_types[ side ] } who can't be assigned to the same { entities_types[ 1 - side ] }" )
+    for side in range( 2 ):  # Left then right
+        if ( max_associations[ side ] is None or max( max_associations[ side ].values() )
+             > 1 ) and len( labels[ side ] ) > 1:  # Only if an entity can be assigned to several
+            define_mutual_exclusion: bool = st.checkbox(
+                f"Is there groups of { entities_types[ side ] } who can't be assigned to the same { entities_types[ 1 - side ] }"
+            )
             if define_mutual_exclusion:
-                nb_groups: int = st.number_input(
-                    f"How many group of { entities_types[ side ] } ?",
-                    min_value = 1 )
+                nb_groups: int = st.number_input( f"How many group of { entities_types[ side ] } ?", min_value=1 )
 
                 mutual_exclusion[ side ] = [ [] for _ in range( nb_groups ) ]
                 for group in range( nb_groups ):
                     nb_entities: int = st.number_input(
                         f"How many { entities_types[ side ] } are conserned for the group { group + 1 } ?",
-                        min_value = 2,
+                        min_value=2,
                     )
                     mutual_exclusion[ side ][ group ] = [ None for _ in range( nb_entities ) ]
                     exclusion_cols = st.columns( nb_entities )
@@ -51,12 +53,12 @@ def logicals_constraints( state ) -> None:
     state.right_mutual_exclusions = tuple( mutual_exclusion[ 1 ] ) if mutual_exclusion[ 1 ] is not None else None
 
     state.implications = None
-    use_implications: bool = st.checkbox( "Is there assignments implie other ?")
+    use_implications: bool = st.checkbox( "Is there assignments implie other ?" )
     if use_implications:
         state.implications = {}
         nb_assignments_with_implications: int = st.number_input(
             "How many assignments implies others ?",
-            min_value = 1,
+            min_value=1,
         )
         for assignment_with_implications in range( nb_assignments_with_implications ):
             st.subheader( f"Rules for the assignment number { assignment_with_implications }" )
@@ -79,7 +81,7 @@ def logicals_constraints( state ) -> None:
 
             nb_implies_assignments: int = st.number_input(
                 f"How many assignments implies the assignment { assignment_with_implications } { assignment_with_implications_labels }",
-                min_value = 1,
+                min_value=1,
             )
             list_implies_assignments = []
             for implies_assignment in range( nb_implies_assignments ):
@@ -98,7 +100,9 @@ def logicals_constraints( state ) -> None:
                 implies_assignment_cols = st.columns( nb_implies_assignment_cols )
                 for param, implies_assignment_col in enumerate( implies_assignment_cols ):
                     with implies_assignment_col:
-                        if param == 0 or ( param == 1 and set_right_label ): # Left and right labels of the implies assignment
+                        if param == 0 or (
+                            param == 1 and set_right_label
+                        ):  # Left and right labels of the implies assignment
                             if len( labels[ param ] ) > 1:
                                 implies_assignment_parameters[ param ] = st.selectbox(
                                     f"Selecte the { entities_types[ param ] } of the assignment { assignment_with_implications } { assignment_with_implications_labels } implie's assignment number { implies_assignment }",
@@ -106,13 +110,13 @@ def logicals_constraints( state ) -> None:
                                 )
                             else:
                                 implies_assignment_parameters[ param ] = labels[ param ][ 0 ]
-                        elif param >= 1: # The number of assignments implies
+                        elif param >= 1:  # The number of assignments implies
                             implies_assignment_parameters[ param ] = st.number_input(
                                 f"Set the number of { implies_assignment_parameters[ :2 ] } assignment implis by the { assignment_with_implications_labels } assignment.",
-                                min_value = 1.,
+                                min_value=1.,
                             )
 
-                list_implies_assignments.append( tuple( implies_assignment_parameters ))
+                list_implies_assignments.append( tuple( implies_assignment_parameters ) )
 
             state.implications[ tuple( assignment_with_implications_labels ) ] = tuple( list_implies_assignments )
     else:

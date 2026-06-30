@@ -3,11 +3,10 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from typing import Optional
 
-from domain.objective import Objective
-from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.score.matching_penalty_functions import PenaltyFunctions
+from domain.assignment.score.matching_reward_functions import RewardFunctions
+from domain.objective import Objective
 
 
 @dataclass
@@ -48,5 +47,5 @@ class MatchingConfig:
     penalty_function: PenaltyFunctions = PenaltyFunctions.NONE
 
     # Constraints
-    max_vals: Optional[ dict[ tuple[ str, str ], float ] ] = None
-    min_vals: Optional[ dict[ tuple[ str, str ], float ] ] = None
+    max_vals: dict[ tuple[ str, str ], float ] | None = None
+    min_vals: dict[ tuple[ str, str ], float ] | None = None

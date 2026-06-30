@@ -3,8 +3,10 @@
 # SPDX-FileContributor: Romain Baville
 
 import math
+from collections.abc import Callable
 from enum import Enum
-from typing_extensions import Self, Callable
+from typing import Self
+
 
 def no_penalty( left_val: float, right_val: float ) -> float:
     return 0.
@@ -25,11 +27,11 @@ def score_relative_shortfall( left_val: float, right_val: float ) -> float:
 
 
 def score_squared_diff( left_val: float, right_val: float ) -> float:
-    return -( left_val - right_val ) ** 2
+    return -( left_val - right_val )**2
 
 
 def score_shortfall_squared( left_val: float, right_val: float ) -> float:
-    return -( max( 0., right_val - left_val ) ** 2 )
+    return -( max( 0., right_val - left_val )**2 )
 
 
 def score_overqualification( left_val: float, right_val: float ) -> float:

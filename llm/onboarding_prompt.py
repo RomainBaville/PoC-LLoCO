@@ -2,8 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-"""
-LLM onboarding prompt builder.
+"""LLM onboarding prompt builder.
 
 Explains how the optimization platform works based entirely on registries
 (problem families, assignment types, variants, and solvers).
@@ -13,10 +12,8 @@ from llm.onboarding_context import build_onboarding_context
 
 
 def build_onboarding_prompt(user_description: str) -> str:
+    """Build a generic AI onboarding explanation aligned with platform registries.
     """
-    Build a generic AI onboarding explanation aligned with platform registries.
-    """
-
     context = build_onboarding_context()
     reward_text = ", ".join( context.get( "reward_functions", [] ) )
     penalty_text = ", ".join( context.get( "penalty_functions", [] ) )

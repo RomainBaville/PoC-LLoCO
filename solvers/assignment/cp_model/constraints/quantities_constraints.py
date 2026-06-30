@@ -2,9 +2,11 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from ortools.sat.python.cp_model import CpModel, IntVar
+
 from domain.assignment.base import AssignmentProblem
 from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
-from ortools.sat.python.cp_model import CpModel, IntVar
+
 
 def apply_quantities_constraints(
     model: CpModel,
@@ -19,88 +21,76 @@ def apply_quantities_constraints(
             for left_label in problem.left_labels:
                 max_right_entities: int = int( quantities_constraints.max_right_entities[ left_label ] )
                 model.add(
-                    sum(
-                        assignment_variable[ left_label, right_label ] for right_label in problem.right_labels
-                    ) <= max_right_entities
+                    sum( assignment_variable[ left_label, right_label ]
+                         for right_label in problem.right_labels ) <= max_right_entities
                 )
 
         if quantities_constraints.min_right_entities is not None:
             for left_label in problem.left_labels:
                 min_right_entities: int = int( quantities_constraints.min_right_entities[ left_label ] )
                 model.add(
-                    sum(
-                        assignment_variable[ left_label, right_label ] for right_label in problem.right_labels
-                    ) >= min_right_entities
+                    sum( assignment_variable[ left_label, right_label ]
+                         for right_label in problem.right_labels ) >= min_right_entities
                 )
 
         if quantities_constraints.max_left_entities is not None:
             for right_label in problem.right_labels:
                 max_left_entities: int = int( quantities_constraints.max_left_entities[ right_label ] )
                 model.add(
-                    sum(
-                        assignment_variable[ left_label, right_label ] for left_label in problem.left_labels
-                    ) <= max_left_entities
+                    sum( assignment_variable[ left_label, right_label ]
+                         for left_label in problem.left_labels ) <= max_left_entities
                 )
 
         if quantities_constraints.min_left_entities is not None:
             for right_label in problem.right_labels:
                 min_left_entities: int = int( quantities_constraints.min_left_entities[ right_label ] )
                 model.add(
-                    sum(
-                        assignment_variable[ left_label, right_label ] for left_label in problem.left_labels
-                    ) >= min_left_entities
+                    sum( assignment_variable[ left_label, right_label ]
+                         for left_label in problem.left_labels ) >= min_left_entities
                 )
 
         if quantities_constraints.multiple_same_assignment:
             if quantities_constraints.max_same_assignments is not None:
-                for ( left_label, right_label ), max_same_assignments in quantities_constraints.max_same_assignments.items():
-                    model.add(
-                        quantities_variable[ left_label, right_label ] <= int( max_same_assignments )
-                    )
+                for ( left_label,
+                      right_label ), max_same_assignments in quantities_constraints.max_same_assignments.items():
+                    model.add( quantities_variable[ left_label, right_label ] <= int( max_same_assignments ) )
 
             if quantities_constraints.min_same_assignments is not None:
-                for ( left_label, right_label ), min_same_assignments in quantities_constraints.min_same_assignments.items():
-                    model.add(
-                        quantities_variable[ left_label, right_label ] >= int( min_same_assignments )
-                    )
+                for ( left_label,
+                      right_label ), min_same_assignments in quantities_constraints.min_same_assignments.items():
+                    model.add( quantities_variable[ left_label, right_label ] >= int( min_same_assignments ) )
 
             if quantities_constraints.max_assignments is not None:
                 for left_label in problem.left_labels:
                     max_assignments: int = int( quantities_constraints.max_assignments[ left_label ] )
                     model.add(
-                        sum(
-                            quantities_variable[ left_label, right_label ] for right_label in problem.right_labels
-                        ) <= max_assignments
+                        sum( quantities_variable[ left_label, right_label ]
+                             for right_label in problem.right_labels ) <= max_assignments
                     )
 
             if quantities_constraints.min_assignments is not None:
                 for left_label in problem.left_labels:
                     min_assignments: int = int( quantities_constraints.min_assignments[ left_label ] )
                     model.add(
-                        sum(
-                            quantities_variable[ left_label, right_label ] for right_label in problem.right_labels
-                        ) >= min_assignments
+                        sum( quantities_variable[ left_label, right_label ]
+                             for right_label in problem.right_labels ) >= min_assignments
                     )
 
             if quantities_constraints.max_capacities is not None:
                 for right_label in problem.right_labels:
                     max_capacities: int = int( quantities_constraints.max_capacities[ right_label ] )
                     model.add(
-                        sum(
-                            quantities_variable[ left_label, right_label ] for left_label in problem.left_labels
-                        ) <= max_capacities
+                        sum( quantities_variable[ left_label, right_label ]
+                             for left_label in problem.left_labels ) <= max_capacities
                     )
 
             if quantities_constraints.min_capacities is not None:
                 for right_label in problem.right_labels:
                     min_capacities: int = int( quantities_constraints.min_capacities[ right_label ] )
                     model.add(
-                        sum(
-                            quantities_variable[ left_label, right_label ] for left_label in problem.left_labels
-                        ) >= min_capacities
+                        sum( quantities_variable[ left_label, right_label ]
+                             for left_label in problem.left_labels ) >= min_capacities
                     )
         else:
             for left_label, right_label in quantities_variable:
-                model.add(
-                    quantities_variable[ left_label, right_label ] <= 1
-                )
+                model.add( quantities_variable[ left_label, right_label ] <= 1 )

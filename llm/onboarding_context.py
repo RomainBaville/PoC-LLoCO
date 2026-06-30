@@ -5,18 +5,17 @@
 
 from importlib import import_module
 
-from ui.registry import PROBLEM_REGISTRY
+from domain.assignment.skills.skills_reward_functions import PENALTY_FUNCTIONS, REWARD_FUNCTIONS
 from ui.assignment.registry import ASSIGNMENT_TYPES
+
 from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
-from domain.assignment.skills.skills_reward_functions import REWARD_FUNCTIONS, PENALTY_FUNCTIONS
+from ui.registry import PROBLEM_REGISTRY
 
 
 def build_onboarding_context() -> dict:
-    """
-    Build a structured description of platform capabilities
+    """Build a structured description of platform capabilities
     based on registries.
     """
-
     problems = [
         {"key": p.key, "label": p.label}
         for p in PROBLEM_REGISTRY.values()

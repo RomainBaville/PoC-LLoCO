@@ -3,16 +3,15 @@
 # SPDX-FileContributor: Romain Baville
 
 import csv
-from infrastructure.base_loader import DataLoader
-
-import csv
 from typing import IO
 
-class CSVLoader(DataLoader):
+from infrastructure.base_loader import DataLoader
 
-    def load(self, source: str | IO ):
-        """
-        Load CSV from a file path or a file-like object (e.g. Streamlit upload).
+
+class CSVLoader( DataLoader ):
+
+    def load( self, source: str | IO ):
+        """Load CSV from a file path or a file-like object (e.g. Streamlit upload).
 
         Args:
             source: file path (str) or file-like object
@@ -24,7 +23,7 @@ class CSVLoader(DataLoader):
         try:
             # Case 1: file path
             if isinstance( source, str ):
-                with open( source, newline = "", encoding = "utf-8" ) as f:
+                with open( source, newline="", encoding="utf-8" ) as f:
                     reader = csv.DictReader( f )
                     columns = reader.fieldnames or []
                     rows = list( reader )

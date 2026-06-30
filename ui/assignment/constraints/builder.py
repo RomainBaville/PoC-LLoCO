@@ -2,8 +2,6 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from typing import Optional
-
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.constraints.logicals_constraints import LogicalsConstraints
 from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
@@ -12,8 +10,8 @@ from domain.assignment.constraints.quantities_constraints import QuantitiesConst
 def build_quantities_constraints(
     entity_col_label: str,
     entity_rows: tuple[ dict[ str, str ], ...],
-    quantities_constraints_col_label: Optional[ str ] = None,
-    quantities_constraints_val: Optional[ float ] = None,
+    quantities_constraints_col_label: str | None = None,
+    quantities_constraints_val: float | None = None,
 ) -> dict[ str, float ]:
     """Builder of the constraints of the quantities constraints of an assignment problem from a column of a csv file are a single float.
 
@@ -32,7 +30,8 @@ def build_quantities_constraints(
         if quantities_constraints_col_label is None and quantities_constraints_val is not None:
             quantities_constraints[ entity_row[ entity_col_label ] ] = quantities_constraints_val
         elif quantities_constraints_val is None and quantities_constraints_col_label is not None:
-            quantities_constraints[ entity_row[ entity_col_label ] ] = float( entity_row[ quantities_constraints_col_label ] )
+            quantities_constraints[ entity_row[ entity_col_label ]
+                                   ] = float( entity_row[ quantities_constraints_col_label ] )
 
     return quantities_constraints
 
@@ -46,35 +45,35 @@ def build_constraints_config( state ) -> ConstraintsConfig:
     Returns:
         ConstraintsConfig: The configuration of the constraints of the assignment problem
     """
-    logicals_constraints: Optional[ LogicalsConstraints ] = None
+    logicals_constraints: LogicalsConstraints | None = None
     if state.use_logicals_constraints:
         logicals_constraints = LogicalsConstraints(
-            left_mutual_exclusions = state.left_mutual_exclusions,
-            right_mutual_exclusions = state.right_mutual_exclusions,
-            implications = state.implications,
+            left_mutual_exclusions=state.left_mutual_exclusions,
+            right_mutual_exclusions=state.right_mutual_exclusions,
+            implications=state.implications,
         )
 
-    quantities_constraints: Optional[ QuantitiesConstraints ] = None
+    quantities_constraints: QuantitiesConstraints | None = None
     if state.use_quantities_constraints:
         quantities_constraints = QuantitiesConstraints(
-            max_right_entities = state.max_right_entities,
-            min_right_entities = state.min_right_entities,
-            max_left_entities = state.max_left_entities,
-            min_left_entities = state.min_left_entities,
-            multiple_same_assignment = state.multiple_same_assignment,
-            max_same_assignments = state.max_same_assignments,
-            min_same_assignments = state.min_same_assignments,
-            max_right_assignments = state.max_right_assignments,
-            min_right_assignments = state.min_right_assignments,
-            max_left_assignments = state.max_left_assignments,
-            min_left_assignments = state.min_left_assignments,
+            max_right_entities=state.max_right_entities,
+            min_right_entities=state.min_right_entities,
+            max_left_entities=state.max_left_entities,
+            min_left_entities=state.min_left_entities,
+            multiple_same_assignment=state.multiple_same_assignment,
+            max_same_assignments=state.max_same_assignments,
+            min_same_assignments=state.min_same_assignments,
+            max_right_assignments=state.max_right_assignments,
+            min_right_assignments=state.min_right_assignments,
+            max_left_assignments=state.max_left_assignments,
+            min_left_assignments=state.min_left_assignments,
         )
 
     constraints_config: ConstraintsConfig = ConstraintsConfig(
-        use_logicals_constraints = state.use_logicals_constraints,
-        logicals_constraints = logicals_constraints,
-        use_quantities_constraints = state.use_quantities_constraints,
-        quantities_constraints = quantities_constraints,
+        use_logicals_constraints=state.use_logicals_constraints,
+        logicals_constraints=logicals_constraints,
+        use_quantities_constraints=state.use_quantities_constraints,
+        quantities_constraints=quantities_constraints,
     )
 
     return constraints_config

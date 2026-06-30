@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Dict
 
 from infrastructure.csv_loader import CSVLoader
 
@@ -16,9 +16,9 @@ class DataSourceDefinition:
     loader_factory: Callable
 
 
-DATA_SOURCE_REGISTRY: Dict[str, DataSourceDefinition] = {
-
-    "csv_two_tables": DataSourceDefinition(
+DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
+    "csv_two_tables":
+    DataSourceDefinition(
         key="csv_two_tables",
         label="Two CSV files (entities + requirements)",
         description=(

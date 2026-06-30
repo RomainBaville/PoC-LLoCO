@@ -3,7 +3,8 @@
 # SPDX-FileContributor: Romain Baville
 
 from enum import Enum
-from typing_extensions import Self
+from typing import Self
+
 
 class Objective( Enum ):
     """Enum for objective functions."""

@@ -3,26 +3,22 @@
 # SPDX-FileContributor: Romain Baville
 
 import streamlit as st
-from importlib import import_module
 
+from infrastructure.registry import DATA_SOURCE_REGISTRY
+
+# from llm.session_model import OptimizationSession
+from solvers.assignment.registry import SOLVERS
+from ui.assignment.builder import build_entities_labels, build_problem
+from ui.assignment.constraints.ui_logicals_constraints import logicals_constraints
+from ui.assignment.constraints.ui_quantities_constraints import quantities_constraints
+from ui.assignment.score.ui_matching import map_matching, matching_constraints, matching_strategy
+from ui.assignment.score.ui_ressources import map_ressources, ressources_constraints, ressources_strategy
 from ui.utils import (
     navigation_buttons,
     # generate_ai_summary,
     # describe_data_source,
     # build_results_zip,
 )
-from infrastructure.registry import DATA_SOURCE_REGISTRY
-
-# from llm.session_model import OptimizationSession
-from solvers.assignment.registry import SOLVERS
-
-from ui.assignment.score.ui_matching import map_matching, matching_strategy, matching_constraints
-from ui.assignment.score.ui_ressources import map_ressources, ressources_strategy, ressources_constraints
-
-from ui.assignment.constraints.ui_quantities_constraints import quantities_constraints
-from ui.assignment.constraints.ui_logicals_constraints import logicals_constraints
-
-from ui.assignment.builder import build_entities_labels, build_problem
 
 DATA_DIR = "data"
 
@@ -34,12 +30,8 @@ def render( state ):
     if state.step == 1:
         st.header( "Define your left and right entities types" )
 
-        state.left_entities_type = st.text_input(
-            "Set the type of the left entity (e.g. Candidates)", "Candidates"
-        )
-        state.right_entities_type = st.text_input(
-            "Set the type of the right entity (e.g. Targets)", "Targets"
-        )
+        state.left_entities_type = st.text_input( "Set the type of the left entity (e.g. Candidates)", "Candidates" )
+        state.right_entities_type = st.text_input( "Set the type of the right entity (e.g. Targets)", "Targets" )
 
         navigation_buttons()
         st.stop()
@@ -48,11 +40,17 @@ def render( state ):
     # STEP 2 — Score parameters
     # ==================================================
     if state.step == 2:
-        st.header( f"How to compute the score to associate { state.left_entities_type} and { state.right_entities_type }" )
+        st.header(
+            f"How to compute the score to associate { state.left_entities_type} and { state.right_entities_type }"
+        )
 
-        state.use_matching = st.checkbox( "Use a scoring optimization involving a score computation from a matching between left and right variables sharing the same label (e.g. python_level, english_level, ...)" )
+        state.use_matching = st.checkbox(
+            "Use a scoring optimization involving a score computation from a matching between left and right variables sharing the same label (e.g. python_level, english_level, ...)"
+        )
 
-        state.use_ressources = st.checkbox( "Use a scoring optimization involving a score computation from an addition of the left entities ressources (e.g. Salary, years_of_experiances, ...)" )
+        state.use_ressources = st.checkbox(
+            "Use a scoring optimization involving a score computation from an addition of the left entities ressources (e.g. Salary, years_of_experiances, ...)"
+        )
 
         navigation_buttons()
         st.stop()
@@ -61,30 +59,22 @@ def render( state ):
     # STEP 3 — Data source
     # ==================================================
     if state.step == 3:
-        st.header("Choose your data format")
+        st.header( "Choose your data format" )
 
         for ds in DATA_SOURCE_REGISTRY.values():
-            if st.button(ds.label):
+            if st.button( ds.label ):
                 state.data_source = ds.key
 
-            st.caption(ds.description)
+            st.caption( ds.description )
 
         if state.data_source == "csv_two_tables":
             st.subheader( "Upload CSV files" )
 
-            left_file = st.file_uploader(
-                f"{ state.left_entities_type } dataset",
-                type = [ "csv" ],
-                key = "left_csv"
-            )
+            left_file = st.file_uploader( f"{ state.left_entities_type } dataset", type=[ "csv" ], key="left_csv" )
 
-            right_file = st.file_uploader(
-                f"{ state.right_entities_type } dataset",
-                type = [ "csv" ],
-                key = "right_csv"
-            )
+            right_file = st.file_uploader( f"{ state.right_entities_type } dataset", type=[ "csv" ], key="right_csv" )
 
-            loader = DATA_SOURCE_REGISTRY[state.data_source].loader_factory()
+            loader = DATA_SOURCE_REGISTRY[ state.data_source ].loader_factory()
 
             if left_file and right_file:
                 state.left_cols, state.left_rows = loader.load( left_file )
@@ -93,7 +83,7 @@ def render( state ):
                 navigation_buttons()
                 st.stop()
 
-        navigation_buttons(show_next=False)
+        navigation_buttons( show_next=False )
 
     # ==================================================
     # STEP 4 — Mapping
@@ -104,16 +94,14 @@ def render( state ):
         # -----------------------------
         # 1. Entities
         # -----------------------------
-        st.subheader( f"1. Identify entities" )
+        st.subheader( "1. Identify entities" )
 
         state.left_entities_col_label = st.selectbox(
-            f"Columns identifying { state.left_entities_type }",
-            state.left_cols
+            f"Columns identifying { state.left_entities_type }", state.left_cols
         )
 
         state.right_entities_col_label = st.selectbox(
-            f"Column identifying { state.right_entities_type }",
-            state.right_cols
+            f"Column identifying { state.right_entities_type }", state.right_cols
         )
 
         state.left_labels = build_entities_labels( state.left_entities_col_label, state.left_rows )
@@ -122,7 +110,7 @@ def render( state ):
         # -----------------------------
         # 2. Scoring variables
         # -----------------------------
-        st.subheader( f"2. Identify scoring variables" )
+        st.subheader( "2. Identify scoring variables" )
         if state.use_matching:
             map_matching( state )
 
@@ -158,8 +146,12 @@ def render( state ):
         # -----------------------------
         st.subheader( "1. Assignment constraints" )
 
-        state.use_quantities_constraints = st.checkbox( "Is there quantities constraints in the problem (e.g. max number of employees per project)" )
-        state.use_logicals_constraints = st.checkbox( "Is there logicals constraints in the problem (e.g. if employee A is assigned to project I then employee B is assigned to project II)" )
+        state.use_quantities_constraints = st.checkbox(
+            "Is there quantities constraints in the problem (e.g. max number of employees per project)"
+        )
+        state.use_logicals_constraints = st.checkbox(
+            "Is there logicals constraints in the problem (e.g. if employee A is assigned to project I then employee B is assigned to project II)"
+        )
 
         if state.use_quantities_constraints:
             quantities_constraints( state )

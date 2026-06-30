@@ -2,9 +2,10 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from typing_extensions import Self
-from domain.assignment.score.score_config import ScoreConfig
+from typing import Self
+
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
+from domain.assignment.score.score_config import ScoreConfig
 
 
 class AssignmentProblem:
@@ -26,7 +27,7 @@ class AssignmentProblem:
             constraints_config (ConstraintsConfig): The configuration of the constraints of the assignment problem.
         """
         self.left_labels: tuple[ str, ...] = left_labels
-        self.right_labels: tuple[ str, ... ] = right_labels
+        self.right_labels: tuple[ str, ...] = right_labels
         self.score_config: ScoreConfig = score_config
         self.constraints_config: ConstraintsConfig = constraints_config
 
@@ -55,7 +56,7 @@ class AssignmentProblem:
                 reward: float = self.score_config.matching_config.reward_function( left_val, right_val )
                 penalty: float = self.score_config.matching_config.penalty_function( left_val, right_val )
 
-                matching_score +=  matching_objective * matching_weight * ( reward + penalty )
+                matching_score += matching_objective * matching_weight * ( reward + penalty )
 
         return matching_score
 

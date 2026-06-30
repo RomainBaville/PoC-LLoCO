@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing_extensions import Callable
 
 from ui.assignment.ui_assignment import render
 
@@ -17,7 +17,8 @@ class ProblemType:
 
 
 PROBLEM_REGISTRY: dict[ str, ProblemType ] = {
-    "assignment": ProblemType(
+    "assignment":
+    ProblemType(
         key="assignment",
         label="Assignment problem",
         description="Assignments problem between left and right entities",

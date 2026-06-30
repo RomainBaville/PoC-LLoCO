@@ -2,8 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-"""
-LLM client.
+"""LLM client.
 
 Implements the same philosophy as the original ask_openai_request:
 - one function
@@ -15,8 +14,8 @@ This version uses a local Qwen GGUF model via llama-server.
 """
 
 import os
-import requests
 
+import requests
 
 # --------------------------------------------------
 # Configuration
@@ -38,10 +37,8 @@ LLM_MODEL_NAME = os.getenv(
 # --------------------------------------------------
 
 def ask_llm_request(prompt: str) -> str:
+    """Send a prompt to the local LLM and return the response text.
     """
-    Send a prompt to the local LLM and return the response text.
-    """
-
     payload = {
         "model": LLM_MODEL_NAME,
         "messages": [

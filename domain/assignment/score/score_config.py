@@ -3,10 +3,10 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from typing import Optional
 
 from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.ressources_config import RessourcesConfig
+
 
 @dataclass
 class ScoreConfig:
@@ -22,7 +22,7 @@ class ScoreConfig:
 
     """
     use_matching: bool = False
-    matching_config: Optional[ MatchingConfig ] = None
+    matching_config: MatchingConfig | None = None
 
     use_ressources: bool = False
-    ressources_config: Optional[ RessourcesConfig ] = None
+    ressources_config: RessourcesConfig | None = None

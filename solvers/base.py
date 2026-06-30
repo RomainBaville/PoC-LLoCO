@@ -5,7 +5,8 @@
 from abc import ABC, abstractmethod
 
 
-class Solver(ABC):
+class Solver( ABC ):
+
     @abstractmethod
-    def solve(self, problem):
+    def solve( self, problem ):
         ...

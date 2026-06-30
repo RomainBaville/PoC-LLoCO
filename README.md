@@ -153,10 +153,11 @@ PoC-LLoCO/
 │   ├── onboarding_context.py
 │   └── onboarding_prompt.py
 │
-├── README.md
 ├── .pre-commit-config.yaml
 ├── project.toml
+├── uv.lock
 │
+├── README.md
 └── run_app.bat
 ```
 
@@ -324,9 +325,9 @@ CI runs automatically on:
 
 It verifies:
 
-- ✅ lint
-- ✅ typing
-- ✅ tests
+- lint
+- typing
+- tests
 
 ---
 
@@ -386,7 +387,7 @@ uv sync --extra dev --frozen
 uv run pytest
 uv run ruff check .
 uv run mypy .
-uv run yapf -r -i .
+uv run yapf -r -i domain solvers infrastructure ui tests
 
 uv run pre-commit run --all-files
 ```

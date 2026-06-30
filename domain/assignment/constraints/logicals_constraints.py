@@ -3,7 +3,7 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from typing import Optional
+
 
 @dataclass
 class LogicalsConstraints:
@@ -16,6 +16,6 @@ class LogicalsConstraints:
             - keys (tuple[str, str]): The left and right entity labels of the association with an implication.
             - values (tuple[tuple[str, str, float], ...]]): The left and rigth labels of the implicated association with the number of forced associations.
     """
-    left_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None
-    right_mutual_exclusions: Optional[ tuple[ tuple[ str, ...], ...] ] = None
-    implications: Optional[ dict[ tuple[ str, str ], tuple[ tuple[ str, str, float ], ...] ] ] = None
+    left_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = None
+    right_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = None
+    implications: dict[ tuple[ str, str ], tuple[ tuple[ str, str, float ], ...] ] | None = None

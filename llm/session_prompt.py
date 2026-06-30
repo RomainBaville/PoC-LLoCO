@@ -6,10 +6,8 @@ from llm.session_model import OptimizationSession
 
 
 def build_session_summary_prompt(session: OptimizationSession) -> str:
+    """Build a generic, solver-aware explanation prompt.
     """
-    Build a generic, solver-aware explanation prompt.
-    """
-
     steps_text = "\n".join(
         f"{i + 1}. {step}" for i, step in enumerate(session.steps)
     )

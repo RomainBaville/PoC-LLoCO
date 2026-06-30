@@ -3,13 +3,11 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
 
 
 @dataclass
 class OptimizationSession:
-    """
-    Structured representation of a complete optimization run.
+    """Structured representation of a complete optimization run.
     Passed to the LLM prompt builder.
     """
 
@@ -19,7 +17,7 @@ class OptimizationSession:
     problem_variant: str          # e.g. "Coverage"
 
     # Workflow trace
-    steps: List[str]
+    steps: list[str]
 
     # Data
     data_description: str
@@ -31,7 +29,7 @@ class OptimizationSession:
     result_summary: str
 
     # Optional
-    config_summary: Optional[str] = None
-    solver_family: Optional[str] = None
-    solver_description: Optional[str] = None
-    result_details: Dict[str, str] = field(default_factory=dict)
+    config_summary: str | None = None
+    solver_family: str | None = None
+    solver_description: str | None = None
+    result_details: dict[str, str] = field(default_factory=dict)

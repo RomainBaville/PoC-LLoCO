@@ -3,9 +3,9 @@
 # SPDX-FileContributor: Romain Baville
 
 from domain.assignment.base import AssignmentProblem
-
-from ui.assignment.score.builder import build_score_config
 from ui.assignment.constraints.builder import build_constraints_config
+from ui.assignment.score.builder import build_score_config
+
 
 def build_entities_labels(
     entity_col_label: str,
@@ -20,7 +20,7 @@ def build_entities_labels(
 
 def build_vals(
     entity_col_label: str,
-    variables_labels: tuple[ str, ... ] | dict[ str, str ],
+    variables_labels: tuple[ str, ...] | dict[ str, str ],
     entity_rows: tuple[ dict[ str, str ], ...],
 ) -> dict[ tuple[ str, str ], float ]:
     vals: dict[ tuple[ str, str ], float ] = {}
@@ -44,15 +44,14 @@ def build_problem( state ) -> AssignmentProblem:
     Args:
         state (): ...
 
-    Returns
+    Returns:
         AssignmentProblem: The assignment problem.
     """
-
     problem: AssignmentProblem = AssignmentProblem(
-        left_labels = state.left_labels,
-        right_labels = state.right_labels,
-        score_config = build_score_config( state ),
-        constraints_config = build_constraints_config( state ),
+        left_labels=state.left_labels,
+        right_labels=state.right_labels,
+        score_config=build_score_config( state ),
+        constraints_config=build_constraints_config( state ),
     )
 
     return problem

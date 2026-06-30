@@ -2,15 +2,13 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from domain.objective import Objective
 from domain.assignment.base import AssignmentProblem
-from domain.assignment.score.score_config import ScoreConfig
-from domain.assignment.score.matching_config import MatchingConfig
-from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
-
-
+from domain.assignment.score.matching_config import MatchingConfig
+from domain.assignment.score.matching_reward_functions import RewardFunctions
+from domain.assignment.score.score_config import ScoreConfig
+from domain.objective import Objective
 """Problem description:
 We need to determine 4 out of 5 workers to complete one of the four tasks respectively. Due to each worker's different technical specialties, the time required for them to complete each task varies. The hours required by each worker to complete each task are shown in Table 5-2.
 Table 5-2
@@ -81,17 +79,17 @@ weights: dict[ str, float ] = {
 reward_function: RewardFunctions = RewardFunctions.PRODUCT
 
 matching_config: MatchingConfig = MatchingConfig(
-    labels = labels,
-    left_vals = left_vals,
-    right_vals = right_vals,
-    objective = objective,
-    weights = weights,
-    reward_function = reward_function,
+    labels=labels,
+    left_vals=left_vals,
+    right_vals=right_vals,
+    objective=objective,
+    weights=weights,
+    reward_function=reward_function,
 )
 
 score_config: ScoreConfig = ScoreConfig(
-    use_matching = True,
-    matching_config = matching_config,
+    use_matching=True,
+    matching_config=matching_config,
 )
 
 max_right_entities: dict[ str, float ] = {
@@ -117,21 +115,21 @@ min_left_entities: dict[ str, float ] = {
 }
 
 quantities_constraints: QuantitiesConstraints = QuantitiesConstraints(
-    max_right_entities = max_right_entities,
-    max_left_entities = max_left_entities,
-    min_left_entities = min_left_entities,
+    max_right_entities=max_right_entities,
+    max_left_entities=max_left_entities,
+    min_left_entities=min_left_entities,
 )
 
 constraints_config: ConstraintsConfig = ConstraintsConfig(
-    use_quantities_constraints = True,
-    quantities_constraints = quantities_constraints,
+    use_quantities_constraints=True,
+    quantities_constraints=quantities_constraints,
 )
 
 problem_08: AssignmentProblem = AssignmentProblem(
-    left_labels = left_labels,
-    right_labels = right_labels,
-    score_config = score_config,
-    constraints_config = constraints_config,
+    left_labels=left_labels,
+    right_labels=right_labels,
+    score_config=score_config,
+    constraints_config=constraints_config,
 )
 
 solution_08: dict[ str, list[ tuple[ str, int ] ] ] = {
