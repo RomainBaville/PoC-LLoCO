@@ -1,4 +1,0 @@
-ortools>=9.6
-streamlit>=1.30
-requests
-pytest

@@ -1,0 +1,144 @@
+# =========================================================
+# PROJECT METADATA
+# =========================================================
+[project]
+name = "poc-lloco"
+version = "0.1.0"
+requires-python = ">=3.14"
+
+dependencies = []
+
+
+# =========================================================
+# DEV DEPENDENCIES
+# =========================================================
+[project.optional-dependencies]
+dev = [
+    "ortools" >= 9.6,
+    "streamlit" >= 1.30,
+    "requests",
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "yapf",
+    "pre-commit"
+]
+
+
+# =========================================================
+# PYTEST CONFIGURATION
+# =========================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v"
+
+
+# =========================================================
+# RUFF CONFIGURATION (LINTER ONLY — NO AUTO FORMAT)
+# =========================================================
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+# Files & folders excluded from analysis
+exclude = [
+    "models",
+    "llama_cpp",
+    ".github",
+    "__pycache__",
+    ".git",
+    ".venv"
+]
+
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "D",
+    "UP",
+    "B",
+    "SIM",
+    "C4",
+    "ERA",
+]
+
+ignore = [
+    # docstring relax
+    "D100",
+    "D104",
+    "D203",
+    "D213",
+
+    # preserve spacing style
+    "E201",
+    "E202",
+    "E203",
+    "E211",
+    "E221",
+    "E222",
+    "E224",
+
+    # readability preference
+    "SIM108",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+# =========================================================
+# MYPY (STRICT MODE)
+# =========================================================
+[tool.mypy]
+python_version = "3.14"
+strict = True
+ignore_missing_imports = True
+
+exclude = [
+    "models/",
+    "llama_cpp/",
+    ".github/",
+]
+
+# Extra useful strictness flags
+warn_return_any = True
+warn_unused_configs = True
+disallow_untyped_defs = True
+check_untyped_defs = True
+no_implicit_optional = True
+
+
+# =========================================================
+# YAPF (CUSTOM STYLE WITH SPACES)
+# =========================================================
+[tool.yapf]
+based_on_style = pep8
+column_limit = 120
+
+
+# Allow spaces inside brackets:
+# Example:
+# tuple[ str, ... ]
+spaces_inside_brackets = True
+
+# Keep spaces between comma and closing bracket
+space_between_ending_comma_and_closing_bracket = True
+
+# Avoid collapsing brackets into one line
+coalesce_brackets = False
+
+# Keep closing bracket indentation readable
+dedent_closing_brackets = False
+
+# Allow splitting after opening parenthesis
+split_before_expression_after_opening_paren = True
+
+# Preserve readability in complex expressions
+split_before_named_assigns = True
+
+# Avoid aggressive compaction
+split_complex_comprehension = True
