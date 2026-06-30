@@ -10,6 +10,21 @@ from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
 
+
+"""Problem description:
+We need to determine 4 out of 5 workers to complete one of the four tasks respectively. Due to each worker's different technical specialties, the time required for them to complete each task varies. The hours required by each worker to complete each task are shown in Table 5-2.
+Table 5-2
+| Worker | $A$ | $B$ | $C$ | $D$ |
+|--------|-----|-----|-----|-----|
+| I      | 9   | 4   | 3   | 7   |
+| II     | 4   | 6   | 5   | 6   |
+| III    | 5   | 4   | 7   | 5   |
+| IV     | 7   | 5   | 2   | 3   |
+| V      | 10  | 6   | 7   | 4   |
+
+Try to find a job assignment plan that minimizes the total working hours.
+"""
+
 left_labels: tuple[ str, ...] = ( "I", "II", "III", "IV", "V" )
 right_labels: tuple[ str, ...] = ( "A", "B", "C", "D" )
 

@@ -21,7 +21,7 @@ class RessourcesConfig:
         objectives (dict[str, Objective]): The dictionary with ressources objectives used in the score computation:
             - keys (str): The label of the ressources used used in the score computation.
             - values (Objective): The objective of the ressources (maximize, minimize).
-        weights (Optional[dict[str, float]]): The dictionary with the ressources weights used in the score computation:
+        weights (dict[str, float]): The dictionary with the ressources weights used in the score computation:
             - keys (str): The label of the ressource with a weight.
             - values (float): The value of the weight.
         max_vals (Optional[dict[tuple[str, ...], float]]): The dictionary whit the maximum ressources values accepted per right entities:
@@ -41,7 +41,7 @@ class RessourcesConfig:
     labels: tuple[ str, ...]
     vals: dict[ tuple[ str, str ], float ]
     objectives: dict[ str, Objective ]
-    weights: Optional[ dict[ str, float ] ] = None
+    weights: dict[ str, float ]
 
     # Constraints
     max_vals: Optional[ dict[ tuple[ str, ...], float ] ] = None
