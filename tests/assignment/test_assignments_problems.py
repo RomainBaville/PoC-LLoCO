@@ -6,10 +6,6 @@ from pathlib import Path
 
 import pytest
 
-# --- make project root importable ---
-ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
-sys.path.append( str( ROOT_DIR ) )
-
 from domain.assignment.base import AssignmentProblem
 from solvers.assignment.cp_model.ortools_cp_sat import solve_assignment_problem
 from tests.assignment.problem_00.problem_00 import problem_00, solution_00
@@ -18,6 +14,10 @@ from tests.assignment.problem_10.problem_10 import problem_10, solution_10
 from tests.assignment.problem_19.problem_19 import problem_19, solution_19
 from tests.assignment.problem_55.problem_55 import problem_55, solution_55
 from tests.assignment.problem_84.problem_84 import problem_84, solution_84
+
+# --- make project root importable ---
+ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
+sys.path.append( str( ROOT_DIR ) )
 
 
 @pytest.mark.parametrize(

@@ -36,8 +36,14 @@ LLM_MODEL_NAME = os.getenv(
 # Public API (same idea as ask_openai_request)
 # --------------------------------------------------
 
-def ask_llm_request(prompt: str) -> str:
+def ask_llm_request( prompt: str ) -> str:
     """Send a prompt to the local LLM and return the response text.
+
+    Args:
+        prompt (str): The prompt to give to the llm.
+
+    Returns:
+        str: The llm response.
     """
     payload = {
         "model": LLM_MODEL_NAME,

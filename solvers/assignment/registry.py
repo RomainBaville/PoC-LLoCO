@@ -9,7 +9,15 @@ from solvers.assignment.cp_model.ortools_cp_sat import solve_assignment_problem
 
 
 @dataclass
-class SolverDefinition:
+class AssignmentSolvers:
+    """The dataclass with all the solvers that can be used for an assignment problem.
+
+    Args:
+        key (str): The name of the solver use for the code.
+        label (str): The label of the solver use for the user.
+        description (str): The description of the solver capabilities.
+        solver_fn (Callable): The function to use to solve the problem.
+    """
     key: str
     label: str
     description: str
@@ -18,7 +26,7 @@ class SolverDefinition:
 
 SOLVERS = {
     "ortools_cp_sat":
-    SolverDefinition(
+    AssignmentSolvers(
         key="ortools_cp_sat",
         label="OR-Tools CP-SAT",
         description=( "Constraint Programming solver suitable for assignment problems with configurable behavior." ),

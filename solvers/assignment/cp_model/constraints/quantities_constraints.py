@@ -10,10 +10,18 @@ from domain.assignment.constraints.quantities_constraints import QuantitiesConst
 
 def apply_quantities_constraints(
     model: CpModel,
-    quantities_variable: dict[ tuple[ str, str ], IntVar ],
-    assignment_variable: dict[ tuple[ str, str ], IntVar ],
+    is_assigned: dict[ tuple[ str, str ], IntVar ],
+    quantities: dict[ tuple[ str, str ], IntVar ],
     problem: AssignmentProblem,
 ) -> None:
+    """Add to the model the quantities constraints if needed.
+
+    Args:
+        model (CpModel): The model used.
+        is_assigned (dict[tuple[str, str], IntVar]): The binary variable with 1 for assigned 0 otherwize.
+        quantities (dict[tuple[str, str], IntVar]): The integrable variable with the number of assocciation.
+        problem (AssignmentProblem): The assignment problem.
+    """
     if problem.constraints_config.use_quantities_constraints:
         quantities_constraints: QuantitiesConstraints = problem.constraints_config.quantities_constraints
 
@@ -21,7 +29,7 @@ def apply_quantities_constraints(
             for left_label in problem.left_labels:
                 max_right_entities: int = int( quantities_constraints.max_right_entities[ left_label ] )
                 model.add(
-                    sum( assignment_variable[ left_label, right_label ]
+                    sum( is_assigned[ left_label, right_label ]
                          for right_label in problem.right_labels ) <= max_right_entities
                 )
 
@@ -29,7 +37,7 @@ def apply_quantities_constraints(
             for left_label in problem.left_labels:
                 min_right_entities: int = int( quantities_constraints.min_right_entities[ left_label ] )
                 model.add(
-                    sum( assignment_variable[ left_label, right_label ]
+                    sum( is_assigned[ left_label, right_label ]
                          for right_label in problem.right_labels ) >= min_right_entities
                 )
 
@@ -37,7 +45,7 @@ def apply_quantities_constraints(
             for right_label in problem.right_labels:
                 max_left_entities: int = int( quantities_constraints.max_left_entities[ right_label ] )
                 model.add(
-                    sum( assignment_variable[ left_label, right_label ]
+                    sum( is_assigned[ left_label, right_label ]
                          for left_label in problem.left_labels ) <= max_left_entities
                 )
 
@@ -45,7 +53,7 @@ def apply_quantities_constraints(
             for right_label in problem.right_labels:
                 min_left_entities: int = int( quantities_constraints.min_left_entities[ right_label ] )
                 model.add(
-                    sum( assignment_variable[ left_label, right_label ]
+                    sum( is_assigned[ left_label, right_label ]
                          for left_label in problem.left_labels ) >= min_left_entities
                 )
 
@@ -53,18 +61,18 @@ def apply_quantities_constraints(
             if quantities_constraints.max_same_assignments is not None:
                 for ( left_label,
                       right_label ), max_same_assignments in quantities_constraints.max_same_assignments.items():
-                    model.add( quantities_variable[ left_label, right_label ] <= int( max_same_assignments ) )
+                    model.add( quantities[ left_label, right_label ] <= int( max_same_assignments ) )
 
             if quantities_constraints.min_same_assignments is not None:
                 for ( left_label,
                       right_label ), min_same_assignments in quantities_constraints.min_same_assignments.items():
-                    model.add( quantities_variable[ left_label, right_label ] >= int( min_same_assignments ) )
+                    model.add( quantities[ left_label, right_label ] >= int( min_same_assignments ) )
 
             if quantities_constraints.max_assignments is not None:
                 for left_label in problem.left_labels:
                     max_assignments: int = int( quantities_constraints.max_assignments[ left_label ] )
                     model.add(
-                        sum( quantities_variable[ left_label, right_label ]
+                        sum( quantities[ left_label, right_label ]
                              for right_label in problem.right_labels ) <= max_assignments
                     )
 
@@ -72,7 +80,7 @@ def apply_quantities_constraints(
                 for left_label in problem.left_labels:
                     min_assignments: int = int( quantities_constraints.min_assignments[ left_label ] )
                     model.add(
-                        sum( quantities_variable[ left_label, right_label ]
+                        sum( quantities[ left_label, right_label ]
                              for right_label in problem.right_labels ) >= min_assignments
                     )
 
@@ -80,7 +88,7 @@ def apply_quantities_constraints(
                 for right_label in problem.right_labels:
                     max_capacities: int = int( quantities_constraints.max_capacities[ right_label ] )
                     model.add(
-                        sum( quantities_variable[ left_label, right_label ]
+                        sum( quantities[ left_label, right_label ]
                              for left_label in problem.left_labels ) <= max_capacities
                     )
 
@@ -88,9 +96,9 @@ def apply_quantities_constraints(
                 for right_label in problem.right_labels:
                     min_capacities: int = int( quantities_constraints.min_capacities[ right_label ] )
                     model.add(
-                        sum( quantities_variable[ left_label, right_label ]
+                        sum( quantities[ left_label, right_label ]
                              for left_label in problem.left_labels ) >= min_capacities
                     )
         else:
-            for left_label, right_label in quantities_variable:
-                model.add( quantities_variable[ left_label, right_label ] <= 1 )
+            for left_label, right_label in quantities:
+                model.add( quantities[ left_label, right_label ] <= 1 )

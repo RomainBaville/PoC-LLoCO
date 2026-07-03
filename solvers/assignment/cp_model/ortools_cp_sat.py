@@ -50,7 +50,7 @@ def solve_assignment_problem( problem: AssignmentProblem, ) -> dict[ str, list[ 
     # --------------------------------------------------
     # Constraints
     # --------------------------------------------------
-    apply_quantities_constraints( model, quantities, is_assigned, problem )
+    apply_quantities_constraints( model, is_assigned, quantities, problem )
     apply_logical_constraints( model, is_assigned, quantities, problem )
     apply_matching_constraints( model, is_assigned, problem )
     apply_ressources_constraints( model, quantities, problem )

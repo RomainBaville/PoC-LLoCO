@@ -11,15 +11,21 @@ from domain.objective import Objective
 
 @dataclass
 class MatchingConfig:
-    """Dataclass to configure the scoring optimization involving a score computation from a matching between left and right variables sharing the same label.
+    """Dataclass to configure the scoring optimization.
+
+    This score optimization use a computation from a match between left and right variables sharing the same label.
+
     This Dataclass also configure optional constraints associated with this matching.
 
     Args:
-        labels (tuple[str, ...]): The variables labels for both left and right entities used in the computation of the score matching.
-        left_vals (dict[tuple[str, str], float]): The dictionary with the value of the left entities for all the variables used in the computation of the score matching:
+        labels (tuple[str, ...]): The variables labels for both left and right entities used in the computation
+        of the score matching.
+        left_vals (dict[tuple[str, str], float]): The dictionary with the value of the left entities for all the
+            variables used in the computation of the score matching:
             - keys (tuple[str, str]): The left entitiy label, the variable label.
             - values (float): The left value used in the computation of the matching score.
-        right_vals (dict[tuple[str, str], float]): The dictionary with the value of the right entities for all the variables used in the computation of the score matching:
+        right_vals (dict[tuple[str, str], float]): The dictionary with the value of the right entities for all the
+            variables used in the computation of the score matching:
             - keys (tuple[str, str]): The right entitiy label, the variable label.
             - values (float): The right value used in the computation of the matching socre.
         objective (Objective): The objective of the score matching (maximize or minimize).
@@ -29,10 +35,12 @@ class MatchingConfig:
         reward_function (RewardFunctions): The reward function used in the computation of the matching score.
         penalty_function (PenaltyFunctions): The penalty function used in the computation of the matching score.
             Defaults to PenaltyFunction.NONE, e.g. no penalty.
-        max_vals (Optional[dict[tuple[str, str], float]]): The dictionary whit the maximum variables values accepted for the assignment of the left entities by the right entities:
+        max_vals (Optional[dict[tuple[str, str], float]]): The dictionary whit the maximum variables values accepted
+            for the assignment of the left entities by the right entities:
             - keys (tuple[str, str]): The right entity label, the left variable label.
             - value (float): The maximum value accepted by the right entity for the left variable.
-        min_vals (Optional[dict[tuple[str, str], float]]): The dictionary whit the minimum variables values accepted for the assignment of the left entities by the right entities:
+        min_vals (Optional[dict[tuple[str, str], float]]): The dictionary whit the minimum variables values accepted
+            for the assignment of the left entities by the right entities:
             - keys (tuple[str, str]): The right entity label, the left variable label.
             - value (float): The minimum value accepted by the right entity for the left variable.
     """

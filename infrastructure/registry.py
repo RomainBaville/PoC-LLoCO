@@ -10,6 +10,14 @@ from infrastructure.csv_loader import CSVLoader
 
 @dataclass
 class DataSourceDefinition:
+    """Dataclass to deal with several type off input data.
+
+    Args:
+        key (str): The key of the input data use for the code.
+        label (str): The label of the input data use for the user.
+        description (str): The description of the input data.
+        loader_factory (Callable): The function used to laod the data.
+    """
     key: str
     label: str
     description: str
@@ -20,17 +28,8 @@ DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
     "csv_two_tables":
     DataSourceDefinition(
         key="csv_two_tables",
-        label="Two CSV files (entities + requirements)",
-        description=(
-            "You have two CSV files: one describing entities "
-            "(e.g. employees) and one describing requirements "
-            "(e.g. projects)."
-        ),
+        label="Two CSV files",
+        description=( "You have two CSV files, one with the data and the other with the constraints." ),
         loader_factory=lambda: CSVLoader(),
     ),
-
-    # Future examples:
-    # "csv_single_table"
-    # "matrix_input"
-    # "manual_input"
 }

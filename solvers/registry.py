@@ -6,15 +6,22 @@ from dataclasses import dataclass
 
 
 @dataclass
-class AssignmentSolverGroup:
+class ProblemsSolverGroup:
+    """The class with all the type of problem that can be solve.
+
+    Args:
+        key (str): The type of problem.
+        description (str): The discription of the problem type.
+        registry_module (str): The path to the module with the implementation of the solver.
+    """
     key: str
     description: str
     registry_module: str
 
 
-ASSIGNMENT_SOLVER_GROUPS = {
+PROBLEM_SOLVER_GROUPS: dict[ str, ProblemsSolverGroup ] = {
     "assignments":
-    AssignmentSolverGroup(
+    ProblemsSolverGroup(
         key="assignments",
         description="Solvers for assignment problems",
         registry_module="solvers.assignment.registry",

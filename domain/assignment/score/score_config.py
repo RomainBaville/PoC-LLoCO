@@ -13,10 +13,10 @@ class ScoreConfig:
     """Dataclass to configure the score evaluation of the assignment problem.
 
     Args:
-        use_matching (bool): True if the problem optimization score uses left and right entities matching (e.g. skills, production ...):
+        use_matching (bool): True if the problem optimization score uses left and right entities matching.
             Defaults to False.
         matching_config (Optional[MatchingConfig]): The configuration of the matching to make.
-        use_ressources (bool): True if the problem optimisation score uses left entities ressources (e.g. salary, time ...):
+        use_ressources (bool): True if the problem optimisation score uses left entities ressources.
             Defaults to False.
         ressources_config (Optional[RessourcesConfig]): The configuration of the ressources to use.
 

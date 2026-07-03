@@ -9,10 +9,14 @@ from domain.assignment.constraints.quantities_constraints import QuantitiesConst
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
+
 """Problem description:
-A company hopes to recruit new employees for its team. The salary requirements for candidates A, B, C, D, and E are $8100, $20000, $21000, $3000, and $8000 respectively. They need to decide whether to hire each candidate. The team wants to minimize the total amount paid to the candidates.
-They hope to hire a maximum of 3 new employees.
-The team has a limited budget of $35,000. They need to ensure that the total payment to the selected candidates does not exceed the budget.
+A company hopes to recruit new employees for its team. The salary requirements for candidates A, B, C, D, and E
+are $8100, $20000, $21000, $3000, and $8000 respectively. They need to decide whether to hire each candidate.
+The team wants to minimize the total amount paid to the candidates.
+
+They hope to hire a maximum of 3 new employees.The team has a limited budget of $35,000.
+They need to ensure that the total payment to the selected candidates does not exceed the budget.
 The qualifications of the five candidates are as follows:
 Candidate A: Bachelor's degree;
 Candidate B: Master's degree;

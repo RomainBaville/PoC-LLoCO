@@ -5,17 +5,15 @@
 import sys
 from pathlib import Path
 
+import streamlit as st
+
+from ui.registry import PROBLEM_REGISTRY
+from ui.utils import select_problem
+
 # --- make project root importable ---
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
-import streamlit as st
-
-from ui.registry import PROBLEM_REGISTRY
-from ui.utils import navigation_buttons
-
-# from llm.onboarding_prompt import build_onboarding_prompt
-# from llm.client import ask_llm_request
 
 # --------------------------------------------------
 # App setup
@@ -23,23 +21,9 @@ from ui.utils import navigation_buttons
 st.set_page_config( page_title="Optimization Playground", layout="wide" )
 st.title( "Optimization Playground" )
 
-# --------------------------------------------------
-# Session state initialization
-# --------------------------------------------------
-if "step" not in st.session_state:
-    st.session_state.step = 0
-
-if "problem_type" not in st.session_state:
-    st.session_state.problem_type = None
-
-if "data_source" not in st.session_state:
-    st.session_state.data_source = None
-
-if "journey" not in st.session_state:
-    st.session_state.journey = []
-
-if "solver_key" not in st.session_state:
-    st.session_state.solver_key = None
+st.session_state.setdefault( "step", 0 )
+st.session_state.setdefault( "problem_type", None )
+st.session_state.setdefault( "data_source", None )
 
 # ==================================================
 # STEP -1 — LLM onboarding
@@ -53,19 +37,19 @@ if st.session_state.step == -1:
         placeholder="Example: I want to assign employees to projects based on their skills...",
     )
 
-    # col1, col2 = st.columns(2)
-
-    # with col1:
-    #     if st.button("Explain how to use the tool"):
-    #         with st.spinner("Analyzing your problem..."):
-    #             prompt = build_onboarding_prompt(user_description)
-    #             explanation = ask_llm_request(prompt)
-
-    #         st.subheader("How the tool will help you")
-    #         st.markdown(explanation)
-
-    # with col2:
-    #     navigation_buttons(show_back=False, show_close=False)
+    # TODO in a futur PR
+    """
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Explain how to use the tool"):
+            with st.spinner("Analyzing your problem..."):
+                prompt = build_onboarding_prompt(user_description)
+                explanation = ask_llm_request(prompt)
+            st.subheader("How the tool will help you")
+            st.markdown(explanation)
+    with col2:
+        navigation_buttons(show_back=False, show_close=False)
+    """
 
     st.stop()
 
@@ -77,23 +61,14 @@ if st.session_state.step == 0:
 
     cols = st.columns( len( PROBLEM_REGISTRY ) )
 
-    for col, problem in zip( cols, PROBLEM_REGISTRY.values() ):
+    for col, problem in zip( cols, PROBLEM_REGISTRY.values(), strict=False ):
         with col:
-            if st.button( problem.label ):
-                st.session_state.problem_type = problem.key
-                st.session_state.step = 1
+            st.button( problem.label, on_click=select_problem, args=( st.session_state, problem.key ) )
 
     st.stop()
 
 # ==================================================
 # Delegate to registered problem UI
 # ==================================================
-problem_key = st.session_state.problem_type
-
-if problem_key in PROBLEM_REGISTRY:
-    problem_def = PROBLEM_REGISTRY[ problem_key ]
-    problem_def.render_fn( st.session_state )
-
-else:
-    st.error( "Unknown problem type" )
-    navigation_buttons( show_back=False, show_next=False )
+if st.session_state.problem_key in PROBLEM_REGISTRY:
+    PROBLEM_REGISTRY[ st.session_state.problem_key ].render_fn( st.session_state )

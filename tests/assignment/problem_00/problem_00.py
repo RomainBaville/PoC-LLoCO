@@ -9,26 +9,32 @@ from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-"""Problem description: (This problem is not in the IndustryOR.json file but is the one use to built this project at the begining)
-I work for a company that manage R&D projects. For each project, we need to affect people based on their skills level and the skills required by the project. The ip.csv file contains the skill mastered by employees (on a scale from 1 to 5). The project.csv file contains the amount of people required for each project and for each skills. I would like to match people to projects based on their skills. An employee can be assigned to only one project at a time. Can you help me find a way to make this affectaction procedure as efficient as possible ?
+
+"""Problem description:
+(This problem is not in the IndustryOR.json file but is the one use to built this project at the begining)
+I work for a company that manage R&D projects. For each project, we need to affect people based on their skills level
+and the skills required by the project. The ip.csv file contains the skill mastered by employees
+(on a scale from 1 to 5). The project.csv file contains the amount of people required for each project and for each
+skills. I would like to match people to projects based on their skills. An employee can be assigned to only one project
+at a time. Can you help me find a way to make this affectaction procedure as efficient as possible ?
 """
 
 left_labels: tuple[ str, ...] = (
     "PierreDupont", "MarieLemoine", "JeanMartin", "ClaireBernard", "SophieDubois", "AlainLefevre", "IsabelleMoreau",
     "LucPetit", "CamilleLeroy", "NicolasLefevre", "AliceRobert", "LaurentDufresne", "NathalieGautier", "GérardPires",
     "CatherineLeclerc", "FrançoisRichard", "JulieBoucher", "ThomasLefranc", "PaulineMorin", "DavidGauthier",
-    "SandraLefevre", "MichelTanguy", "ÉliseGuérin", "HugoPerrier", "LaurenceLemoine", "AntoineHenry", "CarolineRoussel",
-    "CharlesDubois", "EmilieMarchand"
+    "SandraLefevre", "MichelTanguy", "ÉliseGuérin", "HugoPerrier", "LaurenceLemoine", "AntoineHenry",
+    "CarolineRoussel", "CharlesDubois", "EmilieMarchand",
 )
 right_labels: tuple[ str, ...] = (
     "NovaTech", "ZenithX", "HorizonLabs", "QuantumEdge", "SkyBridgeSolutions", "QuantumHorizon", "VelocityHub",
-    "TerraNovaLabs", "NextGenInnovations", "SynergyX"
+    "TerraNovaLabs", "NextGenInnovations", "SynergyX",
 )
 
 # Score
-labels: tuple[
-    str,
-    ...] = ( "React", "SQL", "Python", "Docker", "Vue.js", "Kubernetes", "JavaScript", "Django", "Node.js", "Git" )
+labels: tuple[ str, ...] = (
+    "React", "SQL", "Python", "Docker", "Vue.js", "Kubernetes", "JavaScript", "Django", "Node.js", "Git",
+)
 left_vals: dict[ tuple[ str, str ], float ] = {
     ( "PierreDupont", "React" ): 5.,
     ( "PierreDupont", "SQL" ): 0.,

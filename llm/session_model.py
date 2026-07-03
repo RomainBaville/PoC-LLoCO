@@ -7,29 +7,24 @@ from dataclasses import dataclass, field
 
 @dataclass
 class OptimizationSession:
-    """Structured representation of a complete optimization run.
-    Passed to the LLM prompt builder.
+    """Structured representation of a complete optimization run passed to the LLM prompt builder.
+
+    Args:
+        problem_type (str): The problem type.
+        steps: (list[str]): All the ui step.
+        data_description (str): The data description.
+        solver_name (str): The name of the solver.
+        solver_description str): The solver description.
+        result_summary (str): The summary of the result.
+        config_summary (str | None): The summary of the problem configuration.
+            Defaults to None.
+        result_details (dict) = field( default_factory=dict )
     """
-
-    # High-level structure
-    problem_family: str           # e.g. "Assignment"
-    problem_type: str             # e.g. "Skill-based assignment"
-    problem_variant: str          # e.g. "Coverage"
-
-    # Workflow trace
-    steps: list[str]
-
-    # Data
+    problem_type: str
+    steps: list[ str ]
     data_description: str
-
-    # Solver
     solver_name: str
-
-    # Result
+    solver_description: str
     result_summary: str
-
-    # Optional
     config_summary: str | None = None
-    solver_family: str | None = None
-    solver_description: str | None = None
-    result_details: dict[str, str] = field(default_factory=dict)
+    result_details: dict = field( default_factory=dict )

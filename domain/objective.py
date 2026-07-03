@@ -12,4 +12,9 @@ class Objective( Enum ):
     MINIMIZE: int = -1
 
     def __str__( self: Self ) -> str:
+        """Print the objective label.
+
+        Returns:
+            str: The objective label.
+        """
         return self.name

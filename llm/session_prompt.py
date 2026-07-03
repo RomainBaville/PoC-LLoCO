@@ -5,27 +5,28 @@
 from llm.session_model import OptimizationSession
 
 
-def build_session_summary_prompt(session: OptimizationSession) -> str:
+def build_session_summary_prompt( session: OptimizationSession ) -> str:
     """Build a generic, solver-aware explanation prompt.
+
+    Args:
+        session (OptimizationSession): The session with all the user data.
+
+    Retruns:
+        str: The prompt for the llm to summeryze the session.
     """
     steps_text = "\n".join(
-        f"{i + 1}. {step}" for i, step in enumerate(session.steps)
-    )
-
-    solver_text = (
-        f"{session.solver_name}"
-        + (f" ({session.solver_family})" if session.solver_family else "")
+        f"{ i + 1 }. { step }" for i, step in enumerate( session.steps )
     )
 
     details_text = ""
     if session.result_details:
         details_text = "\n\nAdditional details:\n" + "\n".join(
-            f"- {k}: {v}" for k, v in session.result_details.items()
+            f"- { k }: { v }" for k, v in session.result_details.items()
         )
 
     config_text = ""
     if session.config_summary:
-        config_text = f"\n\nConfiguration:\n{session.config_summary}"
+        config_text = f"\n\nConfiguration:\n{ session.config_summary }"
 
     return f"""
 You are an expert optimization analyst.
@@ -33,28 +34,22 @@ You are an expert optimization analyst.
 Explain the result of the following optimization session in a clear,
 professional, and neutral tone.
 
-Problem family:
-{session.problem_family}
-
 Problem type:
-{session.problem_type}
-
-Formulation / variant:
-{session.problem_variant}
+{ session.problem_type }
 
 Workflow:
-{steps_text}
+{ steps_text }
 
 Data used:
-{session.data_description}
+{ session.data_description }
 
 Solver:
-{solver_text}
+{ session.solver_name + session.solver_description }
 
 Result summary:
-{session.result_summary}
-{config_text}
-{details_text}
+{ session.result_summary }
+{ config_text }
+{ details_text }
 
 Guidelines:
 - Be factual and precise

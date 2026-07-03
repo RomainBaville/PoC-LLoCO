@@ -9,6 +9,7 @@ from infrastructure.base_loader import DataLoader
 
 
 class CSVLoader( DataLoader ):
+    """Class to laod a csv file."""
 
     def load( self, source: str | IO ):
         """Load CSV from a file path or a file-like object (e.g. Streamlit upload).
@@ -17,29 +18,26 @@ class CSVLoader( DataLoader ):
             source: file path (str) or file-like object
 
         Returns:
-            columns (list[str])
-            rows (list[dict])
+            tuple[tuple[str, ...], tuple[dict[str, str], ...]): The column header of the csv, rows of the csv.
         """
-        try:
-            # Case 1: file path
-            if isinstance( source, str ):
-                with open( source, newline="", encoding="utf-8" ) as f:
-                    reader = csv.DictReader( f )
-                    columns = reader.fieldnames or []
-                    rows = list( reader )
+        column: tuple[ str, ...]
+        rows: tuple[ dict[ str, str ] ]
 
-            # Case 2: file-like object (Streamlit)
-            else:
-                # Important: ensure we're at start of file
-                source.seek( 0 )
+        # Case 1: file path
+        if isinstance( source, str ):
+            with open( source, newline="", encoding="utf-8" ) as f:
+                reader = csv.DictReader( f )
+                column = tuple( reader.fieldnames ) or ()
+                rows = tuple( reader )
 
-                content = source.read().decode( "utf-8" ).splitlines()
-                reader = csv.DictReader( content )
+        # Case 2: file-like object ( Streamlit )
+        else:
+            source.seek( 0 )
 
-                columns = reader.fieldnames or []
-                rows = list( reader )
+            content = source.read().decode( "utf-8" ).splitlines()
+            reader = csv.DictReader( content )
 
-            return columns, rows
+            column = tuple( reader.fieldnames ) or ()
+            rows = tuple( reader )
 
-        except FileNotFoundError:
-            raise RuntimeError( f"CSV file not found: { source }" )
+        return column, rows

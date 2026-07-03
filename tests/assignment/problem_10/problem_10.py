@@ -7,10 +7,15 @@ from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-"""Problem description:
-A convenience supermarket is planning to open several chain stores in a newly built residential area in the northwest suburb of the city. For shopping convenience, the distance from any residential area to one of the chain stores should not exceed 800m. Table 5-1 shows the new residential areas and the residential areas within a radius of 800m from each of them.
 
-Question: What is the minimum number of chain stores the supermarket needs to build among the mentioned residential areas, and in which residential areas should they be built?
+"""Problem description:
+A convenience supermarket is planning to open several chain stores in a newly built residential area in the northwest
+suburb of the city. For shopping convenience, the distance from any residential area to one of the chain stores should
+not exceed 800m. Table 5-1 shows the new residential areas and the residential areas within a radius of 800m from each
+of them.
+
+Question: What is the minimum number of chain stores the supermarket needs to build among the mentioned residential
+areas, and in which residential areas should they be built?
 
 | Area Code | Residential Areas within 800m Radius|
 |-----------|-------------------------------------|

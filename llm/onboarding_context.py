@@ -3,50 +3,36 @@
 # SPDX-FileContributor: Romain Baville
 # SPDX-License-Identifier: Apache-2.0
 
-from importlib import import_module
-
-from domain.assignment.skills.skills_reward_functions import PENALTY_FUNCTIONS, REWARD_FUNCTIONS
-from ui.assignment.registry import ASSIGNMENT_TYPES
-
-from solvers.registry import ASSIGNMENT_SOLVER_GROUPS
+from solvers.registry import PROBLEM_SOLVER_GROUPS
 from ui.registry import PROBLEM_REGISTRY
 
 
-def build_onboarding_context() -> dict:
-    """Build a structured description of platform capabilities
-    based on registries.
+def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
+    """Build a structured description of platform capabilities based on registries.
+
+    Returns:
+        dict[str, list[dict[str, str]]]: The data (name, description) of the tools(domain, solvers...).
+
     """
-    problems = [
-        {"key": p.key, "label": p.label}
+    problems: list[ dict[ str, str ] ] = [
+        {
+            "key": p.key,
+            "label": p.label,
+            "description": p.description,
+        }
         for p in PROBLEM_REGISTRY.values()
     ]
 
-    assignment_types = []
-    for atype in ASSIGNMENT_TYPES.values():
-        type_registry = import_module(atype.registry_module)
-        variants = [
-            v.label for v in type_registry.VARIANTS.values()
-        ]
-
-        solver_group = ASSIGNMENT_SOLVER_GROUPS.get(atype.key)
-
-        assignment_types.append({
-            "label": atype.label,
-            "description": atype.description,
-            "variants": variants,
-            "solvers": (
-                list(
-                    import_module(solver_group.registry_module)
-                    .SOLVERS
-                    .keys()
-                )
-                if solver_group else []
-            ),
-        })
+    solvers: list[ dict[ str, str ] ] = [
+        {
+            "key": s.key,
+            "label": s.label,
+            "description": s.description,
+        }
+        for s in PROBLEM_SOLVER_GROUPS.values()
+    ]
 
     return {
         "problems": problems,
-        "assignment_types": assignment_types,
-        "reward_functions": REWARD_FUNCTIONS.keys(),
-        "penalty_functions" : PENALTY_FUNCTIONS.keys(),
+        "solvers": solvers,
     }
