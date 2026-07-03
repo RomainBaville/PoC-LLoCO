@@ -9,7 +9,6 @@ from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-
 """Problem description:
 We need to determine 4 out of 5 workers to complete one of the four tasks respectively. Due to each worker's different
 technical specialties, the time required for them to complete each task varies. The hours required by each worker to
@@ -128,7 +127,7 @@ constraints_config: ConstraintsConfig = ConstraintsConfig(
     quantities_constraints=quantities_constraints,
 )
 
-problem_08: AssignmentProblem = AssignmentProblem(
+problem_08_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,

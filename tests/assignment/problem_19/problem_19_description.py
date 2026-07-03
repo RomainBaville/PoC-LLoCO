@@ -8,7 +8,6 @@ from domain.assignment.constraints.logicals_constraints import LogicalsConstrain
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-
 """Problem description:
 A furniture store can choose to order chairs from three different manufacturers: A, B, and C. The cost of ordering each
 chair from manufacturer A is $50, from manufacturer B is $45, and from manufacturer C is $40. The store needs to
@@ -74,7 +73,7 @@ constraints_config: ConstraintsConfig = ConstraintsConfig(
     logicals_constraints=logicals_constraints,
 )
 
-problem_19: AssignmentProblem = AssignmentProblem(
+problem_19_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,

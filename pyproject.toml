@@ -4,7 +4,7 @@
 [project]
 name = "poc-lloco"
 version = "0.1.0"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 
 dependencies = []
 
@@ -40,7 +40,7 @@ addopts = "-v"
 # =========================================================
 [tool.ruff]
 line-length = 120
-target-version = "py314"
+target-version = "py312"
 
 # Files & folders excluded from analysis
 exclude = [
@@ -94,7 +94,7 @@ convention = "google"
 # MYPY (STRICT MODE)
 # =========================================================
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 

@@ -19,10 +19,12 @@ def map_ressources( session_state: SessionState ) -> None:
     Args:
         session_state (SessionState): The session state.
     """
-    session_state.ressources_labels = tuple( st.multiselect(
-        "Select columns identifying your ressources",
-        session_state.left_cols,
-    ) )
+    session_state.ressources_labels = tuple(
+        st.multiselect(
+            "Select columns identifying your ressources",
+            session_state.left_cols,
+        )
+    )
     session_state.ressources_vals = build_vals(
         session_state.left_entities_col_label,
         session_state.ressources_labels,
@@ -70,16 +72,17 @@ def ressources_constraints( session_state: SessionState ) -> None:
                 f"Is there ressources constrained by a { extrema[ id ] } value ?"
             )
             if use_constraints_extrema_vals:
-                constraints_labels: tuple[ str, ...] = tuple( st.multiselect(
-                    f"Select all variables used as { extrema[ id ] } constraint",
-                    session_state.right_cols,
-                ) )
+                constraints_labels: tuple[ str, ...] = tuple(
+                    st.multiselect(
+                        f"Select all variables used as { extrema[ id ] } constraint",
+                        session_state.right_cols,
+                    )
+                )
                 if len( constraints_labels ) > 0:
                     constraints_ressources_labels: dict[ str, list[ str ] ] = {}
                     for constraint_label in constraints_labels:
                         constraints_ressources_labels[ constraint_label ] = st.multiselect(
-                            f"Select ressources constrainning by { constraint_label }",
-                            session_state.ressources_labels
+                            f"Select ressources constrainning by { constraint_label }", session_state.ressources_labels
                         )
 
                     vals: dict[ tuple[ str, ...], float ] = {}

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-
 """LLM onboarding prompt builder.
 
 Explains how the optimization platform works based entirely on registries
@@ -21,7 +20,6 @@ def build_onboarding_prompt( user_description: str ) -> str:
         str: The prompt for the llm.
     """
     context = build_onboarding_context()
-
 
     return f"""
 You are an AI assistant helping a user understand how to use

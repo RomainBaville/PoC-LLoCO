@@ -24,10 +24,8 @@ def quantities_constraints( session_state: SessionState ) -> None:
     entities_types: tuple[ str, str ] = ( session_state.left_entities_type, session_state.right_entities_type )
     entities_cols: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( session_state.left_cols, session_state.right_cols )
     entities_rows: tuple[ dict[ str, str ], dict[ str, str ] ] = ( session_state.left_rows, session_state.right_rows )
-    entities_col_label: tuple[ str, str ] = (
-        session_state.left_entities_col_label,
-        session_state.right_entities_col_label
-    )
+    entities_col_label: tuple[
+        str, str ] = ( session_state.left_entities_col_label, session_state.right_entities_col_label )
     extrema: tuple[ str, str ] = ( "maximum", "minimum" )
 
     # -----------------------------
@@ -115,9 +113,12 @@ def quantities_constraints( session_state: SessionState ) -> None:
             )
             if use_extrema_same_assignments:
                 extrema_same_assignments[ id ] = {}
-                left_labels_constrainted: tuple[ str, ...] = tuple( st.multiselect(
-                    f"Select all the { session_state.left_entities_type } with a constraint", session_state.left_cols,
-                ) )
+                left_labels_constrainted: tuple[ str, ...] = tuple(
+                    st.multiselect(
+                        f"Select all the { session_state.left_entities_type } with a constraint",
+                        session_state.left_cols,
+                    )
+                )
                 for left_label_constrainted in left_labels_constrainted:
                     right_labels_constrainted: tuple[ str, ...] = tuple( st.multiselect(
                         f"Select all the { session_state.right_entities_type } with a { extrema[ id ] } " \

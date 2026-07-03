@@ -9,7 +9,6 @@ from domain.assignment.constraints.quantities_constraints import QuantitiesConst
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-
 """Problem description:
 A master's student in Operations Research at a certain university is required to select two courses in mathematics,
 two in operations research, and two in computer science from a total of seven courses: Calculus, Operations Research,
@@ -103,7 +102,7 @@ constraints_config = ConstraintsConfig(
     quantities_constraints=quantities_constraints,
 )
 
-problem_55: AssignmentProblem = AssignmentProblem(
+problem_55_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,

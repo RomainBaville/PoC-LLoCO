@@ -9,7 +9,6 @@ from domain.assignment.constraints.quantities_constraints import QuantitiesConst
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-
 """Problem description:
 A company hopes to recruit new employees for its team. The salary requirements for candidates A, B, C, D, and E
 are $8100, $20000, $21000, $3000, and $8000 respectively. They need to decide whether to hire each candidate.
@@ -114,7 +113,7 @@ constraints_config: ConstraintsConfig = ConstraintsConfig(
     quantities_constraints=quantities_constraints,
 )
 
-problem_84: AssignmentProblem = AssignmentProblem(
+problem_84_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,

@@ -28,6 +28,7 @@ def select_problem( session_state: SessionState, problem_key: str ) -> None:
     session_state.problem_key = problem_key
     session_state.step = 1
 
+
 # --------------------------------------------------
 # Navigation helpers
 # --------------------------------------------------

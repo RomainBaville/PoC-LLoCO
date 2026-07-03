@@ -14,9 +14,7 @@ def build_session_summary_prompt( session: OptimizationSession ) -> str:
     Retruns:
         str: The prompt for the llm to summeryze the session.
     """
-    steps_text = "\n".join(
-        f"{ i + 1 }. { step }" for i, step in enumerate( session.steps )
-    )
+    steps_text = "\n".join( f"{ i + 1 }. { step }" for i, step in enumerate( session.steps ) )
 
     details_text = ""
     if session.result_details:

@@ -98,7 +98,8 @@ def matching_constraints( session_state: SessionState ) -> None:
                         )
 
                     matching_extrema_vals[ id ] = build_vals(
-                        session_state.right_entities_col_label, matching_extrema_variables_labels,
+                        session_state.right_entities_col_label,
+                        matching_extrema_variables_labels,
                         session_state.right_rows,
                     )
                 else:

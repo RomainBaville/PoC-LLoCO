@@ -239,9 +239,8 @@ def render( session_state: SessionState ) -> None:
                         solution_row[ session_state.right_entities_type ] = right_labels
 
                     if session_state.use_quantities_constraints and session_state.multiple_same_assignment:
-                        solution_row[
-                            f"Number of assignments per { session_state.right_entities_type }"
-                        ] = nb_assignments
+                        solution_row[ f"Number of assignments per { session_state.right_entities_type }"
+                                     ] = nb_assignments
 
                     session_state.solution_rows.append( solution_row )
 

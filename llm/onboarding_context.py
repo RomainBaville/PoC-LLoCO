@@ -19,8 +19,7 @@ def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
             "key": p.key,
             "label": p.label,
             "description": p.description,
-        }
-        for p in PROBLEM_REGISTRY.values()
+        } for p in PROBLEM_REGISTRY.values()
     ]
 
     solvers: list[ dict[ str, str ] ] = [
@@ -28,8 +27,7 @@ def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
             "key": s.key,
             "label": s.label,
             "description": s.description,
-        }
-        for s in PROBLEM_SOLVER_GROUPS.values()
+        } for s in PROBLEM_SOLVER_GROUPS.values()
     ]
 
     return {

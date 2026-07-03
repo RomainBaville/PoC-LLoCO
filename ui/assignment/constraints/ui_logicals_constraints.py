@@ -26,9 +26,8 @@ def logicals_constraints( session_state: SessionState ) -> None:
 
     labels: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( session_state.left_labels, session_state.right_labels )
     entities_types: tuple[ str, str ] = ( session_state.left_entities_type, session_state.right_entities_type )
-    max_associations: tuple[ dict[ str, float ] | None, dict[ str, float ] | None ] = (
-        session_state.max_left_entities, session_state.max_right_entities
-    )
+    max_associations: tuple[ dict[ str, float ] | None, dict[ str, float ]
+                             | None ] = ( session_state.max_left_entities, session_state.max_right_entities )
     mutual_exclusion: list[ list[ tuple[ str, ...] ] | None ] = [ None, None ]
 
     for side in range( 2 ):  # Left then right
@@ -137,8 +136,7 @@ def logicals_constraints( session_state: SessionState ) -> None:
 
                 list_implies_assignments.append( tuple( implies_assignment_parameters ) )
 
-            session_state.implications[ tuple( assignment_with_implications_labels ) ] = tuple(
-                list_implies_assignments
-            )
+            session_state.implications[ tuple( assignment_with_implications_labels )
+                                       ] = tuple( list_implies_assignments )
     else:
         session_state.implications = None

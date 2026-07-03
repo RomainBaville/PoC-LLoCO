@@ -7,7 +7,6 @@ from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-
 """Problem description:
 A convenience supermarket is planning to open several chain stores in a newly built residential area in the northwest
 suburb of the city. For shopping convenience, the distance from any residential area to one of the chain stores should
@@ -242,7 +241,7 @@ score_config: ScoreConfig = ScoreConfig( use_ressources=True, ressources_config=
 # constraints
 constraints_config: ConstraintsConfig = ConstraintsConfig()
 
-problem_10: AssignmentProblem = AssignmentProblem(
+problem_10_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,

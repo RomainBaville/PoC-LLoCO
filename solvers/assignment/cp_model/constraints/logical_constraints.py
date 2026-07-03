@@ -45,6 +45,6 @@ def apply_logical_constraints(
                         is_assigned[ left_label, right_label ], is_assigned[ left_forced_label, right_forced_label ]
                     )
                     model.add(
-                        quantities[ left_forced_label,
-                           right_forced_label ] >= int( nb_implications ) * quantities[ left_label, right_label ]
+                        quantities[ left_forced_label, right_forced_label ] >= int( nb_implications ) *
+                        quantities[ left_label, right_label ]
                     )

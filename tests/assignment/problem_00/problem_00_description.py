@@ -9,7 +9,6 @@ from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-
 """Problem description:
 (This problem is not in the IndustryOR.json file but is the one use to built this project at the begining)
 I work for a company that manage R&D projects. For each project, we need to affect people based on their skills level
@@ -20,20 +19,61 @@ at a time. Can you help me find a way to make this affectaction procedure as eff
 """
 
 left_labels: tuple[ str, ...] = (
-    "PierreDupont", "MarieLemoine", "JeanMartin", "ClaireBernard", "SophieDubois", "AlainLefevre", "IsabelleMoreau",
-    "LucPetit", "CamilleLeroy", "NicolasLefevre", "AliceRobert", "LaurentDufresne", "NathalieGautier", "GérardPires",
-    "CatherineLeclerc", "FrançoisRichard", "JulieBoucher", "ThomasLefranc", "PaulineMorin", "DavidGauthier",
-    "SandraLefevre", "MichelTanguy", "ÉliseGuérin", "HugoPerrier", "LaurenceLemoine", "AntoineHenry",
-    "CarolineRoussel", "CharlesDubois", "EmilieMarchand",
+    "PierreDupont",
+    "MarieLemoine",
+    "JeanMartin",
+    "ClaireBernard",
+    "SophieDubois",
+    "AlainLefevre",
+    "IsabelleMoreau",
+    "LucPetit",
+    "CamilleLeroy",
+    "NicolasLefevre",
+    "AliceRobert",
+    "LaurentDufresne",
+    "NathalieGautier",
+    "GérardPires",
+    "CatherineLeclerc",
+    "FrançoisRichard",
+    "JulieBoucher",
+    "ThomasLefranc",
+    "PaulineMorin",
+    "DavidGauthier",
+    "SandraLefevre",
+    "MichelTanguy",
+    "ÉliseGuérin",
+    "HugoPerrier",
+    "LaurenceLemoine",
+    "AntoineHenry",
+    "CarolineRoussel",
+    "CharlesDubois",
+    "EmilieMarchand",
 )
 right_labels: tuple[ str, ...] = (
-    "NovaTech", "ZenithX", "HorizonLabs", "QuantumEdge", "SkyBridgeSolutions", "QuantumHorizon", "VelocityHub",
-    "TerraNovaLabs", "NextGenInnovations", "SynergyX",
+    "NovaTech",
+    "ZenithX",
+    "HorizonLabs",
+    "QuantumEdge",
+    "SkyBridgeSolutions",
+    "QuantumHorizon",
+    "VelocityHub",
+    "TerraNovaLabs",
+    "NextGenInnovations",
+    "SynergyX",
 )
 
 # Score
 labels: tuple[ str, ...] = (
-    "React", "SQL", "Python", "Docker", "Vue.js", "Kubernetes", "JavaScript", "Django", "Node.js", "Git",
+    "React",
+    "SQL",
+    "Python",
+    "Docker",
+    "Vue.js",
+    "Kubernetes",
+    "JavaScript",
+    "Django",
+    "Node.js",
+    "Git",
 )
 left_vals: dict[ tuple[ str, str ], float ] = {
     ( "PierreDupont", "React" ): 5.,
@@ -545,7 +585,7 @@ constraints_config: ConstraintsConfig = ConstraintsConfig(
     quantities_constraints=quantities_constraints,
 )
 
-problem_00: AssignmentProblem = AssignmentProblem(
+problem_00_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,
