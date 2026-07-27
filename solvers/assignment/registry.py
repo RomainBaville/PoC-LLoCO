@@ -5,6 +5,7 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from domain.assignment.base import AssignmentProblem
 from solvers.assignment.cp_model.ortools_cp_sat import solve_assignment_problem
 
 
@@ -16,12 +17,12 @@ class AssignmentSolvers:
         key (str): The name of the solver use for the code.
         label (str): The label of the solver use for the user.
         description (str): The description of the solver capabilities.
-        solver_fn (Callable): The function to use to solve the problem.
+        solver_fn ([[AssignmentProblem], dict[str, list[tuple[str, int]]]]): The function to use to solve the problem.
     """
     key: str
     label: str
     description: str
-    solver_fn: Callable
+    solver_fn: Callable[ [ AssignmentProblem ], dict[ str, list[ tuple[ str, int ] ] ] ]
 
 
 SOLVERS = {

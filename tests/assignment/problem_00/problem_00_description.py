@@ -9,15 +9,16 @@ from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-"""Problem description:
-(This problem is not in the IndustryOR.json file but is the one use to built this project at the begining)
-I work for a company that manage R&D projects. For each project, we need to affect people based on their skills level
-and the skills required by the project. The ip.csv file contains the skill mastered by employees
-(on a scale from 1 to 5). The project.csv file contains the amount of people required for each project and for each
-skills. I would like to match people to projects based on their skills. An employee can be assigned to only one project
-at a time. Can you help me find a way to make this affectaction procedure as efficient as possible ?
-"""
 
+problem_00_prompt: str = (
+    "I work for a company that manage R&D projects. For each project, we need to affect people based on their skills "
+    "level and the skills required by the project. The ip.csv file contains the skill mastered by employees (on a "
+    "scale from 1 to 5). The project.csv file contains the amount of people required for each project and for each "
+    "skills. I would like to match people to projects based on their skills. An employee can be assigned to only one "
+    "project at a time. Can you help me find a way to make this affectaction procedure as efficient as possible ?"
+)  # This problem is not in the IndustryOR.json file but the one use to built this project
+
+# Problem
 left_labels: tuple[ str, ...] = (
     "PierreDupont",
     "MarieLemoine",
@@ -47,7 +48,7 @@ left_labels: tuple[ str, ...] = (
     "AntoineHenry",
     "CarolineRoussel",
     "CharlesDubois",
-    "EmilieMarchand",
+    "EmilieMarchand"
 )
 right_labels: tuple[ str, ...] = (
     "NovaTech",
@@ -59,22 +60,13 @@ right_labels: tuple[ str, ...] = (
     "VelocityHub",
     "TerraNovaLabs",
     "NextGenInnovations",
-    "SynergyX",
+    "SynergyX"
 )
 
 # Score
-labels: tuple[ str, ...] = (
-    "React",
-    "SQL",
-    "Python",
-    "Docker",
-    "Vue.js",
-    "Kubernetes",
-    "JavaScript",
-    "Django",
-    "Node.js",
-    "Git",
-)
+labels: tuple[
+    str,
+    ...] = ( "React", "SQL", "Python", "Docker", "Vue.js", "Kubernetes", "JavaScript", "Django", "Node.js", "Git" )
 left_vals: dict[ tuple[ str, str ], float ] = {
     ( "PierreDupont", "React" ): 5.,
     ( "PierreDupont", "SQL" ): 0.,
@@ -365,7 +357,7 @@ left_vals: dict[ tuple[ str, str ], float ] = {
     ( "EmilieMarchand", "JavaScript" ): 3.,
     ( "EmilieMarchand", "Django" ): 0.,
     ( "EmilieMarchand", "Node.js" ): 0.,
-    ( "EmilieMarchand", "Git" ): 0.,
+    ( "EmilieMarchand", "Git" ): 0.
 }
 right_vals: dict[ tuple[ str, str ], float ] = {
     ( "NovaTech", "React" ): 0.,
@@ -467,7 +459,7 @@ right_vals: dict[ tuple[ str, str ], float ] = {
     ( "SynergyX", "JavaScript" ): 2.,
     ( "SynergyX", "Django" ): 0.,
     ( "SynergyX", "Node.js" ): 0.,
-    ( "SynergyX", "Git" ): 4.,
+    ( "SynergyX", "Git" ): 4.
 }
 objective: Objective = Objective.MAXIMIZE
 weights: dict[ str, float ] = {
@@ -480,7 +472,7 @@ weights: dict[ str, float ] = {
     "JavaScript": 1.,
     "Django": 1.,
     "Node.js": 1.,
-    "Git": 1.,
+    "Git": 1.
 }
 reward_function: RewardFunctions = RewardFunctions.MIN
 
@@ -490,13 +482,10 @@ matching_config: MatchingConfig = MatchingConfig(
     right_vals=right_vals,
     objective=objective,
     weights=weights,
-    reward_function=reward_function,
+    reward_function=reward_function
 )
 
-score_config: ScoreConfig = ScoreConfig(
-    use_matching=True,
-    matching_config=matching_config,
-)
+score_config: ScoreConfig = ScoreConfig( use_matching=True, matching_config=matching_config )
 
 # Constraints
 max_right_entites: dict[ str, float ] = {
@@ -528,7 +517,7 @@ max_right_entites: dict[ str, float ] = {
     "AntoineHenry": 1.,
     "CarolineRoussel": 1.,
     "CharlesDubois": 1.,
-    "EmilieMarchand": 1.,
+    "EmilieMarchand": 1.
 }
 min_right_entites: dict[ str, float ] = {
     "PierreDupont": 1.,
@@ -559,7 +548,7 @@ min_right_entites: dict[ str, float ] = {
     "AntoineHenry": 1.,
     "CarolineRoussel": 1.,
     "CharlesDubois": 1.,
-    "EmilieMarchand": 1.,
+    "EmilieMarchand": 1.
 }
 min_left_entites: dict[ str, float ] = {
     "NovaTech": 1.,
@@ -571,26 +560,24 @@ min_left_entites: dict[ str, float ] = {
     "VelocityHub": 1.,
     "TerraNovaLabs": 1.,
     "NextGenInnovations": 1.,
-    "SynergyX": 1.,
+    "SynergyX": 1.
 }
 
 quantities_constraints: QuantitiesConstraints = QuantitiesConstraints(
-    max_right_entities=max_right_entites,
-    min_right_entities=min_right_entites,
-    min_left_entities=min_left_entites,
+    max_right_entities=max_right_entites, min_right_entities=min_right_entites, min_left_entities=min_left_entites
 )
 
 constraints_config: ConstraintsConfig = ConstraintsConfig(
-    use_quantities_constraints=True,
-    quantities_constraints=quantities_constraints,
+    use_quantities_constraints=True, quantities_constraints=quantities_constraints
 )
 
 problem_00_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,
-    constraints_config=constraints_config,
+    constraints_config=constraints_config
 )
+
 solution_00: dict[ str, list[ tuple[ str, int ] ] ] = {
     "PierreDupont": [ ( "NextGenInnovations", 1 ) ],
     "MarieLemoine": [ ( "VelocityHub", 1 ) ],
@@ -620,5 +607,5 @@ solution_00: dict[ str, list[ tuple[ str, int ] ] ] = {
     "AntoineHenry": [ ( "QuantumEdge", 1 ) ],
     "CarolineRoussel": [ ( "TerraNovaLabs", 1 ) ],
     "CharlesDubois": [ ( "NextGenInnovations", 1 ) ],
-    "EmilieMarchand": [ ( "VelocityHub", 1 ) ],
+    "EmilieMarchand": [ ( "VelocityHub", 1 ) ]
 }

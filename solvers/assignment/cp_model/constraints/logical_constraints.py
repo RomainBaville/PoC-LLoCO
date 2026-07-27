@@ -22,8 +22,8 @@ def apply_logical_constraints(
         quantities (dict[tuple[str, str], IntVar]): The integrable variable with the number of assocciation.
         problem (AssignmentProblem): The assignment problem.
     """
-    logicals_constraints: LogicalsConstraints | None = problem.constraints_config.logicals_constraints
-    if logicals_constraints is not None:
+    if isinstance( problem.constraints_config.logicals_constraints, LogicalsConstraints ):
+        logicals_constraints: LogicalsConstraints = problem.constraints_config.logicals_constraints
         if logicals_constraints.left_mutual_exclusions is not None:
             for right_label in problem.right_labels:
                 for left_mutual_exclusion in logicals_constraints.left_mutual_exclusions:
@@ -32,7 +32,7 @@ def apply_logical_constraints(
                     )
 
         if logicals_constraints.right_mutual_exclusions is not None:
-            for left_label in logicals_constraints.left_labels:
+            for left_label in problem.left_labels:
                 for right_mutual_exclusion in logicals_constraints.right_mutual_exclusions:
                     model.add(
                         sum( is_assigned[ left_label, right_label ] for right_label in right_mutual_exclusion ) < 1

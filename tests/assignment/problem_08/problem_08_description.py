@@ -9,22 +9,23 @@ from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-"""Problem description:
-We need to determine 4 out of 5 workers to complete one of the four tasks respectively. Due to each worker's different
-technical specialties, the time required for them to complete each task varies. The hours required by each worker to
-complete each task are shown in Table 5-2.
-Table 5-2
-| Worker | $A$ | $B$ | $C$ | $D$ |
-|--------|-----|-----|-----|-----|
-| I      | 9   | 4   | 3   | 7   |
-| II     | 4   | 6   | 5   | 6   |
-| III    | 5   | 4   | 7   | 5   |
-| IV     | 7   | 5   | 2   | 3   |
-| V      | 10  | 6   | 7   | 4   |
 
-Try to find a job assignment plan that minimizes the total working hours.
-"""
+problem_08_prompt: str = (
+    "Now, we need to determine 4 out of 5 workers to complete one of the four tasks respectively. Due to each "
+    "worker's different technical specialties, the time required for them to complete each task varies. The hours "
+    "required by each worker to complete each task are shown in Table 5-2.\n\n"
+    "Table 5-2\n"
+    "| Worker | $A$ | $B$ | $C$ | $D$ |\n"
+    "|--------|-----|-----|-----|-----|\n"
+    "| I      | 9   | 4   | 3   | 7   |\n"
+    "| II     | 4   | 6   | 5   | 6   |\n"
+    "| III    | 5   | 4   | 7   | 5   |\n"
+    "| IV     | 7   | 5   | 2   | 3   |\n"
+    "| V      | 10  | 6   | 7   | 4   |\n\n"
+    "Try to find a job assignment plan that minimizes the total working hours."
+)
 
+# Problem
 left_labels: tuple[ str, ...] = ( "I", "II", "III", "IV", "V" )
 right_labels: tuple[ str, ...] = ( "A", "B", "C", "D" )
 
@@ -50,7 +51,7 @@ left_vals: dict[ tuple[ str, str ], float ] = {
     ( "V", "T_A" ): 10.,
     ( "V", "T_B" ): 6.,
     ( "V", "T_C" ): 7.,
-    ( "V", "T_D" ): 4.,
+    ( "V", "T_D" ): 4.
 }
 right_vals: dict[ tuple[ str, str ], float ] = {
     ( "A", "T_A" ): 1.,
@@ -68,15 +69,14 @@ right_vals: dict[ tuple[ str, str ], float ] = {
     ( "D", "T_A" ): 0.,
     ( "D", "T_B" ): 0.,
     ( "D", "T_C" ): 0.,
-    ( "D", "T_D" ): 1.,
+    ( "D", "T_D" ): 1.
 }
-
 objective: Objective = Objective.MINIMIZE
 weights: dict[ str, float ] = {
     "T_A": 1.,
     "T_B": 1.,
     "T_C": 1.,
-    "T_D": 1.,
+    "T_D": 1.
 }
 reward_function: RewardFunctions = RewardFunctions.PRODUCT
 
@@ -86,57 +86,50 @@ matching_config: MatchingConfig = MatchingConfig(
     right_vals=right_vals,
     objective=objective,
     weights=weights,
-    reward_function=reward_function,
+    reward_function=reward_function
 )
 
-score_config: ScoreConfig = ScoreConfig(
-    use_matching=True,
-    matching_config=matching_config,
-)
+score_config: ScoreConfig = ScoreConfig( use_matching=True, matching_config=matching_config )
 
+# Constraints
 max_right_entities: dict[ str, float ] = {
     "I": 1.,
     "II": 1.,
     "III": 1.,
     "IV": 1.,
-    "V": 1.,
+    "V": 1.
 }
-
 max_left_entities: dict[ str, float ] = {
     "A": 1.,
     "B": 1.,
     "C": 1.,
-    "D": 1.,
+    "D": 1.
 }
-
 min_left_entities: dict[ str, float ] = {
     "A": 1.,
     "B": 1.,
     "C": 1.,
-    "D": 1.,
+    "D": 1.
 }
 
 quantities_constraints: QuantitiesConstraints = QuantitiesConstraints(
-    max_right_entities=max_right_entities,
-    max_left_entities=max_left_entities,
-    min_left_entities=min_left_entities,
+    max_right_entities=max_right_entities, max_left_entities=max_left_entities, min_left_entities=min_left_entities
 )
 
 constraints_config: ConstraintsConfig = ConstraintsConfig(
-    use_quantities_constraints=True,
-    quantities_constraints=quantities_constraints,
+    use_quantities_constraints=True, quantities_constraints=quantities_constraints
 )
 
 problem_08_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,
-    constraints_config=constraints_config,
+    constraints_config=constraints_config
 )
 
 solution_08: dict[ str, list[ tuple[ str, int ] ] ] = {
     "I": [ ( "C", 1 ) ],
     "II": [ ( "A", 1 ) ],
     "III": [ ( "B", 1 ) ],
-    "IV": [ ( "D", 1 ) ],
+    "IV": [ ( "D", 1 ) ]
 }

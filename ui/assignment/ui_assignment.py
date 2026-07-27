@@ -6,8 +6,10 @@ from collections.abc import MutableMapping
 from typing import Any
 
 import streamlit as st
+from streamlit.runtime.uploaded_file_manager import UploadedFile
 
-from infrastructure.registry import DATA_SOURCE_REGISTRY
+from infrastructure.csv_loader import CSVLoader
+from infrastructure.registry import DATA_SOURCE_REGISTRY, DataSourceDefinition
 from solvers.assignment.registry import SOLVERS
 from ui.assignment.builder import build_entities_labels, build_problem
 from ui.assignment.constraints.ui_logicals_constraints import logicals_constraints
@@ -79,17 +81,18 @@ def render( session_state: SessionState ) -> None:
         if session_state.data_source == "csv_two_tables":
             st.subheader( "Upload CSV files" )
 
-            left_file = st.file_uploader(
+            left_file: UploadedFile | None = st.file_uploader(
                 f"{ session_state.left_entities_type } dataset", type=[ "csv" ], key="left_csv"
             )
 
-            right_file = st.file_uploader(
+            right_file: UploadedFile | None = st.file_uploader(
                 f"{ session_state.right_entities_type } dataset", type=[ "csv" ], key="right_csv"
             )
 
-            loader = DATA_SOURCE_REGISTRY[ session_state.data_source ].loader_factory()
+            data_soure: DataSourceDefinition = DATA_SOURCE_REGISTRY[ session_state.data_source ]
+            loader: CSVLoader = data_soure.loader_class()
 
-            if left_file and right_file:
+            if isinstance( left_file, UploadedFile ) and isinstance( right_file, UploadedFile ):
                 session_state.left_cols, session_state.left_rows = loader.load( left_file )
                 session_state.right_cols, session_state.right_rows = loader.load( right_file )
                 show_next = True

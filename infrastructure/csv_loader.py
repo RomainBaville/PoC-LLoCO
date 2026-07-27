@@ -3,7 +3,9 @@
 # SPDX-FileContributor: Romain Baville
 
 import csv
-from typing import IO
+
+from streamlit.runtime.uploaded_file_manager import UploadedFile
+from typing_extensions import Sequence
 
 from infrastructure.base_loader import DataLoader
 
@@ -11,33 +13,48 @@ from infrastructure.base_loader import DataLoader
 class CSVLoader( DataLoader ):
     """Class to laod a csv file."""
 
-    def load( self, source: str | IO ):
-        """Load CSV from a file path or a file-like object (e.g. Streamlit upload).
+    def load( self, source: str | UploadedFile ) -> tuple[ tuple[ str, ...], tuple[ dict[ str, str ], ...] ]:
+        """Load CSV from a file path or a Streamlit upload file.
 
         Args:
-            source: file path (str) or file-like object
+            source (str, UploadedFile): file path (str) or streamlit upload file (UploadFile).
 
         Returns:
-            tuple[tuple[str, ...], tuple[dict[str, str], ...]): The column header of the csv, rows of the csv.
+            tuple[tuple[str, ...], tuple[dict[str, str], ...]]: The column header of the csv, rows of the csv.
+
+        Raises:
+            ValueError: The columns of the csv file must have name.
+            TypeError: The type of the source is not supported.
         """
         column: tuple[ str, ...]
-        rows: tuple[ dict[ str, str ] ]
+        rows: tuple[ dict[ str, str ], ...]
 
         # Case 1: file path
         if isinstance( source, str ):
-            with open( source, newline="", encoding="utf-8" ) as f:
-                reader = csv.DictReader( f )
-                column = tuple( reader.fieldnames ) or ()
+            with open( source, newline="", encoding="utf-8" ) as file:
+                reader = csv.DictReader( file )
+                if isinstance( reader.fieldnames, Sequence ):
+                    column = tuple( reader.fieldnames )
+                else:
+                    raise ValueError( "The columns of the csv file must have name." )
+
                 rows = tuple( reader )
 
-        # Case 2: file-like object ( Streamlit )
-        else:
+        # Case 2: Streamlit uplaod file
+        elif isinstance( source, UploadedFile ):
             source.seek( 0 )
 
             content = source.read().decode( "utf-8" ).splitlines()
             reader = csv.DictReader( content )
 
-            column = tuple( reader.fieldnames ) or ()
+            if isinstance( reader.fieldnames, Sequence ):
+                column = tuple( reader.fieldnames )
+            else:
+                raise ValueError( "The columns of the csv file must have name." )
+
             rows = tuple( reader )
+
+        else:
+            raise TypeError( "The type of the source is not supported." )
 
         return column, rows

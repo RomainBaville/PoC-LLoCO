@@ -21,7 +21,8 @@ sys.path.append( str( ROOT_DIR ) )
 
 
 @pytest.mark.parametrize(
-    "problem, expected_solution", [
+    "problem, expected_solution",
+    [
         ( problem_00_domain, solution_00 ),
         ( problem_08_domain, solution_08 ),
         ( problem_10_domain, solution_10 ),

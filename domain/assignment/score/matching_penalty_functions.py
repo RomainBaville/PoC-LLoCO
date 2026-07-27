@@ -116,22 +116,22 @@ def score_log_shortfall( left_val: float, right_val: float ) -> float:
 
 class PenaltyFunctions( Enum ):
     """Enum for penalty functions."""
-    NONE: Callable[ [ float, float ], float ] = ( no_penalty, )
-    SHORTFALL: Callable[ [ float, float ], float ] = ( score_shortfall, )
-    ABS_DIFF: Callable[ [ float, float ], float ] = ( score_absdiff, )
-    RELATIVE_SHORTFALL: Callable[ [ float, float ], float ] = ( score_relative_shortfall, )
-    SQUARED_DIFF: Callable[ [ float, float ], float ] = ( score_squared_diff, )
-    SHORTFALL_SQUARED: Callable[ [ float, float ], float ] = ( score_shortfall_squared, )
-    OVERQUALIFICATION: Callable[ [ float, float ], float ] = ( score_overqualification, )
-    LOG_SHORTFALL: Callable[ [ float, float ], float ] = ( score_log_shortfall, )
+    NONE = ( no_penalty, )
+    SHORTFALL = ( score_shortfall, )
+    ABS_DIFF = ( score_absdiff, )
+    RELATIVE_SHORTFALL = ( score_relative_shortfall, )
+    SQUARED_DIFF = ( score_squared_diff, )
+    SHORTFALL_SQUARED = ( score_shortfall_squared, )
+    OVERQUALIFICATION = ( score_overqualification, )
+    LOG_SHORTFALL = ( score_log_shortfall, )
 
-    def __init__( self: Self, func: Callable ):
+    def __init__( self: Self, func: Callable[ [ float, float ], float ] ):
         """Initialisation of the enum.
 
         Args:
-            func (Callable): The function.
+            func (Callable[[float, float], float]): The function.
         """
-        self.func: Callable = func
+        self.func: Callable[ [ float, float ], float ] = func
 
     def __str__( self: Self ) -> str:
         """Print the function name.

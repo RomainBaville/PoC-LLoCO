@@ -103,21 +103,21 @@ def score_soft_min( left_val: float, right_val: float ) -> float:
 
 class RewardFunctions( Enum ):
     """Enum for reward functions."""
-    MIN: Callable[ [ float, float ], float ] = ( score_min, )
-    PRODUCT: Callable[ [ float, float ], float ] = ( score_product, )
-    RATIO: Callable[ [ float, float ], float ] = ( score_ratio, )
-    THRESHOLD: Callable[ [ float, float ], float ] = ( score_threshold, )
-    SQRT_PRODUCT: Callable[ [ float, float ], float ] = ( score_sqrt_product, )
-    LOG_PRODUC: Callable[ [ float, float ], float ] = ( score_log_product, )
-    SOFT_MIN: Callable[ [ float, float ], float ] = ( score_soft_min, )
+    MIN = ( score_min, )
+    PRODUCT = ( score_product, )
+    RATIO = ( score_ratio, )
+    THRESHOLD = ( score_threshold, )
+    SQRT_PRODUCT = ( score_sqrt_product, )
+    LOG_PRODUC = ( score_log_product, )
+    SOFT_MIN = ( score_soft_min, )
 
-    def __init__( self: Self, func: Callable ) -> None:
+    def __init__( self: Self, func: Callable[ [ float, float ], float ] ) -> None:
         """Initialisation of the enum.
 
         Args:
-            func (Callable): The function.
+            func (Callable[[float, float], float]): The function.
         """
-        self.func: Callable = func
+        self.func: Callable[ [ float, float ], float ] = func
 
     def __str__( self: Self ) -> str:
         """Print the function name.

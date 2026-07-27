@@ -8,8 +8,8 @@ from typing import Self
 
 class Objective( Enum ):
     """Enum for objective functions."""
-    MAXIMIZE: int = 1
-    MINIMIZE: int = -1
+    MAXIMIZE = 1
+    MINIMIZE = -1
 
     def __str__( self: Self ) -> str:
         """Print the objective label.

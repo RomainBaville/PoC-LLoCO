@@ -5,6 +5,8 @@
 from typing import Self
 
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
+from domain.assignment.score.matching_config import MatchingConfig
+from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 
 
@@ -46,7 +48,7 @@ class AssignmentProblem:
             float: The matching score for the left and right entities of the problem.
         """
         matching_score: float = 0
-        if self.score_config.use_matching:
+        if self.score_config.use_matching and isinstance( self.score_config.matching_config, MatchingConfig ):
             matching_objective: int = self.score_config.matching_config.objective.value
             for matching_label in self.score_config.matching_config.labels:
                 left_val: float = self.score_config.matching_config.left_vals[ ( left_label, matching_label ) ]
@@ -74,7 +76,7 @@ class AssignmentProblem:
         """
         ressources_score: float = 0
 
-        if self.score_config.use_ressources:
+        if self.score_config.use_ressources and isinstance( self.score_config.ressources_config, RessourcesConfig ):
             for ressource_label in self.score_config.ressources_config.labels:
                 val: float = self.score_config.ressources_config.vals[ ( left_label, ressource_label ) ]
                 ressource_weight: float = self.score_config.ressources_config.weights[ ressource_label ]

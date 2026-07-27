@@ -82,7 +82,8 @@ def ressources_constraints( session_state: SessionState ) -> None:
                     constraints_ressources_labels: dict[ str, list[ str ] ] = {}
                     for constraint_label in constraints_labels:
                         constraints_ressources_labels[ constraint_label ] = st.multiselect(
-                            f"Select ressources constrainning by { constraint_label }", session_state.ressources_labels
+                            f"Select ressources constrainning by { constraint_label }",
+                            session_state.ressources_labels
                         )
 
                     vals: dict[ tuple[ str, ...], float ] = {}

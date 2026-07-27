@@ -5,23 +5,24 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from infrastructure.base_loader import DataLoader
 from infrastructure.csv_loader import CSVLoader
 
 
 @dataclass
 class DataSourceDefinition:
-    """Dataclass to deal with several type off input data.
+    """Dataclass to deal with several type of input data.
 
     Args:
         key (str): The key of the input data use for the code.
         label (str): The label of the input data use for the user.
         description (str): The description of the input data.
-        loader_factory (Callable): The function used to laod the data.
+        loader_class (Callable[[], DataLoader]): The class used to load the data.
     """
     key: str
     label: str
     description: str
-    loader_factory: Callable
+    loader_class: Callable[ [], DataLoader ]
 
 
 DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
@@ -30,6 +31,6 @@ DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
         key="csv_two_tables",
         label="Two CSV files",
         description=( "You have two CSV files, one with the data and the other with the constraints." ),
-        loader_factory=lambda: CSVLoader(),
+        loader_class=CSVLoader,
     ),
 }

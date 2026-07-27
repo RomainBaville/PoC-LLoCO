@@ -4,6 +4,8 @@
 
 from dataclasses import dataclass, field
 
+from typing_extensions import Any
+
 
 @dataclass
 class OptimizationSession:
@@ -18,7 +20,8 @@ class OptimizationSession:
         result_summary (str): The summary of the result.
         config_summary (str | None): The summary of the problem configuration.
             Defaults to None.
-        result_details (dict) = field( default_factory=dict )
+        result_details (dict[Any, Any]): The dictionary with the result.
+            Defaults to field(default_factory=dict )
     """
     problem_type: str
     steps: list[ str ]
@@ -27,4 +30,4 @@ class OptimizationSession:
     solver_description: str
     result_summary: str
     config_summary: str | None = None
-    result_details: dict = field( default_factory=dict )
+    result_details: dict[ Any, Any ] = field( default_factory=dict[ Any, Any ] )

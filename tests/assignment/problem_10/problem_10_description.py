@@ -7,30 +7,29 @@ from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
-"""Problem description:
-A convenience supermarket is planning to open several chain stores in a newly built residential area in the northwest
-suburb of the city. For shopping convenience, the distance from any residential area to one of the chain stores should
-not exceed 800m. Table 5-1 shows the new residential areas and the residential areas within a radius of 800m from each
-of them.
 
-Question: What is the minimum number of chain stores the supermarket needs to build among the mentioned residential
-areas, and in which residential areas should they be built?
-
-| Area Code | Residential Areas within 800m Radius|
-|-----------|-------------------------------------|
-| A         | A, C, E, G, H, I                    |
-| B         | B, H, I                             |
-| C         | A, C, G, H, I                       |
-| D         | D, J                                |
-| E         | A, E, G                             |
-| F         | F, J, K                             |
-| G         | A, C, E, G                          |
-| H         | A, B, C, H, I                       |
-| I         | A, B, C, H, I                       |
-| J         | D, F, J, K, L                       |
-| K         | F, J, K, L                          |
-| L         | J, K, L                             |
-"""
+problem_10_prompt: str = (
+    "A convenience supermarket is planning to open several chain stores in a newly built residential area in the "
+    "northwest suburb of the city. For shopping convenience, the distance from any residential area to one of the "
+    "chain stores should not exceed $800 \\mathrm{~m}$. Table 5-1 shows the new residential areas and the residential "
+    "areas within a radius of $800 \\mathrm{~m}$ from each of them. Question: What is the minimum number of chain "
+    "stores the supermarket needs to build among the mentioned residential areas, and in which residential areas "
+    "should they be built?\n\n"
+    "| Area Code | Residential Areas within $800 \\mathrm{~m}$ Radius |\n"
+    "|-----------|---------------------------------------|\n"
+    "| A         | A, C, E, G, H, I                      |\n"
+    "| B         | B, H, I                               |\n"
+    "| C         | A, C, G, H, I                         |\n"
+    "| D         | D, J                                  |\n"
+    "| E         | A, E, G                               |\n"
+    "| F         | F, J, K                               |\n"
+    "| G         | A, C, E, G                            |\n"
+    "| H         | A, B, C, H, I                         |\n"
+    "| I         | A, B, C, H, I                         |\n"
+    "| J         | D, F, J, K, L                         |\n"
+    "| K         | F, J, K, L                            |\n"
+    "| L         | J, K, L                               |"
+)
 
 left_labels: tuple[ str, ...] = ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" )
 right_labels: tuple[ str, ...] = ( "Commerces", )
@@ -183,7 +182,7 @@ vals: dict[ tuple[ str, str ], float ] = {
     ( "L", "I_800" ): 0.,
     ( "L", "J_800" ): 1.,
     ( "L", "K_800" ): 1.,
-    ( "L", "L_800" ): 1.,
+    ( "L", "L_800" ): 1.
 }
 objectives: dict[ str, Objective ] = {
     "A_800": Objective.MINIMIZE,
@@ -197,7 +196,7 @@ objectives: dict[ str, Objective ] = {
     "I_800": Objective.MINIMIZE,
     "J_800": Objective.MINIMIZE,
     "K_800": Objective.MINIMIZE,
-    "L_800": Objective.MINIMIZE,
+    "L_800": Objective.MINIMIZE
 }
 weights: dict[ str, float ] = {
     "A_800": 1.,
@@ -211,7 +210,7 @@ weights: dict[ str, float ] = {
     "I_800": 1.,
     "J_800": 1.,
     "K_800": 1.,
-    "L_800": 1.,
+    "L_800": 1.
 }
 min_vals: dict[ tuple[ str, ...], float ] = {
     ( "Commerces", "A_800" ): 1.,
@@ -225,15 +224,11 @@ min_vals: dict[ tuple[ str, ...], float ] = {
     ( "Commerces", "I_800" ): 1.,
     ( "Commerces", "J_800" ): 1.,
     ( "Commerces", "K_800" ): 1.,
-    ( "Commerces", "L_800" ): 1.,
+    ( "Commerces", "L_800" ): 1.
 }
 
 ressource_config: RessourcesConfig = RessourcesConfig(
-    labels=labels,
-    vals=vals,
-    objectives=objectives,
-    weights=weights,
-    min_vals=min_vals,
+    labels=labels, vals=vals, objectives=objectives, weights=weights, min_vals=min_vals
 )
 
 score_config: ScoreConfig = ScoreConfig( use_ressources=True, ressources_config=ressource_config )
@@ -245,10 +240,10 @@ problem_10_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,
     right_labels=right_labels,
     score_config=score_config,
-    constraints_config=constraints_config,
+    constraints_config=constraints_config
 )
 solution_10: dict[ list[ tuple[ str, int ] ] ] = {
     "B": [ ( "Commerces", 1 ) ],
     "G": [ ( "Commerces", 1 ) ],
-    "J": [ ( "Commerces", 1 ) ],
+    "J": [ ( "Commerces", 1 ) ]
 }

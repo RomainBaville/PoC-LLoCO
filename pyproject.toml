@@ -36,13 +36,12 @@ addopts = "-v"
 
 
 # =========================================================
-# RUFF CONFIGURATION (LINTER ONLY — NO AUTO FORMAT)
+# RUFF CONFIGURATION
 # =========================================================
 [tool.ruff]
 line-length = 120
 target-version = "py312"
 
-# Files & folders excluded from analysis
 exclude = [
     "models",
     "llama_cpp",
@@ -56,10 +55,10 @@ exclude = [
 [tool.ruff.lint]
 select = [
     "E",
+    "W",
     "F",
     "I",
     "D",
-    "UP",
     "B",
     "SIM",
     "C4",
@@ -91,54 +90,37 @@ convention = "google"
 
 
 # =========================================================
-# MYPY (STRICT MODE)
+# MYPY
 # =========================================================
 [tool.mypy]
 python_version = "3.12"
 strict = true
-ignore_missing_imports = true
 
 exclude = [
     "models/",
     "llama_cpp/",
     ".github/",
+    "llm/",  # TODO in a futur PR
 ]
 
-# Extra useful strictness flags
+ignore_missing_imports = true
+warn_unreachable = true
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 check_untyped_defs = true
-no_implicit_optional = true
+implicit_optional = true
 
 
 # =========================================================
-# YAPF (CUSTOM STYLE WITH SPACES)
+# YAPF
 # =========================================================
 [tool.yapf]
 based_on_style = "pep8"
-column_limit = "120"
 
-
-# Allow spaces inside brackets:
-# Example:
-# tuple[ str, ... ]
-space_inside_brackets = true
-
-# Keep spaces between comma and closing bracket
-space_between_ending_comma_and_closing_bracket = true
-
-# Avoid collapsing brackets into one line
-coalesce_brackets = false
-
-# Keep closing bracket indentation readable
-dedent_closing_brackets = true
-
-# Allow splitting after opening parenthesis
-split_before_expression_after_opening_paren = true
-
-# Preserve readability in complex expressions
-split_before_named_assigns = true
-
-# Avoid aggressive compaction
-split_complex_comprehension = true
+COLUMN_LIMIT = 120
+DEDENT_CLOSING_BRACKETS = true
+FORCE_MULTILINE_DICT = true
+SPACE_INSIDE_BRACKETS = true
+SPLIT_ALL_TOP_LEVEL_COMMA_SEPARATED_VALUES = true
+SPLIT_COMPLEX_COMPREHENSION = true

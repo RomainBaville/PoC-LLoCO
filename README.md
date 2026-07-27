@@ -385,9 +385,9 @@ Do NOT run install without `--frozen`
 uv sync --extra dev --frozen
 
 uv run pytest
+uv run yapf -r -i domain solvers infrastructure ui tests
 uv run ruff check .
 uv run mypy .
-uv run yapf -r -i domain solvers infrastructure ui tests
 
 uv run pre-commit run --all-files
 ```
