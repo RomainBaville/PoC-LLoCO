@@ -242,7 +242,7 @@ problem_10_domain: AssignmentProblem = AssignmentProblem(
     score_config=score_config,
     constraints_config=constraints_config
 )
-solution_10: dict[ list[ tuple[ str, int ] ] ] = {
+solution_10: dict[ str, list[ tuple[ str, int ] ] ] = {
     "B": [ ( "Commerces", 1 ) ],
     "G": [ ( "Commerces", 1 ) ],
     "J": [ ( "Commerces", 1 ) ]
