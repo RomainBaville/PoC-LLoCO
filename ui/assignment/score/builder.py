@@ -2,16 +2,18 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
+
 from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 
 
-def build_score_config( state ) -> ScoreConfig:
+def build_score_config( state: SessionStateProxy ) -> ScoreConfig:
     """Build the score config of the assignment problem.
 
     Args:
-        state (): ...
+        state (SessionStateProxy): The session state.
 
     Returns:
         ScoreConfig: The configuration of the score of the assignment problem

@@ -2,22 +2,18 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from collections.abc import MutableMapping
-from typing import Any
-
 import streamlit as st
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from domain.objective import Objective
 from ui.assignment.builder import build_vals
 
-SessionState = MutableMapping[ str, Any ]
 
-
-def map_ressources( session_state: SessionState ) -> None:
+def map_ressources( session_state: SessionStateProxy ) -> None:
     """Configure the interface to set the data in order to map the ressources.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     session_state.ressources_labels = tuple(
         st.multiselect(
@@ -32,11 +28,11 @@ def map_ressources( session_state: SessionState ) -> None:
     )
 
 
-def ressources_strategy( session_state: SessionState ) -> None:
+def ressources_strategy( session_state: SessionStateProxy ) -> None:
     """Configure the interface to set the assignment ressources strategy.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     session_state.ressoucres_objectives = {}
     for ressource_label in session_state.ressources_labels:
@@ -57,11 +53,11 @@ def ressources_strategy( session_state: SessionState ) -> None:
                 )
 
 
-def ressources_constraints( session_state: SessionState ) -> None:
+def ressources_constraints( session_state: SessionStateProxy ) -> None:
     """Configure the interface to set the constraints data.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     extrema: tuple[ str, str ] = ( "maximum", "minimum" )
     constraints_extrema_cols = st.columns( 2 )
@@ -95,7 +91,7 @@ def ressources_constraints( session_state: SessionState ) -> None:
                             if len( key ) > 1:
                                 vals[ tuple( key ) ] = float( right_row[ constraint_label ] )
                             elif tuple( key ) in vals:
-                                del vals[ tuple[ key ] ]
+                                del vals[ tuple( key ) ]
 
                     if vals != {}:
                         constraints_extrema_vals[ id ] = vals
@@ -119,7 +115,7 @@ def ressources_constraints( session_state: SessionState ) -> None:
                     f"{ extrema[ id ] } value for all { session_state.right_entities_type }"
                 )
                 if use_constraints_extrema_global_vals:
-                    constraints_extrema_global_vals[ id ] = {}
+                    curent_constraints_extrema_global_vals: dict[ tuple[ str, ...], float ] = {}
                     nb_constrained_groups: int = st.number_input(
                         "How many group of ressources are constrained", value=1
                     )
@@ -136,10 +132,11 @@ def ressources_constraints( session_state: SessionState ) -> None:
                                 f"Set the { extrema[ id ] } value constrainning the { constrained_ressources }",
                                 value=1.
                             )
-                            constraints_extrema_global_vals[ id ][ constrained_ressources ] = constraint_val
+                            curent_constraints_extrema_global_vals[ constrained_ressources ] = constraint_val
                         else:
-                            if constrained_ressources in constraints_extrema_global_vals[ id ]:
-                                del constraints_extrema_global_vals[ id ][ constrained_ressources ]
+                            if constrained_ressources in curent_constraints_extrema_global_vals:
+                                del curent_constraints_extrema_global_vals[ constrained_ressources ]
+                    constraints_extrema_global_vals[ id ] = curent_constraints_extrema_global_vals
                 else:
                     constraints_extrema_global_vals[ id ] = None
 

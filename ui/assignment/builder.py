@@ -2,14 +2,11 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from collections.abc import MutableMapping
-from typing import Any
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from domain.assignment.base import AssignmentProblem
 from ui.assignment.constraints.builder import build_constraints_config
 from ui.assignment.score.builder import build_score_config
-
-SessionState = MutableMapping[ str, Any ]
 
 
 def build_entities_labels(
@@ -51,9 +48,9 @@ def build_vals(
     for entity_row in entity_rows:
         for variable_label in variables_labels:
             val: float
-            try:
+            if isinstance( variables_labels, dict ):
                 val = float( entity_row[ variables_labels[ variable_label ] ] )
-            except Exception:
+            else:
                 val = float( entity_row[ variable_label ] )
 
             entity_label: str = entity_row[ entity_col_label ]
@@ -62,11 +59,11 @@ def build_vals(
     return vals
 
 
-def build_problem( session_state: SessionState ) -> AssignmentProblem:
+def build_problem( session_state: SessionStateProxy ) -> AssignmentProblem:
     """Build the assignment problem.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
 
     Returns:
         AssignmentProblem: The assignment problem.

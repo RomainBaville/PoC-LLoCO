@@ -13,6 +13,7 @@ This version uses a local Qwen GGUF model via llama-server.
 """
 
 import os
+from typing import Any
 
 import requests
 
@@ -38,7 +39,7 @@ def ask_llm_request( prompt: str ) -> str:
     Returns:
         str: The llm response.
     """
-    payload = {
+    payload: dict[ str, Any ] = {
         "model":
         LLM_MODEL_NAME,
         "messages": [
@@ -76,6 +77,7 @@ def ask_llm_request( prompt: str ) -> str:
     data = response.json()
 
     try:
-        return data[ "choices" ][ 0 ][ "message" ][ "content" ].strip()
+        content: str = str( data[ "choices" ][ 0 ][ "message" ][ "content" ].strip() )
+        return content
     except ( KeyError, IndexError ) as e:
         raise RuntimeError( f"Unexpected LLM response format: {data}" ) from e

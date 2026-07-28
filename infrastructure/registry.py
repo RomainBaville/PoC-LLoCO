@@ -4,9 +4,9 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
-from infrastructure.base_loader import DataLoader
-from infrastructure.csv_loader import CSVLoader
+from infrastructure.csv_loader import load_csv
 
 
 @dataclass
@@ -17,12 +17,12 @@ class DataSourceDefinition:
         key (str): The key of the input data use for the code.
         label (str): The label of the input data use for the user.
         description (str): The description of the input data.
-        loader_class (Callable[[], DataLoader]): The class used to load the data.
+        loader_fn (Callable[[Any], tuple[tuple[str, ...], tuple[dict[str, str], ...]]]): The function to load the data.
     """
     key: str
     label: str
     description: str
-    loader_class: Callable[ [], DataLoader ]
+    loader_fn: Callable[ [ Any ], tuple[ tuple[ str, ...], tuple[ dict[ str, str ], ...] ] ]
 
 
 DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
@@ -30,7 +30,7 @@ DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
     DataSourceDefinition(
         key="csv_two_tables",
         label="Two CSV files",
-        description=( "You have two CSV files, one with the data and the other with the constraints." ),
-        loader_class=CSVLoader,
+        description="You have two CSV files, one with the data and the other with the constraints.",
+        loader_fn=load_csv,
     ),
 }

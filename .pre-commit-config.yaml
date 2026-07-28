@@ -8,6 +8,11 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
+        additional_dependencies:
+          - requests
+          - types-requests
+          - streamlit
+          - pytest
 
   - repo: https://github.com/google/yapf
     rev: v0.40.2
@@ -18,5 +23,6 @@ repos:
     hooks:
       - id: uv-lock-check
         name: Check uv.lock updated
-        entry: bash -c "uv lock --check"
+        entry: uv lock --check
         language: system
+        pass_filenames: false

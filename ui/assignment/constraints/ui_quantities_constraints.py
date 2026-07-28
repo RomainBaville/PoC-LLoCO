@@ -2,203 +2,239 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from collections.abc import MutableMapping
-from typing import Any
-
 import streamlit as st
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from ui.assignment.constraints.builder import build_quantities_constraints
 
-SessionState = MutableMapping[ str, Any ]
 
-
-def quantities_constraints( session_state: SessionState ) -> None:
+def quantities_constraints( session_state: SessionStateProxy ) -> None:
     """Configure the interface to set the quantities constraints of the problem.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     st.subheader( "Quantities constraints" )
-
-    labels: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( session_state.left_labels, session_state.right_labels )
-    entities_types: tuple[ str, str ] = ( session_state.left_entities_type, session_state.right_entities_type )
-    entities_cols: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( session_state.left_cols, session_state.right_cols )
-    entities_rows: tuple[ dict[ str, str ], dict[ str, str ] ] = ( session_state.left_rows, session_state.right_rows )
-    entities_col_label: tuple[
-        str, str ] = ( session_state.left_entities_col_label, session_state.right_entities_col_label )
-    extrema: tuple[ str, str ] = ( "maximum", "minimum" )
-
     # -----------------------------
     # Extrema side entities
     # -----------------------------
-    extrema_side_entities: list[ list[ dict[ str, float ] | None ] ] = [ [ None, None ], [ None, None ] ]
-    for side in range( 2 ):  # left then right
-        extrema_side_entities_cols = st.columns( 2 )
-        for id, extrema_side_entities_col in enumerate( extrema_side_entities_cols ):  # max and min columns
-            with extrema_side_entities_col:
-                use_extrema_side_entities: bool = st.checkbox(
-                    f"Is there a { extrema[ id ] } number of { entities_types[ 1 - side ] } " \
-                    f"that can be assigned to one { entities_types[ side ] } ?"
-                )
-
-                if use_extrema_side_entities:
-                    entities_mode: str = st.radio(
-                        f"How to define the { extrema[ id ] } number of { entities_types[ 1 - side ] } " \
-                        f"that can be assigned to one { entities_types[ side ] } ?",
-                        [
-                            "With data column",
-                            f"Set it manually for each { entities_types[ side ] }",
-                            f"Set it manually for all { entities_types[ side ] }",
-                        ],
-                    )
-
-                    if entities_mode == "With data column":
-                        extrema_side_entities_col_label: str = st.selectbox(
-                            f"Select the column identifying the { extrema[ id ] } number of " \
-                            f"{ entities_types[ 1 - side ] } that can be assigned to one { entities_types[ side ] }",
-                            entities_cols[ side ],
-                        )
-                        extrema_side_entities[ side ][ id ] = build_quantities_constraints(
-                            entities_col_label[ side ],
-                            entities_rows[ side ],
-                            quantities_constraints_col_label=extrema_side_entities_col_label,
-                        )
-
-                    elif entities_mode == f"Set it manually for each { entities_types[ side ] }":
-                        for label in labels[ side ]:
-                            extrema_side_entities[ side ][ id ][ label ] = st.number_input(
-                                f"Set the { extrema[ id ] } number of { entities_types[ 1 - side ] } " \
-                                f"that can be assigned to { label }",
-                                min_value=1.,
-                            )
-
-                    elif entities_mode == f"Set it manually for all { entities_types[ side ] }":
-                        extrema_side_entities_val: float = st.number_input(
-                            f"Set the { extrema[ id ] } number of { entities_types[ 1 - side ] } " \
-                            f"that can be assigned to one { entities_types[ side ] }",
-                            min_value=1.,
-                        )
-                        extrema_side_entities[ side ][ id ] = build_quantities_constraints(
-                            entities_col_label[ side ],
-                            entities_rows[ side ],
-                            quantities_constraints_val=extrema_side_entities_val
-                        )
-                else:
-                    extrema_side_entities[ side ][ id ] = None
-
-    session_state.max_right_entities = extrema_side_entities[ 0 ][ 0 ]
-    session_state.min_right_entities = extrema_side_entities[ 0 ][ 1 ]
-    session_state.max_left_entities = extrema_side_entities[ 1 ][ 0 ]
-    session_state.min_left_entities = extrema_side_entities[ 1 ][ 1 ]
+    session_state.max_right_entities = extremum_assignments(
+        extremum="maximum",
+        labels=session_state.left_labels,
+        entities_type=session_state.left_entities_type,
+        entities_rows=session_state.left_entities_rows,
+        entities_cols=session_state.left_entities_cols,
+        entities_col_label=session_state.left_entities_col_label,
+        message="all the several assignments to the same entities count for one."
+    )
+    session_state.min_right_entities = extremum_assignments(
+        extremum="minimum",
+        labels=session_state.left_labels,
+        entities_type=session_state.left_entities_type,
+        entities_rows=session_state.left_entities_rows,
+        entities_cols=session_state.left_entities_cols,
+        entities_col_label=session_state.left_entities_col_label,
+        message="all the several assignments to the same entities count for one."
+    )
+    session_state.max_left_entities = extremum_assignments(
+        extremum="maximum",
+        labels=session_state.right_labels,
+        entities_type=session_state.right_entities_type,
+        entities_rows=session_state.right_entities_rows,
+        entities_cols=session_state.right_entities_cols,
+        entities_col_label=session_state.right_entities_col_label,
+        message="all the several assignments to the same entities count for one."
+    )
+    session_state.min_left_entities = extremum_assignments(
+        extremum="minimum",
+        labels=session_state.right_labels,
+        entities_type=session_state.right_entities_type,
+        entities_rows=session_state.right_entities_rows,
+        entities_cols=session_state.right_entities_cols,
+        entities_col_label=session_state.right_entities_col_label,
+        message="all the several assignments to the same entities count for one."
+    )
 
     # -----------------------------
     # Mutiple same assignment
     # -----------------------------
     session_state.multiple_same_assignment = st.checkbox(
-        f"{ session_state.left_entities_type } can be assigned multiple time to the " \
-        f"same { session_state.right_entities_type } ?"
+        f"{ session_state.left_entities_type } can be assigned multiple " \
+        f"time to the same { session_state.right_entities_type } ?"
     )
-
-    extrema_same_assignments: list[ dict[ tuple[ str, str ], float ] | None ] = [ None, None ]
-    extrema_side_assignments: list[ list[ dict[ str, float ] | None ] ] = [ [ None, None ], [ None, None ] ]
-
     if session_state.multiple_same_assignment:
         # -----------------------------
         # Extrema same assignments
         # -----------------------------
-        for id in range( 2 ):  # max then min
-            use_extrema_same_assignments: bool = st.checkbox(
-                f"Is there { session_state.left_entities_type } with a { extrema[ id ] } number of " \
-                f"assignment to the same { session_state.right_entities_type } ?"
-            )
-            if use_extrema_same_assignments:
-                extrema_same_assignments[ id ] = {}
-                left_labels_constrainted: tuple[ str, ...] = tuple(
-                    st.multiselect(
-                        f"Select all the { session_state.left_entities_type } with a constraint",
-                        session_state.left_cols,
-                    )
-                )
-                for left_label_constrainted in left_labels_constrainted:
-                    right_labels_constrainted: tuple[ str, ...] = tuple( st.multiselect(
-                        f"Select all the { session_state.right_entities_type } with a { extrema[ id ] } " \
-                        f"constraint du to the { left_label_constrainted }",
-                        session_state.right_cols,
-                    ) )
-                    for right_label_constrainted in right_labels_constrainted:
-                        extrema_same_assignments[ id ][
-                            left_label_constrainted, right_label_constrainted
-                        ] = st.number_input(
-                            f"Set the { extrema[ id ] } numuber of assignement allowed between " \
-                            f"{ left_label_constrainted } and { right_label_constrainted }",
-                            min_value=1.,
-                        )
-                if extrema_same_assignments[ id ] == {}:
-                    extrema_same_assignments[ id ] = None
-            else:
-                extrema_same_assignments[ id ] = None
+        entities_types: tuple[ str, str ] = ( session_state.left_entities_type, session_state.right_entities_type )
+        entities_cols: tuple[ tuple[ str, ...], tuple[ str,
+                                                       ...] ] = ( session_state.left_cols, session_state.right_cols )
+
+        session_state.max_same_assignments = extremum_same_assignments(
+            extremum="maximum", entities_types=entities_types, entities_cols=entities_cols
+        )
+        session_state.min_same_assignments = extremum_same_assignments(
+            extremum="minimum", entities_types=entities_types, entities_cols=entities_cols
+        )
 
         # -----------------------------
         # Extrema side assignments
         # -----------------------------
-        for side in range( 2 ):  # left then right
-            extrema_side_assignments_cols = st.columns( 2 )
-            for id, extrema_side_assignments_col in enumerate( extrema_side_assignments_cols ):  # max and min columns
-                with extrema_side_assignments_col:
-                    use_extrema_side_assignments: bool = st.checkbox(
-                        f"Is there a { extrema[ id ] } number of assignments allowed per { entities_types[ side ] } ?"
-                    )
-
-                    if use_extrema_side_assignments:
-                        assignments_mode: str = st.radio(
-                            f"How to define the { extrema[ id ] } number of assignments allowed " \
-                            f"per { entities_types[ side ] } ?",
-                            [
-                                "With data column",
-                                f"Set it manually for each { entities_types[ side ] }",
-                                f"Set it manually for all { entities_types[ side ] }",
-                            ],
-                        )
-
-                        if assignments_mode == "With data column":
-                            extrema_side_assignments_col_label: str = st.selectbox(
-                                f"Select the column identifying the { extrema[ id ] } number of " \
-                                f"assignments allowed per { entities_types[ side ] }",
-                                entities_cols[ side ],
-                            )
-                            extrema_side_assignments[ side ][ id ] = build_quantities_constraints(
-                                entities_col_label[ side ],
-                                entities_rows[ side ],
-                                quantities_constraints_col_label=extrema_side_assignments_col_label
-                            )
-
-                        elif assignments_mode == f"Set it manually for each { entities_types[ side ] }":
-                            for label in labels[ side ]:
-                                extrema_side_assignments[ side ][ id ][ label ] = st.number_input(
-                                    f"Set the { extrema[ id ] } number of assignments allowed for the { label }",
-                                    min_value=1.,
-                                )
-
-                        elif assignments_mode == f"Set it manually for all { entities_types[ side ] }":
-                            extrema_side_assignments_val: float = st.number_input(
-                                f"Set the { extrema[ id ] } number of { entities_types[ side ] } assignments allowed ",
-                                min_value=1.,
-                            )
-                            extrema_side_assignments[ side ][ id ] = build_quantities_constraints(
-                                entities_col_label[ side ],
-                                entities_rows[ side ],
-                                quantities_constraints_val=extrema_side_assignments_val
-                            )
-                    else:
-                        extrema_side_assignments[ side ][ id ] = None
+        session_state.max_right_assignments = extremum_assignments(
+            extremum="maximum",
+            labels=session_state.left_labels,
+            entities_type=session_state.left_entities_type,
+            entities_rows=session_state.left_entities_rows,
+            entities_cols=session_state.left_entities_cols,
+            entities_col_label=session_state.left_entities_col_label,
+            message="all the several assignments to the same entities count."
+        )
+        session_state.min_right_assignments = extremum_assignments(
+            extremum="minimum",
+            labels=session_state.left_labels,
+            entities_type=session_state.left_entities_type,
+            entities_rows=session_state.left_entities_rows,
+            entities_cols=session_state.left_entities_cols,
+            entities_col_label=session_state.left_entities_col_label,
+            message="all the several assignments to the same entities count."
+        )
+        session_state.max_left_assignments = extremum_assignments(
+            extremum="maximum",
+            labels=session_state.right_labels,
+            entities_type=session_state.right_entities_type,
+            entities_rows=session_state.right_entities_rows,
+            entities_cols=session_state.right_entities_cols,
+            entities_col_label=session_state.right_entities_col_label,
+            message="all the several assignments to the same entities count."
+        )
+        session_state.min_left_assignments = extremum_assignments(
+            extremum="minimum",
+            labels=session_state.right_labels,
+            entities_type=session_state.right_entities_type,
+            entities_rows=session_state.right_entities_rows,
+            entities_cols=session_state.right_entities_cols,
+            entities_col_label=session_state.right_entities_col_label,
+            message="all the several assignments to the same entities count."
+        )
     else:
-        extrema_same_assignments = [ None, None ]
-        extrema_side_assignments = [ [ None, None ], [ None, None ] ]
+        session_state.max_same_assignments = None
+        session_state.min_same_assignments = None
+        session_state.max_right_assignments = None
+        session_state.min_right_assignments = None
+        session_state.max_left_assignments = None
+        session_state.min_left_assignments = None
 
-    session_state.max_same_assignments = extrema_same_assignments[ 0 ]
-    session_state.min_same_assignments = extrema_same_assignments[ 1 ]
 
-    session_state.max_right_assignments = extrema_side_assignments[ 0 ][ 0 ]
-    session_state.min_right_assignments = extrema_side_assignments[ 0 ][ 1 ]
-    session_state.max_left_assignments = extrema_side_assignments[ 1 ][ 0 ]
-    session_state.min_left_assignments = extrema_side_assignments[ 1 ][ 1 ]
+def extremum_same_assignments(
+    extremum: str, entities_types: tuple[ str, str ], entities_cols: tuple[ tuple[ str, ...], tuple[ str, ...] ]
+) -> dict[ tuple[ str, str ], float ] | None:
+    """Build the extremum same assignment constraints of the problem.
+
+    Args:
+        extremum (str): The extremum.
+        entities_types (tuple[str, str]): The left and right entities types.
+        entities_cols (tuple[tuple[str, ...], tuple[str, ...]]): The left and right entities columns.
+
+    Returns:
+        dict[tuple[str, str], float] | None: The extremum same assignment constraints.
+    """
+    extremum_same_assignments_constraints: dict[ tuple[ str, str ], float ] | None = None
+    use_extremum_same_assignments: bool = st.checkbox(
+        f"Is there { entities_types[ 0 ] } with a { extremum } number of " \
+        f"assignment to the same { entities_types[ 1 ] } ?"
+    )
+    if use_extremum_same_assignments:
+        constraints: dict[ tuple[ str, str ], float ] = {}
+        left_labels_constrainted: list[ str ] = st.multiselect(
+            f"Select all the { entities_types[ 0 ] } with a constraint", entities_cols[ 0 ]
+        )
+        for left_label_constrainted in left_labels_constrainted:
+            right_labels_constrainted: list[ str ] = st.multiselect(
+                f"Select all the { entities_types[ 1 ] } with a { extremum } " \
+                f"constraint due to the { left_label_constrainted }",
+                entities_cols[ 1 ]
+            )
+            for right_label_constrainted in right_labels_constrainted:
+                constraints[ ( left_label_constrainted, right_label_constrainted ) ] = st.number_input(
+                    f"Set the { extremum } numuber of assignement allowed between " \
+                    f"{ left_label_constrainted } and { right_label_constrainted }",
+                    min_value=1.
+                )
+        if constraints != {}:
+            extremum_same_assignments_constraints = constraints
+
+    return extremum_same_assignments_constraints
+
+
+def extremum_assignments(
+    extremum: str,
+    labels: tuple[ str, ...],
+    entities_type: str,
+    entities_rows: tuple[ dict[ str, str ], ...],
+    entities_cols: tuple[ str, ...],
+    entities_col_label: str,
+    message: str
+) -> dict[ str, float ] | None:
+    """Build the extremum entities constraints of the problem if it exits.
+
+    This function can build the eights quantities constraints about the number of assignments per entity.
+    The variable message allows to explain the diffences between the four constraint taking into acount two
+    assignments to a same entity and the four other. Here is an example of the two messages:
+
+        - extremum_side_assignments: all the several assignments to the same entities count.
+        - extremum_side_entities: all the several assignments to the same entities count for one.
+
+    Args:
+        extremum (str): The extremum.
+        labels (tuple[str, ...]): The entities labels.
+        entities_type (str): The entities type.
+        entities_rows (tuple[dict[str, str], ...]): The entities rows.
+        entities_cols (tuple[str, ...]): The entities columns.
+        entities_col_label (str): The entities column label.
+        message (str): The message to make the difference between the two family of constraints
+
+    Retunrs:
+        dict[str, float] | None: The extremum entities constraints of the problem.
+    """
+    extremum_assignments_constraints: dict[ str, float ] | None = None
+    use_extremum_assignments: bool = st.checkbox(
+        f"Is there a { extremum } number of assignments allowed per { entities_type } ? Note that { message }"
+    )
+    if use_extremum_assignments:
+        constraints: dict[ str, float ] = {}
+        assignments_mode: str = st.radio(
+            f"How to define the { extremum } number of assignments allowed per { entities_type } ?",
+            [
+                "With data column",
+                f"Set it manually for each { entities_type }",
+                f"Set it manually for all { entities_type }",
+            ]
+        )
+
+        if assignments_mode == "With data column":
+            extremum_assignments_col_label: str = st.selectbox(
+                f"Select the column identifying the { extremum } number of assignments allowed per { entities_type }",
+                entities_cols
+            )
+            constraints = build_quantities_constraints(
+                entities_col_label, entities_rows, quantities_constraints_col_label=extremum_assignments_col_label
+            )
+
+        elif assignments_mode == f"Set it manually for each { entities_type }":
+            for label in labels:
+                constraints[ label ] = st.number_input(
+                    f"Set the { extremum } number of assignments allowed for the { label }", min_value=1.
+                )
+
+        elif assignments_mode == f"Set it manually for all { entities_type }":
+            extremum_assignments_val: float = st.number_input(
+                f"Set the { extremum } number of assignments allowed per { entities_type }", min_value=1.
+            )
+            constraints = build_quantities_constraints(
+                entities_col_label, entities_rows, quantities_constraints_val=extremum_assignments_val
+            )
+
+        if constraints != {}:
+            extremum_assignments_constraints = constraints
+
+    return extremum_assignments_constraints

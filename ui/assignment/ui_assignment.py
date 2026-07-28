@@ -2,13 +2,10 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from collections.abc import MutableMapping
-from typing import Any
-
 import streamlit as st
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
-from infrastructure.csv_loader import CSVLoader
 from infrastructure.registry import DATA_SOURCE_REGISTRY, DataSourceDefinition
 from solvers.assignment.registry import SOLVERS
 from ui.assignment.builder import build_entities_labels, build_problem
@@ -18,14 +15,12 @@ from ui.assignment.score.ui_matching import map_matching, matching_constraints, 
 from ui.assignment.score.ui_ressources import map_ressources, ressources_constraints, ressources_strategy
 from ui.utils import navigation_buttons
 
-SessionState = MutableMapping[ str, Any ]
 
-
-def render( session_state: SessionState ) -> None:
+def render( session_state: SessionStateProxy ) -> None:
     """Define the user interface for assignment problem.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     # ==================================================
     # STEP 1 — Naming entities types
@@ -89,12 +84,12 @@ def render( session_state: SessionState ) -> None:
                 f"{ session_state.right_entities_type } dataset", type=[ "csv" ], key="right_csv"
             )
 
-            data_soure: DataSourceDefinition = DATA_SOURCE_REGISTRY[ session_state.data_source ]
-            loader: CSVLoader = data_soure.loader_class()
+            data_source: DataSourceDefinition = DATA_SOURCE_REGISTRY[ session_state.data_source ]
+            loader_fn = data_source.loader_fn
 
             if isinstance( left_file, UploadedFile ) and isinstance( right_file, UploadedFile ):
-                session_state.left_cols, session_state.left_rows = loader.load( left_file )
-                session_state.right_cols, session_state.right_rows = loader.load( right_file )
+                session_state.left_cols, session_state.left_rows = loader_fn( left_file )
+                session_state.right_cols, session_state.right_rows = loader_fn( right_file )
                 show_next = True
             else:
                 show_next = False
@@ -281,10 +276,6 @@ def render( session_state: SessionState ) -> None:
             zip_bytes = build_results_zip(
                 solution_rows=st.session_state.solution_rows,
                 ai_summary=st.session_state.ai_summary,
-                metadata={
-                    "solver": state.solver.label,
-                    "type": "assignment",
-                },
             )
             st.download_button(
                 "Download results (ZIP)",

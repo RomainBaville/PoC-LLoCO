@@ -61,8 +61,8 @@ def solve_assignment_problem( problem: AssignmentProblem, ) -> dict[ str, list[ 
     model.maximize(
         sum(
             problem.compute_matching_score( left_label, right_label ) * is_assigned[ left_label, right_label ] +
-            problem.compute_ressources_score( left_label ) * quantities[ left_label, right_label ]
-            for left_label, right_label in is_assigned
+            problem.compute_ressources_score( left_label ) * quantities[ left_label, right_label ] for left_label,
+            right_label in is_assigned
         )
     )
 

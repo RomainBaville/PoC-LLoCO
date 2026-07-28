@@ -2,24 +2,20 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from collections.abc import MutableMapping
-from typing import Any
-
 import streamlit as st
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from domain.assignment.score.matching_penalty_functions import PenaltyFunctions
 from domain.assignment.score.matching_reward_functions import RewardFunctions
 from domain.objective import Objective
 from ui.assignment.builder import build_vals
 
-SessionState = MutableMapping[ str, Any ]
 
-
-def map_matching( session_state: SessionState ) -> None:
+def map_matching( session_state: SessionStateProxy ) -> None:
     """Configure the interface to set the data in order to map the matching.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     session_state.matching_labels = tuple(
         st.multiselect(
@@ -36,11 +32,11 @@ def map_matching( session_state: SessionState ) -> None:
     )
 
 
-def matching_strategy( session_state: SessionState ) -> None:
+def matching_strategy( session_state: SessionStateProxy ) -> None:
     """Configure the interface to set the assignment matching strategy.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     session_state.matching_objective = st.selectbox( " Set the objective for the matching", Objective )
 
@@ -68,11 +64,11 @@ def matching_strategy( session_state: SessionState ) -> None:
                 )
 
 
-def matching_constraints( session_state: SessionState ) -> None:
+def matching_constraints( session_state: SessionStateProxy ) -> None:
     """Configure the interface to set the constraints data.
 
     Args:
-        session_state (SessionState): The session state.
+        session_state (SessionStateProxy): The session state.
     """
     extrema: tuple[ str, str ] = ( "maximum", "minimum" )
     matching_extrema_cols = st.columns( 2 )

@@ -2,14 +2,11 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from collections.abc import MutableMapping
-from typing import Any
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.constraints.logicals_constraints import LogicalsConstraints
 from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
-
-SessionState = MutableMapping[ str, Any ]
 
 
 def build_quantities_constraints(
@@ -43,11 +40,11 @@ def build_quantities_constraints(
     return quantities_constraints
 
 
-def build_constraints_config( session_state: SessionState ) -> ConstraintsConfig:
+def build_constraints_config( session_state: SessionStateProxy ) -> ConstraintsConfig:
     """Build the constraints config of the assignment problem.
 
     Args:
-        session_state (SessionSate): the session state.
+        session_state (SessionStateProxy): the session state.
 
     Returns:
         ConstraintsConfig: The configuration of the constraints of the assignment problem.

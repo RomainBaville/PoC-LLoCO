@@ -100,7 +100,6 @@ exclude = [
     "models/",
     "llama_cpp/",
     ".github/",
-    "llm/",  # TODO in a futur PR
 ]
 
 ignore_missing_imports = true

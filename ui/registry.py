@@ -5,6 +5,8 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
+
 from ui.assignment.ui_assignment import render
 
 
@@ -16,12 +18,12 @@ class ProblemType:
         key (str): The key of the problem.
         label (str): The label of the problem.
         description (str): A short description of the problem.
-        render_fn (Callable): The function with the implementation of the user interface for this type of problem.
+        render_fn (Callable[[SessionStateProxy], None]): The function with the ui for this type of problem.
     """
     key: str
     label: str
     description: str
-    render_fn: Callable
+    render_fn: Callable[ [ SessionStateProxy ], None ]
 
 
 PROBLEM_REGISTRY: dict[ str, ProblemType ] = {
