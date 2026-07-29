@@ -21,6 +21,17 @@ def select_problem( session_state: SessionStateProxy, problem_key: str ) -> None
     session_state.step = 1
 
 
+def select_solver( session_state: SessionStateProxy, solver_key: str ) -> None:
+    """Set the solver key in the session state and go to the next step.
+
+    Args:
+        session_state (SessionStateProxy): The session state.
+        solver_key (str): The solver key.
+    """
+    session_state.solver_key = solver_key
+    session_state.step += 1
+
+
 # --------------------------------------------------
 # Navigation functions
 # --------------------------------------------------

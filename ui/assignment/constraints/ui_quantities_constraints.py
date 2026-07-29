@@ -22,37 +22,37 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
         extremum="maximum",
         labels=session_state.left_labels,
         entities_type=session_state.left_entities_type,
-        entities_rows=session_state.left_entities_rows,
-        entities_cols=session_state.left_entities_cols,
+        entities_rows=session_state.left_rows,
+        entities_cols=session_state.left_cols,
         entities_col_label=session_state.left_entities_col_label,
-        message="all the several assignments to the same entities count for one."
+        message="all the several assignments to the same entity count for one."
     )
     session_state.min_right_entities = extremum_assignments(
         extremum="minimum",
         labels=session_state.left_labels,
         entities_type=session_state.left_entities_type,
-        entities_rows=session_state.left_entities_rows,
-        entities_cols=session_state.left_entities_cols,
+        entities_rows=session_state.left_rows,
+        entities_cols=session_state.left_cols,
         entities_col_label=session_state.left_entities_col_label,
-        message="all the several assignments to the same entities count for one."
+        message="all the several assignments to the same entity count for one."
     )
     session_state.max_left_entities = extremum_assignments(
         extremum="maximum",
         labels=session_state.right_labels,
         entities_type=session_state.right_entities_type,
-        entities_rows=session_state.right_entities_rows,
-        entities_cols=session_state.right_entities_cols,
+        entities_rows=session_state.right_rows,
+        entities_cols=session_state.right_cols,
         entities_col_label=session_state.right_entities_col_label,
-        message="all the several assignments to the same entities count for one."
+        message="all the several assignments to the same entity count for one."
     )
     session_state.min_left_entities = extremum_assignments(
         extremum="minimum",
         labels=session_state.right_labels,
         entities_type=session_state.right_entities_type,
-        entities_rows=session_state.right_entities_rows,
-        entities_cols=session_state.right_entities_cols,
+        entities_rows=session_state.right_rows,
+        entities_cols=session_state.right_cols,
         entities_col_label=session_state.right_entities_col_label,
-        message="all the several assignments to the same entities count for one."
+        message="all the several assignments to the same entity count for one."
     )
 
     # -----------------------------
@@ -84,37 +84,37 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
             extremum="maximum",
             labels=session_state.left_labels,
             entities_type=session_state.left_entities_type,
-            entities_rows=session_state.left_entities_rows,
-            entities_cols=session_state.left_entities_cols,
+            entities_rows=session_state.left_rows,
+            entities_cols=session_state.left_cols,
             entities_col_label=session_state.left_entities_col_label,
-            message="all the several assignments to the same entities count."
+            message="all the several assignments to the same entity count."
         )
         session_state.min_right_assignments = extremum_assignments(
             extremum="minimum",
             labels=session_state.left_labels,
             entities_type=session_state.left_entities_type,
-            entities_rows=session_state.left_entities_rows,
-            entities_cols=session_state.left_entities_cols,
+            entities_rows=session_state.left_rows,
+            entities_cols=session_state.left_cols,
             entities_col_label=session_state.left_entities_col_label,
-            message="all the several assignments to the same entities count."
+            message="all the several assignments to the same entity count."
         )
         session_state.max_left_assignments = extremum_assignments(
             extremum="maximum",
             labels=session_state.right_labels,
             entities_type=session_state.right_entities_type,
-            entities_rows=session_state.right_entities_rows,
-            entities_cols=session_state.right_entities_cols,
+            entities_rows=session_state.right_rows,
+            entities_cols=session_state.right_cols,
             entities_col_label=session_state.right_entities_col_label,
-            message="all the several assignments to the same entities count."
+            message="all the several assignments to the same entity count."
         )
         session_state.min_left_assignments = extremum_assignments(
             extremum="minimum",
             labels=session_state.right_labels,
             entities_type=session_state.right_entities_type,
-            entities_rows=session_state.right_entities_rows,
-            entities_cols=session_state.right_entities_cols,
+            entities_rows=session_state.right_rows,
+            entities_cols=session_state.right_cols,
             entities_col_label=session_state.right_entities_col_label,
-            message="all the several assignments to the same entities count."
+            message="all the several assignments to the same entity count."
         )
     else:
         session_state.max_same_assignments = None
@@ -181,8 +181,8 @@ def extremum_assignments(
     The variable message allows to explain the diffences between the four constraint taking into acount two
     assignments to a same entity and the four other. Here is an example of the two messages:
 
-        - extremum_side_assignments: all the several assignments to the same entities count.
-        - extremum_side_entities: all the several assignments to the same entities count for one.
+        - extremum_side_assignments: all the several assignments to the same entity count.
+        - extremum_side_entities: all the several assignments to the same entity count for one.
 
     Args:
         extremum (str): The extremum.
@@ -203,7 +203,8 @@ def extremum_assignments(
     if use_extremum_assignments:
         constraints: dict[ str, float ] = {}
         assignments_mode: str = st.radio(
-            f"How to define the { extremum } number of assignments allowed per { entities_type } ?",
+            f"How to define the { extremum } number of assignments allowed per { entities_type } ?" \
+            f"Note that { message }",
             [
                 "With data column",
                 f"Set it manually for each { entities_type }",
@@ -213,7 +214,8 @@ def extremum_assignments(
 
         if assignments_mode == "With data column":
             extremum_assignments_col_label: str = st.selectbox(
-                f"Select the column identifying the { extremum } number of assignments allowed per { entities_type }",
+                f"Select the column identifying the { extremum } number of assignments allowed per { entities_type }" \
+                f" Note that { message }",
                 entities_cols
             )
             constraints = build_quantities_constraints(
@@ -223,12 +225,16 @@ def extremum_assignments(
         elif assignments_mode == f"Set it manually for each { entities_type }":
             for label in labels:
                 constraints[ label ] = st.number_input(
-                    f"Set the { extremum } number of assignments allowed for the { label }", min_value=1.
+                    f"Set the { extremum } number of assignments allowed for the { label }" \
+                    f" Note that { message }",
+                    min_value=1.
                 )
 
         elif assignments_mode == f"Set it manually for all { entities_type }":
             extremum_assignments_val: float = st.number_input(
-                f"Set the { extremum } number of assignments allowed per { entities_type }", min_value=1.
+                f"Set the { extremum } number of assignments allowed per { entities_type }" \
+                f" Note that { message }",
+                min_value=1.
             )
             constraints = build_quantities_constraints(
                 entities_col_label, entities_rows, quantities_constraints_val=extremum_assignments_val

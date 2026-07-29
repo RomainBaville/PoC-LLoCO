@@ -55,8 +55,9 @@ def apply_ressources_constraints(
                 model.add(
                     sum(
                         int( ressources_config.vals[ left_label, ressource_label ] ) *
-                        quantities[ left_label, right_label ] for ressource_label in ressources_labels for left_label,
-                        right_label in quantities
+                        quantities[ left_label, right_label ]
+                        for ressource_label in ressources_labels
+                        for left_label, right_label in quantities
                     ) <= int( max_global_val )
                 )
 
@@ -65,7 +66,8 @@ def apply_ressources_constraints(
                 model.add(
                     sum(
                         int( ressources_config.vals[ left_label, ressource_label ] ) *
-                        quantities[ left_label, right_label ] for ressource_label in ressources_labels for left_label,
-                        right_label in quantities
+                        quantities[ left_label, right_label ]
+                        for ressource_label in ressources_labels
+                        for left_label, right_label in quantities
                     ) >= int( min_global_val )
                 )

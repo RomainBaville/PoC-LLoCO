@@ -13,7 +13,7 @@ from ui.assignment.constraints.ui_logicals_constraints import logicals_constrain
 from ui.assignment.constraints.ui_quantities_constraints import quantities_constraints
 from ui.assignment.score.ui_matching import map_matching, matching_constraints, matching_strategy
 from ui.assignment.score.ui_ressources import map_ressources, ressources_constraints, ressources_strategy
-from ui.utils import navigation_buttons
+from ui.utils import navigation_buttons, select_solver
 
 
 def render( session_state: SessionStateProxy ) -> None:
@@ -43,7 +43,7 @@ def render( session_state: SessionStateProxy ) -> None:
     # ==================================================
     if session_state.step == 2:
         st.header(
-            f"How to compute the score to associate { session_state.left_entities_type}  " \
+            f"How to compute the score to associate { session_state.left_entities_type }  " \
             f" and { session_state.right_entities_type }"
         )
 
@@ -198,9 +198,7 @@ def render( session_state: SessionStateProxy ) -> None:
         solver_cols = st.columns( len( SOLVERS ) )
         for solver_col, solver in zip( solver_cols, SOLVERS.values(), strict=False ):
             with solver_col:
-                if st.button( solver.label ):
-                    session_state.solver_key = solver.key
-                    session_state.step += 1
+                st.button( solver.label, on_click=select_solver, args=( session_state, solver.key ) )
 
         navigation_buttons( session_state, show_next=False )
         st.stop()

@@ -1,18 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
+# ruff: noqa: E402 # disable Module level import not at top of file
 
 import sys
 from pathlib import Path
 
 import streamlit as st
 
-from ui.registry import PROBLEM_REGISTRY
-from ui.utils import select_problem
-
 # --- make project root importable ---
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
+
+from ui.registry import PROBLEM_REGISTRY
+from ui.utils import select_problem
 
 # --------------------------------------------------
 # App setup

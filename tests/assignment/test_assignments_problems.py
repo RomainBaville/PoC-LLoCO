@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-import sys
-from pathlib import Path
 
 import pytest
 
@@ -13,10 +11,6 @@ from tests.assignment.problem_10.problem_10_description import problem_10_domain
 from tests.assignment.problem_19.problem_19_description import problem_19_domain, solution_19
 from tests.assignment.problem_55.problem_55_description import problem_55_domain, solution_55
 from tests.assignment.problem_84.problem_84_description import problem_84_domain, solution_84
-
-# --- make project root importable ---
-ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
-sys.path.append( str( ROOT_DIR ) )
 
 
 @pytest.mark.parametrize(
@@ -43,5 +37,6 @@ def test_assignments_problem_unique(
     """
     obtained_solution: dict[ str, list[ tuple[ str, int ] ] ] = solve_assignment_problem( problem )
     assert obtained_solution == expected_solution
+
 
 # TODO: test problem with none unique solution starting with problem 0
