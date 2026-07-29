@@ -12,8 +12,10 @@ import streamlit as st
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
+from llm.client import ask_llm_request
+from llm.onboarding_prompt import build_onboarding_prompt
 from ui.registry import PROBLEM_REGISTRY
-from ui.utils import select_problem
+from ui.utils import navigation_buttons, select_problem
 
 # --------------------------------------------------
 # App setup
@@ -21,7 +23,7 @@ from ui.utils import select_problem
 st.set_page_config( page_title="Optimization Playground", layout="wide" )
 st.title( "Optimization Playground" )
 
-st.session_state.setdefault( "step", 0 )
+st.session_state.setdefault( "step", -1 )
 st.session_state.setdefault( "problem_type", None )
 st.session_state.setdefault( "data_source", None )
 
@@ -31,25 +33,23 @@ st.session_state.setdefault( "data_source", None )
 if st.session_state.step == -1:
     st.header( "Describe your problem" )
 
-    user_description = st.text_area(
+    user_description: str = st.text_area(
         "Explain in plain language what you want to optimize",
         height=150,
-        placeholder="Example: I want to assign employees to projects based on their skills...",
+        placeholder="Example: I want to assign employees to projects based on their skills..."
     )
 
-    # TODO in a futur PR
-    """
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns( 2 )
     with col1:
-        if st.button("Explain how to use the tool"):
-            with st.spinner("Analyzing your problem..."):
-                prompt = build_onboarding_prompt(user_description)
-                explanation = ask_llm_request(prompt)
-            st.subheader("How the tool will help you")
-            st.markdown(explanation)
+        if st.button( "Explain how to use the tool" ):
+            with st.spinner( "Analyzing your problem..." ):
+                prompt: str = build_onboarding_prompt( user_description )
+                explanation: str = ask_llm_request( prompt )
+
+            st.subheader( "How the tool will help you" )
+            st.markdown( explanation )
     with col2:
-        navigation_buttons(show_back=False, show_close=False)
-    """
+        navigation_buttons( st.session_state, show_back=False )
 
     st.stop()
 
@@ -65,6 +65,7 @@ if st.session_state.step == 0:
         with col:
             st.button( problem.label, on_click=select_problem, args=( st.session_state, problem.key ) )
 
+    navigation_buttons( st.session_state, show_next=False )
     st.stop()
 
 # ==================================================

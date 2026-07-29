@@ -52,7 +52,7 @@ def back_step( session_state: SessionStateProxy ) -> None:
     Args:
         session_state (SessionStateProxy): The session state.
     """
-    if session_state.step > 0:
+    if session_state.step >= 0:
         session_state.step -= 1
 
 
@@ -63,7 +63,7 @@ def reset_app( session_state: SessionStateProxy ) -> None:
         session_state (SessionStateProxy): The session state.
     """
     session_state.clear()
-    session_state.step = 0
+    session_state.step = -1
     session_state.problem_key = None
 
 

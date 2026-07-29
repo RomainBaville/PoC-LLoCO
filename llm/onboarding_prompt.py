@@ -1,11 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-"""LLM onboarding prompt builder.
-
-Explains how the optimization platform works based entirely on registries
-(ui, domain and solvers).
-"""
 
 from llm.onboarding_context import build_onboarding_context
 
@@ -38,6 +33,9 @@ Problem types:
 
 Available solvers:
 { context[ "solvers" ] }
+
+Available input data:
+{ context[ "input data" ] }
 
 
 Explain clearly:
