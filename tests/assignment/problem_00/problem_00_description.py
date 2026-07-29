@@ -578,34 +578,4 @@ problem_00_domain: AssignmentProblem = AssignmentProblem(
     constraints_config=constraints_config
 )
 
-solution_00: dict[ str, list[ tuple[ str, int ] ] ] = {
-    "PierreDupont": [ ( "NextGenInnovations", 1 ) ],
-    "MarieLemoine": [ ( "VelocityHub", 1 ) ],
-    "JeanMartin": [ ( "TerraNovaLabs", 1 ) ],
-    "ClaireBernard": [ ( "NextGenInnovations", 1 ) ],
-    "SophieDubois": [ ( "TerraNovaLabs", 1 ) ],
-    "AlainLefevre": [ ( "NextGenInnovations", 1 ) ],
-    "IsabelleMoreau": [ ( "ZenithX", 1 ) ],
-    "LucPetit": [ ( "TerraNovaLabs", 1 ) ],
-    "CamilleLeroy": [ ( "NextGenInnovations", 1 ) ],
-    "NicolasLefevre": [ ( "TerraNovaLabs", 1 ) ],
-    "AliceRobert": [ ( "SynergyX", 1 ) ],
-    "LaurentDufresne": [ ( "QuantumHorizon", 1 ) ],
-    "NathalieGautier": [ ( "NextGenInnovations", 1 ) ],
-    "GérardPires": [ ( "NextGenInnovations", 1 ) ],
-    "CatherineLeclerc": [ ( "NextGenInnovations", 1 ) ],
-    "FrançoisRichard": [ ( "HorizonLabs", 1 ) ],
-    "JulieBoucher": [ ( "TerraNovaLabs", 1 ) ],
-    "ThomasLefranc": [ ( "SynergyX", 1 ) ],
-    "PaulineMorin": [ ( "NextGenInnovations", 1 ) ],
-    "DavidGauthier": [ ( "NovaTech", 1 ) ],
-    "SandraLefevre": [ ( "NextGenInnovations", 1 ) ],
-    "MichelTanguy": [ ( "NextGenInnovations", 1 ) ],
-    "ÉliseGuérin": [ ( "TerraNovaLabs", 1 ) ],
-    "HugoPerrier": [ ( "TerraNovaLabs", 1 ) ],
-    "LaurenceLemoine": [ ( "SkyBridgeSolutions", 1 ) ],
-    "AntoineHenry": [ ( "QuantumEdge", 1 ) ],
-    "CarolineRoussel": [ ( "TerraNovaLabs", 1 ) ],
-    "CharlesDubois": [ ( "NextGenInnovations", 1 ) ],
-    "EmilieMarchand": [ ( "VelocityHub", 1 ) ]
-}
+# TODO: fund a way of testing the resutl despite the multiple solution
