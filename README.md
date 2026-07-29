@@ -5,7 +5,7 @@
 
 This project is a **Proof of Concept (PoC)** for a generic optimization playground.
 
-It provides a **guided, UI‑driven workflow** to help users:
+It aims to provide a **guided, UI‑driven workflow** to help users:
 
 1. Describe an optimization problem (LLM-assisted)
 2. Configure the problem step by step
@@ -51,10 +51,10 @@ All computations are done by deterministic solvers.
 
 ## Architectural Principles
 
-- **UI defines semantics** → labels, CSV mapping, user meaning
-- **Domain defines structure** → mathematical modeling
-- **Solvers define math** → constraints and optimization engines
-- **Registries declare capabilities** → problems and solvers
+- **UI defines semantics**: labels, data mapping, user meaning
+- **Domain defines structure**: mathematical modeling
+- **Solvers define math**: constraints and optimization engines
+- **Registries declare capabilities**: problems and solvers
 - **LLM assists but never replaces solvers**
 
 Benefits:
@@ -70,42 +70,11 @@ Benefits:
 ```
 PoC-LLoCO/
 │
-├── tests/
-│   ├── IndustryOR.json          # All the problem the project needs to solve at the end
-│   │
-│   └── assignment/
-│       ├── problem_i/           # Folder with data for problem from the json file
-│       │   ├── problem_i.py     # Build the AssignmentProblem and the solution
-│       │   ├── left_data_i.csv
-│       │   └── right_data_i.csv
-:       :
-│       │
-│       └── test_assignments_problem.py
-│
 ├── models/
 │   └── ...
 │
 ├── llama_cpp/
 │   └── ...
-│
-├── ui/
-│   ├── app.py
-│   ├── registry.py
-│   ├── utils.py
-│   │
-│   └── assignment/
-│       ├── constraints/
-│       │   ├── builder.py
-│       │   ├── ui_logicals_constraints.py
-│       │   └── ui_quantities_constraints.py
-│       │
-│       ├── score/
-│       │   ├── builder.py
-│       │   ├── ui_matching.py
-│       │   └── ui_ressources.py
-│       │
-│       ├── builder.py
-│       └── ui_assignment.py
 │
 ├── domain/
 │   ├── objective.py
@@ -125,8 +94,18 @@ PoC-LLoCO/
 │           ├── matching_penalty_functions.py
 │           └── matching_reward_functions.py
 │
+├── infrastructure/
+│   ├── csv_loader.py
+│   └── registry.py
+│
+├── llm/
+│   ├── client.py
+│   ├── session_model.py
+│   ├── session_prompt.py
+│   ├── onboarding_context.py
+│   └── onboarding_prompt.py
+│
 ├── solvers/
-│   ├── base.py
 │   ├── registry.py
 │   │
 │   └── assignment/
@@ -141,17 +120,36 @@ PoC-LLoCO/
 │           │
 │           └── ortools_cp_sat.py
 │
-├── infrastructure/
-│   ├── base_loader.py
-│   ├── csv_loader.py
-│   └── registry.py
+├── tests/
+│   ├── IndustryOR.json                      # All the problem the project needs to solve at the end
+│   │
+│   └── assignment/
+│       ├── problem_i/                       # Folder with data for the assignment problem i from the json file
+│       │   ├── problem_i_description.py     # Build the AssignmentProblem with the solution
+│       │   ├── left_data_i.csv              # The csv file with the left data for the ui
+│       │   └── right_data_i.csv             # The csv file with the right data for the ui
+:       :
+│       │
+│       └── test_assignments_problem.py      # The file with all the tests for assignments problem
 │
-├── llm/
-│   ├── client.py
-│   ├── session_model.py
-│   ├── session_prompt.py
-│   ├── onboarding_context.py
-│   └── onboarding_prompt.py
+├── ui/
+│   ├── app.py
+│   ├── registry.py
+│   ├── utils.py
+│   │
+│   └── assignment/
+│       ├── constraints/
+│       │   ├── builder.py
+│       │   ├── ui_logicals_constraints.py
+│       │   └── ui_quantities_constraints.py
+│       │
+│       ├── score/
+│       │   ├── builder.py
+│       │   ├── ui_matching.py
+│       │   └── ui_ressources.py
+│       │
+│       ├── builder.py
+│       └── ui_assignment.py
 │
 ├── .pre-commit-config.yaml
 ├── project.toml
@@ -320,7 +318,7 @@ uv run pre-commit run --all-files
 
 CI runs automatically on:
 
-- push
+- push (on the main branch)
 - pull requests
 
 It verifies:
@@ -352,7 +350,7 @@ uv.lock
 Always install with:
 
 ```bash
-uv sync --frozen
+uv sync --extra dev --frozen
 ```
 
 Do NOT run install without `--frozen`
