@@ -166,7 +166,7 @@ PoC-LLoCO/
 
 ## Requirements
 
-- Python >= 3.14
+- Python == 3.12
 - https://github.com/astral-sh/uv
 
 ---
