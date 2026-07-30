@@ -5,7 +5,6 @@
 from domain.assignment.base import AssignmentProblem
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
 from domain.assignment.constraints.logicals_constraints import LogicalsConstraints
-from domain.assignment.constraints.quantities_constraints import QuantitiesConstraints
 from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 from domain.objective import Objective
@@ -86,8 +85,6 @@ ressouces_config: RessourcesConfig = RessourcesConfig(
 score_config: ScoreConfig = ScoreConfig( use_ressources=True, ressources_config=ressouces_config )
 
 # Constraints
-quantities_constraints: QuantitiesConstraints = QuantitiesConstraints()
-
 implications: dict[ tuple[ str, str ], tuple[ tuple[ str, str, float ], ...] ] = {
     ( "DataStructures", "Student" ): ( ( "ComputerProgramming", "Student", 1. ), ),
     ( "ComputerSimulation", "Student" ): ( ( "ComputerProgramming", "Student", 1. ), ),
@@ -98,10 +95,7 @@ implications: dict[ tuple[ str, str ], tuple[ tuple[ str, str, float ], ...] ] =
 logicals_constraints: LogicalsConstraints = LogicalsConstraints( implications=implications )
 
 constraints_config: ConstraintsConfig = ConstraintsConfig(
-    use_logicals_constraints=True,
-    logicals_constraints=logicals_constraints,
-    use_quantities_constraints=True,
-    quantities_constraints=quantities_constraints
+    multiple_same_assignment=False, use_logicals_constraints=True, logicals_constraints=logicals_constraints
 )
 
 problem_55_domain: AssignmentProblem = AssignmentProblem(

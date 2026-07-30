@@ -58,10 +58,6 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
     # -----------------------------
     # Mutiple same assignment
     # -----------------------------
-    session_state.multiple_same_assignment = st.checkbox(
-        f"{ session_state.left_entities_type } can be assigned multiple " \
-        f"time to the same { session_state.right_entities_type } ?"
-    )
     if session_state.multiple_same_assignment:
         # -----------------------------
         # Extrema same assignments

@@ -99,6 +99,7 @@ left_mutual_exclusions: tuple[ tuple[ str, str ], ...] = ( ( "A", "E" ), )
 logicals_constraints: LogicalsConstraints = LogicalsConstraints( left_mutual_exclusions=left_mutual_exclusions )
 
 constraints_config: ConstraintsConfig = ConstraintsConfig(
+    multiple_same_assignment=False,
     use_logicals_constraints=True,
     logicals_constraints=logicals_constraints,
     use_quantities_constraints=True,

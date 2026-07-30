@@ -13,7 +13,7 @@ def build_quantities_constraints(
     entity_col_label: str,
     entity_rows: tuple[ dict[ str, str ], ...],
     quantities_constraints_col_label: str | None = None,
-    quantities_constraints_val: float | None = None,
+    quantities_constraints_val: float | None = None
 ) -> dict[ str, float ]:
     """Builder of the constraints of the quantities constraints of an assignment problem.
 
@@ -54,7 +54,7 @@ def build_constraints_config( session_state: SessionStateProxy ) -> ConstraintsC
         logicals_constraints = LogicalsConstraints(
             left_mutual_exclusions=session_state.left_mutual_exclusions,
             right_mutual_exclusions=session_state.right_mutual_exclusions,
-            implications=session_state.implications,
+            implications=session_state.implications
         )
 
     quantities_constraints: QuantitiesConstraints | None = None
@@ -64,20 +64,20 @@ def build_constraints_config( session_state: SessionStateProxy ) -> ConstraintsC
             min_right_entities=session_state.min_right_entities,
             max_left_entities=session_state.max_left_entities,
             min_left_entities=session_state.min_left_entities,
-            multiple_same_assignment=session_state.multiple_same_assignment,
             max_same_assignments=session_state.max_same_assignments,
             min_same_assignments=session_state.min_same_assignments,
             max_right_assignments=session_state.max_right_assignments,
             min_right_assignments=session_state.min_right_assignments,
             max_left_assignments=session_state.max_left_assignments,
-            min_left_assignments=session_state.min_left_assignments,
+            min_left_assignments=session_state.min_left_assignments
         )
 
     constraints_config: ConstraintsConfig = ConstraintsConfig(
+        multiple_same_assignment=session_state.multiple_same_assignment,
         use_logicals_constraints=session_state.use_logicals_constraints,
         logicals_constraints=logicals_constraints,
         use_quantities_constraints=session_state.use_quantities_constraints,
-        quantities_constraints=quantities_constraints,
+        quantities_constraints=quantities_constraints
     )
 
     return constraints_config

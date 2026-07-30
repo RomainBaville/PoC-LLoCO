@@ -234,7 +234,7 @@ ressource_config: RessourcesConfig = RessourcesConfig(
 score_config: ScoreConfig = ScoreConfig( use_ressources=True, ressources_config=ressource_config )
 
 # constraints
-constraints_config: ConstraintsConfig = ConstraintsConfig()
+constraints_config: ConstraintsConfig = ConstraintsConfig( multiple_same_assignment=False )
 
 problem_10_domain: AssignmentProblem = AssignmentProblem(
     left_labels=left_labels,

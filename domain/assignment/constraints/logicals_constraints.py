@@ -18,7 +18,7 @@ class LogicalsConstraints:
             The dictionary with the implication of an association:
             - keys (tuple[str, str]): The left and right entity labels of the association with an implication.
             - values (tuple[tuple[str, str, float], ...]]): The left and rigth labels of the implicated association
-                with the number of forced associations.
+                with the number of forced associations (1. if multiple_same_assignment is False).
     """
     left_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = None
     right_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = None

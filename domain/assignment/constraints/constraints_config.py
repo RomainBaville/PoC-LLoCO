@@ -13,6 +13,8 @@ class ConstraintsConfig:
     """Dataclass to configure constraints of the assignment problem.
 
     Args:
+        multiple_same_assignment (bool): True if a left entity can be assigned more than once to the same right entity.
+            Defaults to True.
         use_quantities_constraints (bool): True if the assignment problem has quantities constraints.
             Defaults to False.
         quantities_constraints (Optional[QuantitiesConstraints]): The quantities constraints of the problem.
@@ -20,6 +22,8 @@ class ConstraintsConfig:
             Defaults to False.
         logicals_constraints (Optional[LogicalsConstraints]): The logicals constraints of the problem.
     """
+    multiple_same_assignment: bool = True
+
     use_quantities_constraints: bool = False
     quantities_constraints: QuantitiesConstraints | None = None
 

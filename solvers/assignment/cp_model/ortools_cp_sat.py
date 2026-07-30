@@ -5,13 +5,10 @@
 from ortools.sat.python.cp_model import FEASIBLE, OPTIMAL, CpModel, CpSolver, CpSolverStatus, IntVar
 
 from domain.assignment.base import AssignmentProblem
-from solvers.assignment.cp_model.constraints.logical_constraints import apply_logical_constraints
-from solvers.assignment.cp_model.constraints.matching_constraints import apply_matching_constraints
-from solvers.assignment.cp_model.constraints.quantities_constraints import apply_quantities_constraints
-from solvers.assignment.cp_model.constraints.ressources_contraints import apply_ressources_constraints
+from solvers.assignment.cp_model.constraints.solver_constraints import apply_constraints
 
 
-def solve_assignment_problem( problem: AssignmentProblem, ) -> dict[ str, list[ tuple[ str, int ] ] ]:
+def solve_assignment_problem( problem: AssignmentProblem ) -> dict[ str, list[ tuple[ str, int ] ] ]:
     """Solve an assignment problem using cp_model.
 
     Args:
@@ -50,10 +47,7 @@ def solve_assignment_problem( problem: AssignmentProblem, ) -> dict[ str, list[ 
     # --------------------------------------------------
     # Constraints
     # --------------------------------------------------
-    apply_quantities_constraints( model, is_assigned, quantities, problem )
-    apply_logical_constraints( model, is_assigned, quantities, problem )
-    apply_matching_constraints( model, is_assigned, problem )
-    apply_ressources_constraints( model, quantities, problem )
+    apply_constraints( model, is_assigned, quantities, problem )
 
     # --------------------------------------------------
     # Objective

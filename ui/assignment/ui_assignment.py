@@ -162,6 +162,11 @@ def render( session_state: SessionStateProxy ) -> None:
         # -----------------------------
         st.subheader( "1. Assignment constraints" )
 
+        session_state.multiple_same_assignment = st.checkbox(
+            f"{ session_state.left_entities_type } can be assigned multiple " \
+            f"time to the same { session_state.right_entities_type } ?",
+            value=True
+        )
         session_state.use_quantities_constraints = st.checkbox(
             "Is there quantities constraints in the problem (e.g. max number of employees per project)"
         )
@@ -234,7 +239,7 @@ def render( session_state: SessionStateProxy ) -> None:
                     if len( session_state.right_labels ) > 1:
                         solution_row[ session_state.right_entities_type ] = right_labels
 
-                    if session_state.use_quantities_constraints and session_state.multiple_same_assignment:
+                    if session_state.multiple_same_assignment:
                         solution_row[ f"Number of assignments per { session_state.right_entities_type }"
                                      ] = nb_assignments
 

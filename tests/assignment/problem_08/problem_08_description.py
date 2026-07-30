@@ -117,7 +117,7 @@ quantities_constraints: QuantitiesConstraints = QuantitiesConstraints(
 )
 
 constraints_config: ConstraintsConfig = ConstraintsConfig(
-    use_quantities_constraints=True, quantities_constraints=quantities_constraints
+    multiple_same_assignment=False, use_quantities_constraints=True, quantities_constraints=quantities_constraints
 )
 
 problem_08_domain: AssignmentProblem = AssignmentProblem(

@@ -38,9 +38,7 @@ def logicals_constraints( session_state: SessionStateProxy ) -> None:
     labels: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( session_state.left_labels, session_state.right_labels )
     entities_types: tuple[ str, str ] = ( session_state.left_entities_type, session_state.right_entities_type )
 
-    session_state.implications = implications(
-        labels, entities_types, session_state.use_quantities_constraints, session_state.multiple_same_assignment
-    )
+    session_state.implications = implications( labels, entities_types, session_state.multiple_same_assignment )
 
 
 def mutual_exclusions(
@@ -97,7 +95,6 @@ def mutual_exclusions(
 def implications(
     labels: tuple[ tuple[ str, ...], tuple[ str, ...] ],
     entities_types: tuple[ str, str ],
-    use_quantities_constraints: bool,
     multiple_same_assignment: bool
 ) -> dict[ tuple[ str, str ], tuple[ tuple[ str, str, float ], ...] ] | None:
     """Build the implications constraints of the problem if it exist.
@@ -147,7 +144,7 @@ def implications(
                 implies_assignment_parameters: list[ Any ] = [ "", "", 1. ]
                 nb_implies_assignment_cols: int = 2
 
-                if use_quantities_constraints and multiple_same_assignment:
+                if multiple_same_assignment:
                     nb_implies_assignment_cols += 1
 
                 set_right_label: bool = True
