@@ -3,17 +3,53 @@
 # SPDX-FileContributor: Romain Baville
 
 import csv
-from infrastructure.base_loader import DataLoader
+
+from streamlit.runtime.uploaded_file_manager import UploadedFile
+from typing_extensions import Sequence
 
 
-class CSVLoader(DataLoader):
-    def load(self, path: str):
-        try:
-            with open(path, newline="", encoding="utf-8") as f:
-                reader = csv.DictReader(f)
-                columns = reader.fieldnames or []
-                rows = list(reader)
-            return columns, rows
+def load_csv( source: str | UploadedFile ) -> tuple[ tuple[ str, ...], tuple[ dict[ str, str ], ...] ]:
+    """Load CSV from a file path or a Streamlit upload file.
 
-        except FileNotFoundError:
-            raise RuntimeError(f"CSV file not found: {path}")
+    Args:
+        source (str | UploadedFile): file path (str) or streamlit upload file (UploadFile).
+
+    Returns:
+        tuple[tuple[str, ...], tuple[dict[str, str], ...]]: The column header of the csv, rows of the csv.
+
+    Raises:
+        ValueError: The columns of the csv file must have name.
+        TypeError: The type of the source is not supported.
+    """
+    column: tuple[ str, ...]
+    rows: tuple[ dict[ str, str ], ...]
+
+    # Case 1: file path
+    if isinstance( source, str ):
+        with open( source, newline="", encoding="utf-8" ) as file:
+            reader = csv.DictReader( file )
+            if isinstance( reader.fieldnames, Sequence ):
+                column = tuple( reader.fieldnames )
+            else:
+                raise ValueError( "The columns of the csv file must have name." )
+
+            rows = tuple( reader )
+
+    # Case 2: Streamlit uplaod file
+    elif isinstance( source, UploadedFile ):
+        source.seek( 0 )
+
+        content = source.read().decode( "utf-8" ).splitlines()
+        reader = csv.DictReader( content )
+
+        if isinstance( reader.fieldnames, Sequence ):
+            column = tuple( reader.fieldnames )
+        else:
+            raise ValueError( "The columns of the csv file must have name." )
+
+        rows = tuple( reader )
+
+    else:
+        raise TypeError( "The type of the source is not supported." )
+
+    return column, rows

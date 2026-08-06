@@ -2,21 +2,36 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from ui.problems.assignment.ui_router import render_assignment
+
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
+
+from ui.assignment.ui_assignment import render
 
 
 @dataclass
-class ProblemDefinition:
+class ProblemType:
+    """Dataclass to acces to all the type of problems the user interface can deals with.
+
+    Args:
+        key (str): The key of the problem.
+        label (str): The label of the problem.
+        description (str): A short description of the problem.
+        render_fn (Callable[[SessionStateProxy], None]): The function with the ui for this type of problem.
+    """
     key: str
     label: str
-    render_fn: callable
+    description: str
+    render_fn: Callable[ [ SessionStateProxy ], None ]
 
 
-PROBLEM_REGISTRY = {
-    "assignment": ProblemDefinition(
+PROBLEM_REGISTRY: dict[ str, ProblemType ] = {
+    "assignment":
+    ProblemType(
         key="assignment",
         label="Assignment problem",
-        render_fn=render_assignment,
+        description="Assignments problem between left and right entities",
+        render_fn=render,
     ),
 }

@@ -1,0 +1,125 @@
+# =========================================================
+# PROJECT METADATA
+# =========================================================
+[project]
+name = "poc-lloco"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+
+dependencies = []
+
+
+# =========================================================
+# DEV DEPENDENCIES
+# =========================================================
+[project.optional-dependencies]
+dev = [
+    "ortools >= 9.6",
+    "streamlit >= 1.30",
+    "requests",
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "yapf",
+    "pre-commit"
+]
+
+
+# =========================================================
+# PYTEST CONFIGURATION
+# =========================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v"
+
+
+# =========================================================
+# RUFF CONFIGURATION
+# =========================================================
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+exclude = [
+    "models",
+    "llama_cpp",
+    ".github",
+    "__pycache__",
+    ".git",
+    ".venv"
+]
+
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "D",
+    "B",
+    "SIM",
+    "C4",
+    "ERA",
+]
+
+ignore = [
+    # docstring relax
+    "D100",
+    "D104",
+    "D203",
+    "D213",
+
+    # preserve spacing style
+    "E201",
+    "E202",
+    "E203",
+    "E211",
+    "E221",
+    "E222",
+    "E224",
+
+    # readability preference
+    "SIM108",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+# =========================================================
+# MYPY
+# =========================================================
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+exclude = [
+    "models/",
+    "llama_cpp/",
+    ".github/",
+]
+
+ignore_missing_imports = true
+warn_unreachable = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+implicit_optional = true
+
+
+# =========================================================
+# YAPF
+# =========================================================
+[tool.yapf]
+based_on_style = "pep8"
+
+COLUMN_LIMIT = 120
+DEDENT_CLOSING_BRACKETS = true
+FORCE_MULTILINE_DICT = true
+SPACE_INSIDE_BRACKETS = true
+SPLIT_ALL_TOP_LEVEL_COMMA_SEPARATED_VALUES = true
+SPLIT_COMPLEX_COMPREHENSION = true

@@ -1,184 +1,406 @@
+
 # Optimization Playground (PoC)
 
-This project is a **proof of concept (PoC)** for a generic optimization playground.
-It provides a **guided, UI‑driven workflow** to help users:
+## Overview
 
-1. Describe an optimization problem in natural language
+This project is a **Proof of Concept (PoC)** for a generic optimization playground.
+
+It aims to provide a **guided, UI‑driven workflow** to help users:
+
+1. Describe an optimization problem (LLM-assisted)
 2. Configure the problem step by step
 3. Select an appropriate solver
 4. Solve the problem
-5. Receive an **AI‑generated explanation and summary** of the results
+5. Receive an **AI-generated explanation of the results**
 
-The long‑term goal is to build a **solver‑agnostic and problem‑agnostic platform**
-for constraint optimization.
+The long-term goal is to build a **solver-agnostic and problem-agnostic platform** for constraint optimization.
 
 ---
 
 ## Role of the LLM (AI Assistant)
 
-The project integrates a Large Language Model (LLM) at **two key points** of the user journey:
+The LLM is used strictly as a **guidance and explanation layer**.
 
-### 1. Problem onboarding (start of the flow)
-At the beginning of the application, the user can describe their problem in plain language.
-The LLM is used to:
-- explain how the tool can help
-- clarify what type of optimization problem the user is facing
-- guide the user into the appropriate modeling flow
+### 1. Problem onboarding
 
-This lowers the entry barrier for non‑experts in optimization.
+At the beginning:
 
-### 2. Solution summarization (end of the flow)
-After the solver produces a solution, the LLM is used to:
-- summarize the assignment / optimization result in natural language
-- explain the outcome using the user’s own terminology
-- provide a human‑readable interpretation of the solution
+- The user describes their problem in natural language
+- The LLM:
+  - clarifies the problem type
+  - explains how the tool can help
+  - guides the user through the modeling process
 
-The LLM **never replaces the solver**: it acts as a **guidance and explanation layer** only.
+This lowers the entry barrier for non-experts.
 
 ---
 
-## Features
+### 2. Solution explanation
 
-- Streamlit-based interactive UI
-- Wizard-style problem configuration
-- LLM-assisted onboarding and result explanation
-- Generic domain modeling (solver-agnostic)
-- Registry-based problem and solver selection
-- Support for multiple solvers per problem
-- Clean object-oriented architecture
+After solving:
 
-Currently implemented:
-- **Generic Assignment Problem** (bipartite assignment with requirements)
+- The LLM generates:
+  - a natural language explanation
+  - a summary aligned with the user’s terminology
+
+Important:
+The LLM **does NOT perform optimization**.
+All computations are done by deterministic solvers.
 
 ---
 
 ## Architectural Principles
 
-- **UI defines semantics**
-  (labels, CSV mappings, user meaning)
-- **Domain defines structure**
-  (mathematical representation)
-- **Solvers define math**
-  (constraints, objectives, optimization engines)
-- **Registries declare capabilities**
-  (available problems and solvers)
-- **LLM assists the user**, but does not solve problems
+- **UI defines semantics**: labels, data mapping, user meaning
+- **Domain defines structure**: mathematical modeling
+- **Solvers define math**: constraints and optimization engines
+- **Registries declare capabilities**: problems and solvers
+- **LLM assists but never replaces solvers**
 
-This separation allows:
-- adding new solvers without touching the UI
-- adding new problems without changing solver code
-- integrating AI safely without coupling it to optimization logic
+Benefits:
+
+- Add new solvers without changing UI
+- Add new problems without changing solvers
+- Keep AI decoupled from optimization logic
 
 ---
 
 ## Project Structure
+
 ```
 PoC-LLoCO/
 │
+├── models/
+│   └── ...
+│
+├── llama_cpp/
+│   └── ...
+│
+├── domain/
+│   ├── objective.py
+│   │
+│   └── assignment/
+│       ├── base.py
+│       │
+│       ├── constraints/
+│       │   ├── constraints_config.py
+│       │   ├── logicals_constraints.py
+│       │   └── quantities_constraints.py
+│       │
+│       └── score/
+│           ├── score_config.py
+│           ├── ressources_config.py
+│           ├── matching_config.py
+│           ├── matching_penalty_functions.py
+│           └── matching_reward_functions.py
+│
+├── infrastructure/
+│   ├── csv_loader.py
+│   └── registry.py
+│
+├── llm/
+│   ├── client.py
+│   ├── session_model.py
+│   ├── session_prompt.py
+│   ├── onboarding_context.py
+│   └── onboarding_prompt.py
+│
+├── solvers/
+│   ├── registry.py
+│   │
+│   └── assignment/
+│       ├── registry.py
+│       │
+│       └── cp_model/
+│           ├── constraints/
+│           │   └── quantities_constraints.py
+│           │   └── logical_constraints.py
+│           │   └── matching_constraints.py
+│           │   └── ressources_constraints.py
+│           │
+│           └── ortools_cp_sat.py
+│
+├── tests/
+│   ├── IndustryOR.json                      # All the problem the project needs to solve at the end
+│   │
+│   └── assignment/
+│       ├── problem_i/                       # Folder with data for the assignment problem i from the json file
+│       │   ├── problem_i_description.py     # Build the AssignmentProblem with the solution
+│       │   ├── left_data_i.csv              # The csv file with the left data for the ui
+│       │   └── right_data_i.csv             # The csv file with the right data for the ui
+:       :
+│       │
+│       └── test_assignments_problem.py      # The file with all the tests for assignments problem
+│
+├── ui/
+│   ├── app.py
+│   ├── registry.py
+│   ├── utils.py
+│   │
+│   └── assignment/
+│       ├── constraints/
+│       │   ├── builder.py
+│       │   ├── ui_logicals_constraints.py
+│       │   └── ui_quantities_constraints.py
+│       │
+│       ├── score/
+│       │   ├── builder.py
+│       │   ├── ui_matching.py
+│       │   └── ui_ressources.py
+│       │
+│       ├── builder.py
+│       └── ui_assignment.py
+│
+├── .pre-commit-config.yaml
+├── project.toml
+├── uv.lock
+│
 ├── README.md
-│
-├── data/                             # Input datasets (CSV for now)
-│   └── ...
-│
-├── models/                           # Local LLM models (GGUF)
-│   └── ...
-│
-├── llama_cpp/                        # llama.cpp runtime & binaries
-│   └── ...
-│
-├── ui/                               # Streamlit UI layer
-│   ├── app.py                        # Main Streamlit entry point
-│   ├── registry.py                   # Problem FAMILY registry (Assignment, etc.)
-│   ├── utils.py                      # Navigation, journey logging, AI helpers
-│   │
-│   └── problems/
-│       ├── assignment/               # Assignment problem family
-│       │   ├── registry.py            # Assignment TYPES registry (skills, cost, …)
-│       │   ├── ui_router.py           # Assignment workflow router
-│       │   │
-│       │   ├── skills/                # Skill-based assignment TYPE
-│       │   │   ├── registry.py        # Skill VARIANTS registry (coverage, best_fit…)
-│       │   │   ├── builder.py         # Generic skills builder (registry-driven)
-│       │   │   ├── ui_coverage.py     # Coverage variant UI
-│       │   │   ├── ui_best_fit.py     # Best-fit variant UI
-│       │   │   ├── ui_team.py         # Team variant UI
-│       │   │   └── ui_portfolio.py    # Portfolio variant UI
-│       │
-│       └── base.py                    # (Optional) base UI contracts
-│
-├── domain/                           # Solver-agnostic mathematical models
-│   ├── base.py                       # Base DomainProblem
-│   ├── entity_registry.py            # Entity identity & uniqueness handling
-│   │
-│   └── assignment/                   # Assignment family (math side)
-│       ├── base.py                   # AssignmentBaseProblem
-│       │
-│       └── skills/                   # Skill-based assignment models
-│           ├── base.py               # SkillAssignmentProblem (dataclass!)
-│           ├── coverage.py           # SkillCoverageAssignment
-│           ├── best_fit.py           # SkillBestFitAssignment
-│           ├── team.py               # SkillTeamAssignment
-│           └── portfolio.py          # SkillPortfolioSelection
-│
-├── solvers/                          # Solver layer (execution)
-│   ├── base.py                       # Solver interface
-│   │
-│   └── assignment/                   # Assignment solvers
-│       ├── registry.py               # Assignment solver GROUPS (skills, cost…)
-│       │
-│       └── skills/                   # Skill-based solvers
-│           ├── registry.py           # Skill solver registry (OR-Tools, etc.)
-│           └── ortools_cp_sat.py     # OR-Tools CP-SAT solver (variant-aware)
-│
-├── infrastructure/                   # Data access layer
-│   ├── base_loader.py                # Abstract data loader
-│   ├── csv_loader.py                 # CSV loader
-│   └── registry.py                   # Data source registry
-│
-├── llm/                              # LLM integration layer
-│   ├── client.py                     # LLM client (llama.cpp)
-│   ├── session_model.py              # OptimizationSession dataclass
-│   ├── session_prompt.py             # Solver-aware summary prompt
-│   ├── onboarding_context.py         # Registry-driven onboarding context
-│   └── onboarding_prompt.py          # Onboarding prompt builder
-│
-└── requirements.txt                  # Python dependencies
+└── run_app.bat
+```
+
+
+---
+
+## Requirements
+
+- Python == 3.12
+- https://github.com/astral-sh/uv
+
+---
+
+## Installation (Reproducible Environment)
+
+```bash
+uv sync --extra dev --frozen
+```
+
+Uses `uv.lock`
+Guarantees identical environments for all developers and CI
+
+---
+
+## ▶Running the Application
+
+### 1. Prepare data
+
+- Only CSV format is supported for now
+
+---
+
+### 2. Prepare LLM model
+
+- Place a `.gguf` Qwen model in `models/`
+- Download:
+  https://huggingface.co/Qwen
+
+---
+
+### 3. Prepare llama.cpp
+
+- Place binaries in `llama_cpp/`
+- Download:
+  https://github.com/ggml-org/llama.cpp/releases
+
+---
+
+### 4. Run application
+
+```bash
+run_app.bat
+```
+
+This will:
+
+- Start `llama.cpp` server
+- Start Streamlit UI
+- Open the app in your browser
+
+---
+
+### 5. Shutdown
+
+- Close the browser
+- Press `Q` in the terminal
+
+---
+
+## Testing
+
+Run all tests:
+
+```bash
+uv run pytest
 ```
 
 ---
 
-## Running the Application
+## Code Quality & Tooling
 
-This project has been developed and tested on **Windows**.
+The project enforces strict quality standards:
 
-To run the application, follow these steps:
+| Tool       | Purpose                  |
+|------------|--------------------------|
+| Ruff       | Linting                  |
+| MyPy       | Static typing (strict)   |
+| Yapf       | Formatting (custom)      |
+| Pytest     | Testing                  |
+| Pre-commit | Local validation         |
 
-1. **Prepare the data**
-   - Place your input files in the `data/` directory
-   - Only **CSV files** are supported for now
+---
 
-2. **Prepare the LLM model**
-   - Place a `.gguf` **Qwen model** in the `models/` directory
-   - Models can be downloaded from: https://huggingface.co/Qwen
+## Lint
 
-3. **Prepare llama.cpp**
-   - Place the `llama.cpp` binaries and required files in the `llama_cpp/` directory
-   - Precompiled releases are available here: https://github.com/ggml-org/llama.cpp/releases
+```bash
+uv run ruff check .
+```
 
-4. **Run the application**
-   - Execute `run_app.bat` from a terminal
+---
 
-   This will:
-   - Open **two terminal windows**:
-     - one running the **llama.cpp server**
-     - one running the **Streamlit application**
-   - Automatically open the application in your web browser
+## Typing
 
-5. **Shut down**
-   - Close the browser window when finished
-   - Press **`e`** in the terminal used to execute the bat file to terminate all running processes
+```bash
+uv run mypy .
+```
 
-### Notes
-- The LLM is used only for **onboarding guidance** and **solution summarization**
-- All optimization computations are performed by deterministic solvers
-- Once the models are downloaded, **no internet connection is required**
+---
+
+## Formatting
+
+```bash
+uv run yapf -r -i .
+```
+
+---
+
+## Code Style
+
+This project uses a **custom readable style**:
+
+```python
+tuple[ str, ... ]
+( left_label, matching_label )
+```
+
+This is intentional
+Do NOT use:
+
+- `black`
+- `ruff format`
+
+Formatting is handled by **yapf only**.
+
+---
+
+## Pre-commit Hooks (REQUIRED)
+
+### Install:
+
+```bash
+uv run pre-commit install
+```
+
+### Run manually:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+### Checks performed:
+
+- Ruff (lint)
+- MyPy (types)
+- Yapf (format)
+
+---
+
+## Continuous Integration
+
+CI runs automatically on:
+
+- push (on the main branch)
+- pull requests
+
+It verifies:
+
+- lint
+- typing
+- tests
+
+---
+
+## Reproducible Environment
+
+This project relies on:
+
+```
+pyproject.toml
+uv.lock
+```
+
+### Rules
+
+Always commit:
+
+```
+pyproject.toml
+uv.lock
+```
+
+Always install with:
+
+```bash
+uv sync --extra dev --frozen
+```
+
+Do NOT run install without `--frozen`
+
+---
+
+## Development Guidelines
+
+### Always
+
+- Add type annotations
+- Write docstrings (Google style)
+- Keep functions small and readable
+- Respect architecture boundaries
+
+---
+
+### Avoid
+
+- Editing `models/` and `llama_cpp`
+- Untyped functions
+- Dead code
+- Using unauthorized formatters
+
+---
+
+## Quick Start
+
+```bash
+uv sync --extra dev --frozen
+
+uv run pytest
+uv run yapf -r -i domain solvers infrastructure ui tests llm
+uv run ruff check .
+uv run mypy .
+
+uv run pre-commit run --all-files
+```
+
+---
+
+## Contributing
+
+1. Install environment
+2. Enable pre-commit
+3. Run all checks
+4. Submit a Pull Request
+
+---
+
+## License
+
+Apache-2.0
