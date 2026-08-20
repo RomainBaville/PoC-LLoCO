@@ -54,7 +54,7 @@ def test_assignments_problem_few(
 
     Args:
         problem (AssignmentProblem): The assignment problem.
-        expected_solution (dict[str, list[tuple[str, int]]]): The list with all the expected solutions.
+        expected_solutions (dict[str, list[tuple[str, int]]]): The list with all the expected solutions.
     """
     obtained_solution: dict[ str, list[ tuple[ str, int ] ] ] = solve_assignment_problem( problem )
     assert obtained_solution in expected_solutions
