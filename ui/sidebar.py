@@ -68,23 +68,20 @@ _PLACEHOLDER_VARIANT = "—"
 
 
 def _render_config_panel():
-    analysis_done = st.session_state.get("analysis_done", False)
-
     st.markdown("## Configuration")
 
     # ── Problème ─────────────────────────────────────
-    theme.section_label("Problème")
-    problem_options = [_PLACEHOLDER] + list(PROBLEM_REGISTRY.keys())
+    theme.section_label( "Problème" )
+    problem_options = [ "Chose your problem type" ] + list( PROBLEM_REGISTRY.keys() )
     current_problem = st.session_state.get("problem_key")
     problem_index = problem_options.index(current_problem) if current_problem in problem_options else 0
 
     selected_problem = st.selectbox(
-        "Problème",
+        "Problem",
         options=problem_options,
         index=problem_index,
         format_func=lambda k: _PLACEHOLDER_PROBLEM if k == _PLACEHOLDER else PROBLEM_REGISTRY[k].label,
-        label_visibility="collapsed",
-        disabled=not analysis_done,
+        label_visibility="collapsed"
     )
     st.session_state.problem_key = None if selected_problem == _PLACEHOLDER else selected_problem
 
@@ -99,8 +96,7 @@ def _render_config_panel():
         options=type_options,
         index=type_index,
         format_func=lambda k: _PLACEHOLDER_TYPE if k == _PLACEHOLDER else ASSIGNMENT_TYPES[k].label,
-        label_visibility="collapsed",
-        disabled=not analysis_done,
+        label_visibility="collapsed"
     )
     assignment_type = None if selected_type == _PLACEHOLDER else selected_type
     st.session_state.assignment_type = assignment_type
@@ -122,8 +118,7 @@ def _render_config_panel():
             options=variant_options,
             index=variant_index,
             format_func=lambda k: _PLACEHOLDER_VARIANT if k == _PLACEHOLDER else variants[k].label,
-            label_visibility="collapsed",
-            disabled=not analysis_done,
+            label_visibility="collapsed"
         )
         variant_local = None if selected_variant == _PLACEHOLDER else selected_variant
         st.session_state.assignment_variant = (
@@ -136,7 +131,7 @@ def _render_config_panel():
             rec_label = variants[rec["variant_local"]].label
             st.markdown(
                 f'<p class="ui-hint">💡 Recommandation IA : <strong>{rec_label}</strong></p>',
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
     else:
         st.selectbox(
@@ -144,15 +139,14 @@ def _render_config_panel():
             options=[_PLACEHOLDER],
             format_func=lambda k: _PLACEHOLDER_VARIANT,
             label_visibility="collapsed",
-            disabled=True,
+            disabled=True
         )
         st.session_state.assignment_variant = None
 
     # ── Validate button ───────────────────────────────
     st.markdown("")
     can_validate = (
-        analysis_done
-        and st.session_state.get("problem_key")
+        st.session_state.get("problem_key")
         and st.session_state.get("assignment_type")
         and st.session_state.get("assignment_variant")
     )
@@ -160,7 +154,7 @@ def _render_config_panel():
         "✔  Valider la configuration",
         type="primary",
         use_container_width=True,
-        disabled=not can_validate,
+        disabled=not can_validate
     ):
         st.session_state.config_validated = True
         st.session_state.data_step = 1
@@ -169,7 +163,7 @@ def _render_config_panel():
     if not can_validate:
         st.markdown(
             '<p class="ui-hint">→ Analysez d\'abord votre problème dans la zone centrale.</p>',
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
 
