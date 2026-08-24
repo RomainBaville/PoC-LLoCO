@@ -3,48 +3,42 @@
 # SPDX-FileContributor: Romain Baville
 # SPDX-License-Identifier: Apache-2.0
 
-from importlib import import_module
-
+from infrastructure.registry import DATA_SOURCE_REGISTRY
+from solvers.registry import PROBLEM_SOLVER_GROUPS
 from ui.registry import PROBLEM_REGISTRY
-from ui.problems.assignment.registry import ASSIGNMENT_TYPES
-from solvers.assignment.registry import ASSIGNMENT_SOLVER_GROUPS
 
 
-def build_onboarding_context() -> dict:
+def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
+    """Build a structured description of platform capabilities based on registries.
+
+    Returns:
+        dict[str, list[dict[str, str]]]: The data (name, description) of the tools(domain, solvers...).
+
     """
-    Build a structured description of platform capabilities
-    based on registries.
-    """
-
-    problems = [
-        {"key": p.key, "label": p.label}
-        for p in PROBLEM_REGISTRY.values()
+    problems: list[ dict[ str, str ] ] = [
+        {
+            "key": p.key,
+            "label": p.label,
+            "description": p.description
+        } for p in PROBLEM_REGISTRY.values()
     ]
 
-    assignment_types = []
-    for atype in ASSIGNMENT_TYPES.values():
-        type_registry = import_module(atype.registry_module)
-        variants = [
-            v.label for v in type_registry.VARIANTS.values()
-        ]
+    solvers: list[ dict[ str, str ]
+                  ] = [ {
+                      "key": s.key,
+                      "description": s.description
+                  } for s in PROBLEM_SOLVER_GROUPS.values() ]
 
-        solver_group = ASSIGNMENT_SOLVER_GROUPS.get(atype.key)
-
-        assignment_types.append({
-            "label": atype.label,
-            "description": atype.description,
-            "variants": variants,
-            "solvers": (
-                list(
-                    import_module(solver_group.registry_module)
-                    .SOLVERS
-                    .keys()
-                )
-                if solver_group else []
-            ),
-        })
+    input_data: list[ dict[ str, str ] ] = [
+        {
+            "key": d.key,
+            "label": d.label,
+            "description": d.description
+        } for d in DATA_SOURCE_REGISTRY.values()
+    ]
 
     return {
         "problems": problems,
-        "assignment_types": assignment_types,
+        "solvers": solvers,
+        "input data": input_data
     }

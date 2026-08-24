@@ -1,44 +1,43 @@
+
 # Optimization Playground (PoC)
 
-This project is a **proof of concept (PoC)** for a generic optimization playground.
-It provides a **guided, UI‑driven workflow** to help users:
+## Overview
 
-1. Describe an optimization problem in natural language
+This project is a **Proof of Concept (PoC)** for a generic optimization playground.
+
+It aims to provide a **guided, UI‑driven workflow** to help users:
+
+1. Describe an optimization problem (LLM-assisted)
 2. Configure the problem step by step
 3. Select an appropriate solver
 4. Solve the problem
-5. Receive an **AI‑generated explanation and summary** of the results
+5. Receive an **AI-generated explanation of the results**
 
-The long‑term goal is to build a **solver‑agnostic and problem‑agnostic platform**
-for constraint optimization.
+The long-term goal is to build a **solver-agnostic and problem-agnostic platform** for constraint optimization.
 
 ---
 
 ## Role of the LLM (AI Assistant)
 
-The project integrates a Large Language Model (LLM) at **two key points** of the user journey:
+The LLM is used strictly as a **guidance and explanation layer**.
 
-### 1. Problem onboarding (start of the flow)
-At the beginning of the application, the user can describe their problem in plain language.
-The LLM is used to:
-- explain how the tool can help
-- clarify what type of optimization problem the user is facing
-- guide the user into the appropriate modeling flow
+### 1. Problem onboarding
 
-This lowers the entry barrier for non‑experts in optimization.
+At the beginning:
 
-### 2. Solution summarization (end of the flow)
-After the solver produces a solution, the LLM is used to:
-- summarize the assignment / optimization result in natural language
-- explain the outcome using the user’s own terminology
-- provide a human‑readable interpretation of the solution
+- The user describes their problem in natural language
+- The LLM:
+  - clarifies the problem type
+  - explains how the tool can help
+  - guides the user through the modeling process
 
-The LLM **never replaces the solver**: it acts as a **guidance and explanation layer** only.
+This lowers the entry barrier for non-experts.
 
 ---
 
-## Features
+### 2. Solution explanation
 
+<<<<<<< HEAD
 - Streamlit-based interactive UI — single-page dashboard layout
 - Sidebar-driven configuration with progressive disclosure
 - Multi-backend LLM model picker: Ollama, llama-server, and AKKODIS Azure OpenAI (auto-detected)
@@ -51,33 +50,128 @@ The LLM **never replaces the solver**: it acts as a **guidance and explanation l
 Currently implemented:
 - **Generic Assignment Problem** (bipartite assignment with requirements)
   - Skill coverage · Best-fit matching · Team formation · Portfolio selection
+=======
+After solving:
+
+- The LLM generates:
+  - a natural language explanation
+  - a summary aligned with the user’s terminology
+
+Important:
+The LLM **does NOT perform optimization**.
+All computations are done by deterministic solvers.
+>>>>>>> main
 
 ---
 
 ## Architectural Principles
 
-- **UI defines semantics**
-  (labels, CSV mappings, user meaning)
-- **Domain defines structure**
-  (mathematical representation)
-- **Solvers define math**
-  (constraints, objectives, optimization engines)
-- **Registries declare capabilities**
-  (available problems and solvers)
-- **LLM assists the user**, but does not solve problems
+- **UI defines semantics**: labels, data mapping, user meaning
+- **Domain defines structure**: mathematical modeling
+- **Solvers define math**: constraints and optimization engines
+- **Registries declare capabilities**: problems and solvers
+- **LLM assists but never replaces solvers**
 
-This separation allows:
-- adding new solvers without touching the UI
-- adding new problems without changing solver code
-- integrating AI safely without coupling it to optimization logic
+Benefits:
+
+- Add new solvers without changing UI
+- Add new problems without changing solvers
+- Keep AI decoupled from optimization logic
 
 ---
 
 ## Project Structure
+
 ```
 PoC-LLoCO/
 │
+├── models/
+│   └── ...
+│
+├── llama_cpp/
+│   └── ...
+│
+├── domain/
+│   ├── objective.py
+│   │
+│   └── assignment/
+│       ├── base.py
+│       │
+│       ├── constraints/
+│       │   ├── constraints_config.py
+│       │   ├── logicals_constraints.py
+│       │   └── quantities_constraints.py
+│       │
+│       └── score/
+│           ├── score_config.py
+│           ├── ressources_config.py
+│           ├── matching_config.py
+│           ├── matching_penalty_functions.py
+│           └── matching_reward_functions.py
+│
+├── infrastructure/
+│   ├── csv_loader.py
+│   └── registry.py
+│
+├── llm/
+│   ├── client.py
+│   ├── session_model.py
+│   ├── session_prompt.py
+│   ├── onboarding_context.py
+│   └── onboarding_prompt.py
+│
+├── solvers/
+│   ├── registry.py
+│   │
+│   └── assignment/
+│       ├── registry.py
+│       │
+│       └── cp_model/
+│           ├── constraints/
+│           │   └── quantities_constraints.py
+│           │   └── logical_constraints.py
+│           │   └── matching_constraints.py
+│           │   └── ressources_constraints.py
+│           │
+│           └── ortools_cp_sat.py
+│
+├── tests/
+│   ├── IndustryOR.json                      # All the problem the project needs to solve at the end
+│   │
+│   └── assignment/
+│       ├── problem_i/                       # Folder with data for the assignment problem i from the json file
+│       │   ├── problem_i_description.py     # Build the AssignmentProblem with the solution
+│       │   ├── left_data_i.csv              # The csv file with the left data for the ui
+│       │   └── right_data_i.csv             # The csv file with the right data for the ui
+:       :
+│       │
+│       └── test_assignments_problem.py      # The file with all the tests for assignments problem
+│
+├── ui/
+│   ├── app.py
+│   ├── registry.py
+│   ├── utils.py
+│   │
+│   └── assignment/
+│       ├── constraints/
+│       │   ├── builder.py
+│       │   ├── ui_logicals_constraints.py
+│       │   └── ui_quantities_constraints.py
+│       │
+│       ├── score/
+│       │   ├── builder.py
+│       │   ├── ui_matching.py
+│       │   └── ui_ressources.py
+│       │
+│       ├── builder.py
+│       └── ui_assignment.py
+│
+├── .pre-commit-config.yaml
+├── project.toml
+├── uv.lock
+│
 ├── README.md
+<<<<<<< HEAD
 │
 ├── data/                             # Input datasets (CSV for now)
 │   └── ...
@@ -148,12 +242,90 @@ PoC-LLoCO/
 │   └── onboarding_prompt.py          # Onboarding prompt builder
 │
 └── requirements.txt                  # Python dependencies
+=======
+└── run_app.bat
+```
+
+
+---
+
+## Requirements
+
+- Python == 3.12
+- https://github.com/astral-sh/uv
+
+---
+
+## Installation (Reproducible Environment)
+
+```bash
+uv sync --extra dev --frozen
+```
+
+Uses `uv.lock`
+Guarantees identical environments for all developers and CI
+
+---
+
+## ▶Running the Application
+
+### 1. Prepare data
+
+- Only CSV format is supported for now
+
+---
+
+### 2. Prepare LLM model
+
+- Place a `.gguf` Qwen model in `models/`
+- Download:
+  https://huggingface.co/Qwen
+
+---
+
+### 3. Prepare llama.cpp
+
+- Place binaries in `llama_cpp/`
+- Download:
+  https://github.com/ggml-org/llama.cpp/releases
+
+---
+
+### 4. Run application
+
+```bash
+run_app.bat
+```
+
+This will:
+
+- Start `llama.cpp` server
+- Start Streamlit UI
+- Open the app in your browser
+
+---
+
+### 5. Shutdown
+
+- Close the browser
+- Press `Q` in the terminal
+
+---
+
+## Testing
+
+Run all tests:
+
+```bash
+uv run pytest
+>>>>>>> main
 ```
 
 ---
 
-## Running the Application
+## Code Quality & Tooling
 
+<<<<<<< HEAD
 ### Prerequisites (all platforms)
 
 - **Python 3.10+**
@@ -286,3 +458,172 @@ To use a different port: `streamlit run ui/app.py --server.port 8502`
 - The model picker auto-detects all three backends (AKKODIS, Ollama, llama-server) at each page load
 - AKKODIS GPT models require an internet connection; Ollama and llama-server run fully offline
 - `.api_key.txt` is gitignored — never commit it
+=======
+The project enforces strict quality standards:
+
+| Tool       | Purpose                  |
+|------------|--------------------------|
+| Ruff       | Linting                  |
+| MyPy       | Static typing (strict)   |
+| Yapf       | Formatting (custom)      |
+| Pytest     | Testing                  |
+| Pre-commit | Local validation         |
+
+---
+
+## Lint
+
+```bash
+uv run ruff check .
+```
+
+---
+
+## Typing
+
+```bash
+uv run mypy .
+```
+
+---
+
+## Formatting
+
+```bash
+uv run yapf -r -i .
+```
+
+---
+
+## Code Style
+
+This project uses a **custom readable style**:
+
+```python
+tuple[ str, ... ]
+( left_label, matching_label )
+```
+
+This is intentional
+Do NOT use:
+
+- `black`
+- `ruff format`
+
+Formatting is handled by **yapf only**.
+
+---
+
+## Pre-commit Hooks (REQUIRED)
+
+### Install:
+
+```bash
+uv run pre-commit install
+```
+
+### Run manually:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+### Checks performed:
+
+- Ruff (lint)
+- MyPy (types)
+- Yapf (format)
+
+---
+
+## Continuous Integration
+
+CI runs automatically on:
+
+- push (on the main branch)
+- pull requests
+
+It verifies:
+
+- lint
+- typing
+- tests
+
+---
+
+## Reproducible Environment
+
+This project relies on:
+
+```
+pyproject.toml
+uv.lock
+```
+
+### Rules
+
+Always commit:
+
+```
+pyproject.toml
+uv.lock
+```
+
+Always install with:
+
+```bash
+uv sync --extra dev --frozen
+```
+
+Do NOT run install without `--frozen`
+
+---
+
+## Development Guidelines
+
+### Always
+
+- Add type annotations
+- Write docstrings (Google style)
+- Keep functions small and readable
+- Respect architecture boundaries
+
+---
+
+### Avoid
+
+- Editing `models/` and `llama_cpp`
+- Untyped functions
+- Dead code
+- Using unauthorized formatters
+
+---
+
+## Quick Start
+
+```bash
+uv sync --extra dev --frozen
+
+uv run pytest
+uv run yapf -r -i domain solvers infrastructure ui tests llm
+uv run ruff check .
+uv run mypy .
+
+uv run pre-commit run --all-files
+```
+
+---
+
+## Contributing
+
+1. Install environment
+2. Enable pre-commit
+3. Run all checks
+4. Submit a Pull Request
+
+---
+
+## License
+
+Apache-2.0
+>>>>>>> main

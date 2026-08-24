@@ -7,7 +7,6 @@ import streamlit as st
 
 import ui.theme as theme
 from ui.registry import PROBLEM_REGISTRY
-from ui.problems.assignment.registry import ASSIGNMENT_TYPES
 from ui.model_picker import discover as discover_models
 
 
@@ -15,7 +14,7 @@ from ui.model_picker import discover as discover_models
 
 def _render_model_picker():
     available_models = discover_models()
-    model_options = {m.key: m for m in available_models}
+    model_options = { m.key: m for m in available_models }
 
     if available_models:
         selected_key = st.selectbox(
@@ -61,18 +60,12 @@ def _render_model_picker():
 
 # ── Config panel — shown before validation ───────────────────────────────────
 
-_PLACEHOLDER = "__placeholder__"
-_PLACEHOLDER_PROBLEM = "Sélection automatique après analyse"
-_PLACEHOLDER_TYPE = "—"
-_PLACEHOLDER_VARIANT = "—"
-
-
 def _render_config_panel():
-    st.markdown("## Configuration")
+    st.markdown( "## Configuration" )
 
-    # ── Problème ─────────────────────────────────────
-    theme.section_label( "Problème" )
-    problem_options = [ "Chose your problem type" ] + list( PROBLEM_REGISTRY.keys() )
+    # ── Problem ─────────────────────────────────────
+    theme.section_label( "Problem" )
+    problem_options = [ "Chose your problem" ] + list( PROBLEM_REGISTRY.keys() )
     current_problem = st.session_state.get("problem_key")
     problem_index = problem_options.index(current_problem) if current_problem in problem_options else 0
 
@@ -80,75 +73,15 @@ def _render_config_panel():
         "Problem",
         options=problem_options,
         index=problem_index,
-        format_func=lambda k: _PLACEHOLDER_PROBLEM if k == _PLACEHOLDER else PROBLEM_REGISTRY[k].label,
+        format_func=lambda k: "Chose your problem" if k == "Chose your problem" else PROBLEM_REGISTRY[ k ].label,
         label_visibility="collapsed"
     )
-    st.session_state.problem_key = None if selected_problem == _PLACEHOLDER else selected_problem
-
-    # ── Type ──────────────────────────────────────────
-    theme.section_label("Type & Formulation")
-    type_options = [_PLACEHOLDER] + list(ASSIGNMENT_TYPES.keys())
-    current_type = st.session_state.get("assignment_type")
-    type_index = type_options.index(current_type) if current_type in type_options else 0
-
-    selected_type = st.selectbox(
-        "Type",
-        options=type_options,
-        index=type_index,
-        format_func=lambda k: _PLACEHOLDER_TYPE if k == _PLACEHOLDER else ASSIGNMENT_TYPES[k].label,
-        label_visibility="collapsed"
-    )
-    assignment_type = None if selected_type == _PLACEHOLDER else selected_type
-    st.session_state.assignment_type = assignment_type
-
-    # ── Formulation ───────────────────────────────────
-    if assignment_type:
-        atype_def = ASSIGNMENT_TYPES[assignment_type]
-        variant_reg = import_module(atype_def.registry_module)
-        variants = variant_reg.VARIANTS
-
-        variant_options = [_PLACEHOLDER] + list(variants.keys())
-        current_variant_full = st.session_state.get("assignment_variant") or ""
-        # Extract local key: "skills_coverage" → "coverage"
-        current_variant_local = current_variant_full.split("_", 1)[1] if "_" in current_variant_full else None
-        variant_index = variant_options.index(current_variant_local) if current_variant_local in variant_options else 0
-
-        selected_variant = st.selectbox(
-            "Formulation",
-            options=variant_options,
-            index=variant_index,
-            format_func=lambda k: _PLACEHOLDER_VARIANT if k == _PLACEHOLDER else variants[k].label,
-            label_visibility="collapsed"
-        )
-        variant_local = None if selected_variant == _PLACEHOLDER else selected_variant
-        st.session_state.assignment_variant = (
-            f"{assignment_type}_{variant_local}" if variant_local else None
-        )
-
-        # Recommendation hint
-        rec = st.session_state.get("analysis_recommendation")
-        if rec and rec.get("variant_local") in variants:
-            rec_label = variants[rec["variant_local"]].label
-            st.markdown(
-                f'<p class="ui-hint">💡 Recommandation IA : <strong>{rec_label}</strong></p>',
-                unsafe_allow_html=True
-            )
-    else:
-        st.selectbox(
-            "Formulation",
-            options=[_PLACEHOLDER],
-            format_func=lambda k: _PLACEHOLDER_VARIANT,
-            label_visibility="collapsed",
-            disabled=True
-        )
-        st.session_state.assignment_variant = None
+    st.session_state.problem_key = None if selected_problem == "Chose your problem" else selected_problem
 
     # ── Validate button ───────────────────────────────
     st.markdown("")
     can_validate = (
-        st.session_state.get("problem_key")
-        and st.session_state.get("assignment_type")
-        and st.session_state.get("assignment_variant")
+        st.session_state.get( "problem_key" )
     )
     if st.button(
         "✔  Valider la configuration",
@@ -157,7 +90,7 @@ def _render_config_panel():
         disabled=not can_validate
     ):
         st.session_state.config_validated = True
-        st.session_state.data_step = 1
+        st.session_state.step = 1
         st.rerun()
 
     if not can_validate:
@@ -171,8 +104,7 @@ def _render_config_panel():
 
 def _render_guide_panel():
     # Guard: if required keys were lost (hot reload, session reset), fall back to config panel
-    if not st.session_state.get("problem_key") or not st.session_state.get("assignment_type") \
-            or not st.session_state.get("assignment_variant"):
+    if not st.session_state.get("problem_key"):
         st.session_state.config_validated = False
         st.rerun()
         return
@@ -181,12 +113,8 @@ def _render_guide_panel():
     theme.section_label("Configuration active")
 
     problem_label = PROBLEM_REGISTRY[st.session_state.problem_key].label
-    atype_def = ASSIGNMENT_TYPES[st.session_state.assignment_type]
-    _, variant_key = st.session_state.assignment_variant.split("_", 1)
-    variant_reg = import_module(atype_def.registry_module)
-    variant_label = variant_reg.VARIANTS[variant_key].label
 
-    st.markdown(f"**{problem_label}**  \n{atype_def.label} · {variant_label}")
+    st.markdown(f"**{problem_label}**")
 
     st.markdown("")
     if st.button("✏  Modifier", use_container_width=True):

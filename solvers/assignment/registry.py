@@ -2,27 +2,35 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from collections.abc import Callable
 from dataclasses import dataclass
+
+from domain.assignment.base import AssignmentProblem
+from solvers.assignment.cp_model.ortools_cp_sat import solve_assignment_problem
 
 
 @dataclass
-class AssignmentSolverGroup:
+class AssignmentSolvers:
+    """The dataclass with all the solvers that can be used for an assignment problem.
+
+    Args:
+        key (str): The name of the solver use for the code.
+        label (str): The label of the solver use for the user.
+        description (str): The description of the solver capabilities.
+        solver_fn ([[AssignmentProblem], dict[str, list[tuple[str, int]]]]): The function to use to solve the problem.
+    """
     key: str
+    label: str
     description: str
-    registry_module: str  # import path
+    solver_fn: Callable[ [ AssignmentProblem ], dict[ str, list[ tuple[ str, int ] ] ] ]
 
 
-ASSIGNMENT_SOLVER_GROUPS = {
-    "skills": AssignmentSolverGroup(
-        key="skills",
-        description="Solvers for skill-based assignment problems",
-        registry_module="solvers.assignment.skills.registry",
+SOLVERS = {
+    "ortools_cp_sat":
+    AssignmentSolvers(
+        key="ortools_cp_sat",
+        label="OR-Tools CP-SAT",
+        description=( "Constraint Programming solver suitable for assignment problems with configurable behavior." ),
+        solver_fn=solve_assignment_problem,
     ),
-
-    # Future:
-    # "cost": AssignmentSolverGroup(
-    #     key="cost",
-    #     description="Solvers for cost-based assignment problems",
-    #     registry_module="solvers.assignment.cost.registry",
-    # ),
 }
