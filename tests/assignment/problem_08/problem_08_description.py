@@ -133,8 +133,7 @@ solutions_08: list[ dict[ str, list[ tuple[ str, int ] ] ] ] = [
         "II": [ ( "A", 1 ) ],
         "III": [ ( "B", 1 ) ],
         "IV": [ ( "D", 1 ) ]
-    },
-    {
+    }, {
         "I": [ ( "B", 1 ) ],
         "II": [ ( "A", 1 ) ],
         "IV": [ ( "C", 1 ) ],

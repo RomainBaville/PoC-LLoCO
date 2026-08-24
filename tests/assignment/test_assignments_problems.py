@@ -16,9 +16,7 @@ from tests.assignment.problem_84.problem_84_description import problem_84_domain
 @pytest.mark.parametrize(
     "problem, expected_solution",
     [
-        ( problem_10_domain, solution_10 ),
-        ( problem_19_domain, solution_19 ),
-        ( problem_55_domain, solution_55 ),
+        ( problem_10_domain, solution_10 ), ( problem_19_domain, solution_19 ), ( problem_55_domain, solution_55 ),
         ( problem_84_domain, solution_84 )
     ]
 )
@@ -38,12 +36,7 @@ def test_assignments_problem_unique(
     assert obtained_solution == expected_solution
 
 
-@pytest.mark.parametrize(
-    "problem, expected_solutions",
-    [
-        ( problem_08_domain, solutions_08 )
-    ]
-)
+@pytest.mark.parametrize( "problem, expected_solutions", [ ( problem_08_domain, solutions_08 ) ] )
 def test_assignments_problem_few(
     problem: AssignmentProblem,
     expected_solutions: list[ dict[ str, list[ tuple[ str, int ] ] ] ],

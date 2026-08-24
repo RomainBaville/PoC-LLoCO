@@ -7,20 +7,20 @@ from collections.abc import Callable
 
 import streamlit as st
 
+from llm.client import ask_llm_request
 from llm.session_model import OptimizationSession
 from llm.session_prompt import build_session_summary_prompt
-from llm.client import ask_llm_request
 
 
-def log_step(message: str):
+def log_step( message: str ):
     if "journey" not in st.session_state:
         st.session_state.journey = []
-    st.session_state.journey.append(message)
+    st.session_state.journey.append( message )
 
 
-def generate_ai_summary(session: OptimizationSession) -> str:
-    prompt = build_session_summary_prompt(session)
-    return ask_llm_request(prompt)
+def generate_ai_summary( session: OptimizationSession ) -> str:
+    prompt = build_session_summary_prompt( session )
+    return ask_llm_request( prompt )
 
 
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy

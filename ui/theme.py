@@ -203,29 +203,29 @@ _CSS = """
 
 
 def inject():
-    st.markdown(_CSS, unsafe_allow_html=True)
+    st.markdown( _CSS, unsafe_allow_html=True )
 
 
-def section_label(text: str):
-    st.markdown(f'<span class="ui-label">{text}</span>', unsafe_allow_html=True)
+def section_label( text: str ):
+    st.markdown( f'<span class="ui-label">{text}</span>', unsafe_allow_html=True )
 
 
 def divider():
-    st.markdown('<hr class="ui-hr">', unsafe_allow_html=True)
+    st.markdown( '<hr class="ui-hr">', unsafe_allow_html=True )
 
 
-def ai_block(content: str):
-    st.markdown(f'<div class="ui-ai">{content}</div>', unsafe_allow_html=True)
+def ai_block( content: str ):
+    st.markdown( f'<div class="ui-ai">{content}</div>', unsafe_allow_html=True )
 
 
-def hero(title: str, subtitle: str = ""):
+def hero( title: str, subtitle: str = "" ):
     html = f'<p class="ui-hero-title">{title}</p>'
     if subtitle:
         html += f'<p class="ui-hero-sub">{subtitle}</p>'
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown( html, unsafe_allow_html=True )
 
 
-def render_topbar(active_model: str | None = None):
+def render_topbar( active_model: str | None = None ):
     if active_model:
         right_html = (
             '<div class="ui-topbar-model">'

@@ -3,24 +3,18 @@
 # SPDX-FileContributor: Romain Baville
 # ruff: noqa: E402 # disable Module level import not at top of file
 
-import os
 import sys
 from pathlib import Path
-from importlib import import_module
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-sys.path.append(str(ROOT_DIR))
+ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
+sys.path.append( str( ROOT_DIR ) )
 
 import streamlit as st
 
 import ui.theme as theme
-from ui.sidebar import render as render_sidebar
-from ui.utils import build_results_zip, log_step
-from infrastructure.registry import DATA_SOURCE_REGISTRY
-from llm.onboarding_prompt import build_onboarding_prompt
-from llm.session_prompt import build_session_summary_prompt
 from llm.client import ask_llm_request
-from llm.session_model import OptimizationSession
+from llm.onboarding_prompt import build_onboarding_prompt
+from ui.sidebar import render as render_sidebar
 
 _DATA_DIR = "data"
 _LOADER_KEY = "csv_two_tables"
@@ -29,10 +23,7 @@ _LOADER_KEY = "csv_two_tables"
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
-from llm.client import ask_llm_request
-from llm.onboarding_prompt import build_onboarding_prompt
 from ui.registry import PROBLEM_REGISTRY
-from ui.utils import navigation_buttons, select_problem
 
 # ── Page setup ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -43,51 +34,61 @@ st.set_page_config(
 theme.inject()
 
 # ── Session defaults ─────────────────────────────────────────────────────────
-st.session_state.setdefault("config_validated", False)
-st.session_state.setdefault("step", 0)
-st.session_state.setdefault("solution", None)
-st.session_state.setdefault("ai_summary", None)
-st.session_state.setdefault("journey", [])
-st.session_state.setdefault("onboarding_result", None)
-st.session_state.setdefault("solve_error", None)
-st.session_state.setdefault("analysis_done", False)
-st.session_state.setdefault("analysis_recommendation", None)
+st.session_state.setdefault( "config_validated", False )
+st.session_state.setdefault( "step", 0 )
+st.session_state.setdefault( "solution", None )
+st.session_state.setdefault( "ai_summary", None )
+st.session_state.setdefault( "journey", [] )
+st.session_state.setdefault( "onboarding_result", None )
+st.session_state.setdefault( "solve_error", None )
+st.session_state.setdefault( "analysis_done", False )
+st.session_state.setdefault( "analysis_recommendation", None )
 # Config fields start as None — only populated after AI analysis
-st.session_state.setdefault("problem_key", None)
-st.session_state.setdefault("assignment_type", None)
-st.session_state.setdefault("assignment_variant", None)
+st.session_state.setdefault( "problem_key", None )
+st.session_state.setdefault( "assignment_type", None )
+st.session_state.setdefault( "assignment_variant", None )
 # Data-workflow labels (used in results rendering)
-st.session_state.setdefault("left_label", "Personnes")
-st.session_state.setdefault("right_label", "Projets")
+st.session_state.setdefault( "left_label", "Personnes" )
+st.session_state.setdefault( "right_label", "Projets" )
 
 # ── Sidebar + top bar ────────────────────────────────────────────────────────
 render_sidebar()
-theme.render_topbar(st.session_state.get("llm_model_name"))
-
+theme.render_topbar( st.session_state.get( "llm_model_name" ) )
 
 # ── Problem configuration inference ─────────────────────────────────────────
 
-def infer_problem_configuration(user_desc: str, ai_text: str | None = None) -> dict:
+
+def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) -> dict:
     """Deterministic keyword-based recommendation — no extra LLM call."""
     text = f"{user_desc}\n{ai_text or ''}".lower()
 
     assignment_keywords = [
-        "assign", "affect", "affectation", "affecter", "assignment",
-        "employee", "employé", "project", "projet", "skill", "compétence", "competence",
+        "assign",
+        "affect",
+        "affectation",
+        "affecter",
+        "assignment",
+        "employee",
+        "employé",
+        "project",
+        "projet",
+        "skill",
+        "compétence",
+        "competence",
     ]
-    if not any(w in text for w in assignment_keywords):
+    if not any( w in text for w in assignment_keywords ):
         return {}
 
     problem_key = "assignment"
     assignment_type = "skills"
 
-    if any(w in text for w in ["coverage", "required", "requirement", "besoin", "couverture", "requis"]):
+    if any( w in text for w in [ "coverage", "required", "requirement", "besoin", "couverture", "requis" ] ):
         variant_local = "coverage"
-    elif any(w in text for w in ["best fit", "best_fit", "matching", "compatibility", "score", "compatibilité"]):
+    elif any( w in text for w in [ "best fit", "best_fit", "matching", "compatibility", "score", "compatibilité" ] ):
         variant_local = "best_fit"
-    elif any(w in text for w in ["team", "équipe", "group", "groupe"]):
+    elif any( w in text for w in [ "team", "équipe", "group", "groupe" ] ):
         variant_local = "team"
-    elif any(w in text for w in ["portfolio", "selection", "budget", "sélection"]):
+    elif any( w in text for w in [ "portfolio", "selection", "budget", "sélection" ] ):
         variant_local = "portfolio"
     else:
         variant_local = "coverage"
@@ -99,27 +100,29 @@ def infer_problem_configuration(user_desc: str, ai_text: str | None = None) -> d
         "assignment_variant": f"{assignment_type}_{variant_local}",
     }
 
+
 st.session_state.setdefault( "step", 0 )
 st.session_state.setdefault( "problem_type", None )
 st.session_state.setdefault( "data_source", None )
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
-def _llm_ask(prompt: str) -> str:
-    source = st.session_state.get("llm_source", "ollama")
+
+def _llm_ask( prompt: str ) -> str:
+    source = st.session_state.get( "llm_source", "ollama" )
     model_name = st.session_state.llm_model_name
     if source == "akkodis":
         from ui.akkodis_client import ask as akkodis_ask
-        return akkodis_ask(prompt, model_name)
+        return akkodis_ask( prompt, model_name )
     else:
         import llm.client as _llm
         _llm.LLM_SERVER_URL = st.session_state.llm_url
         _llm.LLM_MODEL_NAME = model_name
-        return ask_llm_request(prompt)
-
+        return ask_llm_request( prompt )
 
 
 # ── Main area renderers ───────────────────────────────────────────────────────
+
 
 def _render_onboarding():
     theme.hero(
@@ -127,37 +130,35 @@ def _render_onboarding():
         "Décrivez votre problème en langage naturel. L'IA configurera automatiquement la barre latérale.",
     )
 
-    st.markdown("### Analyser votre problème avec l'IA")
+    st.markdown( "### Analyser votre problème avec l'IA" )
     user_desc = st.text_area(
         "Description",
         height=110,
-        placeholder=(
-            "Exemple : Je veux affecter des employés à des projets "
-            "en fonction de leurs compétences…"
-        ),
+        placeholder=( "Exemple : Je veux affecter des employés à des projets "
+                      "en fonction de leurs compétences…" ),
         label_visibility="collapsed",
     )
 
-    if st.button("Analyser", type="primary"):
+    if st.button( "Analyser", type="primary" ):
         if not user_desc.strip():
-            st.warning("Saisissez une description avant d'analyser.")
-        elif not st.session_state.get("llm_model_name"):
-            st.warning("Sélectionnez un modèle IA dans la barre latérale.")
+            st.warning( "Saisissez une description avant d'analyser." )
+        elif not st.session_state.get( "llm_model_name" ):
+            st.warning( "Sélectionnez un modèle IA dans la barre latérale." )
         else:
             try:
-                with st.spinner("Analyse en cours…"):
-                    result = _llm_ask(build_onboarding_prompt(user_desc))
+                with st.spinner( "Analyse en cours…" ):
+                    result = _llm_ask( build_onboarding_prompt( user_desc ) )
 
                 st.session_state.onboarding_result = result
                 st.session_state.analysis_done = True
 
                 # Infer and immediately apply configuration recommendation
-                rec = infer_problem_configuration(user_desc, result)
+                rec = infer_problem_configuration( user_desc, result )
                 st.session_state.analysis_recommendation = rec
                 if rec:
-                    st.session_state["problem_key"] = rec["problem_key"]
-                    st.session_state["assignment_type"] = rec["assignment_type"]
-                    st.session_state["assignment_variant"] = rec["assignment_variant"]
+                    st.session_state[ "problem_key" ] = rec[ "problem_key" ]
+                    st.session_state[ "assignment_type" ] = rec[ "assignment_type" ]
+                    st.session_state[ "assignment_variant" ] = rec[ "assignment_variant" ]
 
                 # Reset any prior validation so user re-confirms the new config
                 st.session_state.config_validated = False
@@ -168,12 +169,12 @@ def _render_onboarding():
                 st.rerun()
 
             except Exception as exc:
-                st.error(f"Erreur lors de l'appel au modèle IA : {exc}")
+                st.error( f"Erreur lors de l'appel au modèle IA : {exc}" )
 
-    if st.session_state.get("onboarding_result"):
-        st.markdown("**Guidage IA**")
-        theme.ai_block(st.session_state.onboarding_result)
-        st.markdown("")
+    if st.session_state.get( "onboarding_result" ):
+        st.markdown( "**Guidage IA**" )
+        theme.ai_block( st.session_state.onboarding_result )
+        st.markdown( "" )
         st.markdown(
             '<p class="ui-hint">✓ Configuration proposée dans la barre latérale. '
             'Vous pouvez la modifier, puis cliquer sur '
@@ -181,7 +182,7 @@ def _render_onboarding():
             unsafe_allow_html=True,
         )
     else:
-        st.markdown("")
+        st.markdown( "" )
         st.markdown(
             '<p class="ui-hint">→ Décrivez votre problème ci-dessus. '
             'L\'IA proposera automatiquement une configuration dans la barre latérale.</p>',
@@ -191,10 +192,10 @@ def _render_onboarding():
 
 def _render_data_workflow():
 
-    theme.hero("Saisie des données")
+    theme.hero( "Saisie des données" )
 
-    if st.session_state.get("solve_error"):
-        st.error(st.session_state.solve_error)
+    if st.session_state.get( "solve_error" ):
+        st.error( st.session_state.solve_error )
 
     if st.session_state.problem_key in PROBLEM_REGISTRY:
         PROBLEM_REGISTRY[ st.session_state.problem_key ].render_fn( st.session_state )
@@ -202,7 +203,7 @@ def _render_data_workflow():
 
 # ── Main routing ──────────────────────────────────────────────────────────────
 
-if not st.session_state.get("config_validated"):
+if not st.session_state.get( "config_validated" ):
     _render_onboarding()
 elif st.session_state.solution is None:
     _render_data_workflow()
