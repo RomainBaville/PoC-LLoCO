@@ -127,9 +127,17 @@ problem_08_domain: AssignmentProblem = AssignmentProblem(
     constraints_config=constraints_config
 )
 
-solution_08: dict[ str, list[ tuple[ str, int ] ] ] = {
-    "I": [ ( "C", 1 ) ],
-    "II": [ ( "A", 1 ) ],
-    "III": [ ( "B", 1 ) ],
-    "IV": [ ( "D", 1 ) ]
-}
+solutions_08: list[ dict[ str, list[ tuple[ str, int ] ] ] ] = [
+    {
+        "I": [ ( "C", 1 ) ],
+        "II": [ ( "A", 1 ) ],
+        "III": [ ( "B", 1 ) ],
+        "IV": [ ( "D", 1 ) ]
+    },
+    {
+        "I": [ ( "B", 1 ) ],
+        "II": [ ( "A", 1 ) ],
+        "IV": [ ( "C", 1 ) ],
+        "V": [ ( "D", 1 ) ]
+    }
+]
