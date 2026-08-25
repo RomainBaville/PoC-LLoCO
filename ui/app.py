@@ -11,7 +11,6 @@ import streamlit as st
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
-
 import ui.theme as theme
 from llm.client import ask_llm_request
 from llm.onboarding_prompt import build_onboarding_prompt

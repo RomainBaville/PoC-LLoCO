@@ -31,7 +31,7 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
     if session_state.max_right_entities is not None:
         session_state.journey[ "Max right entities" ] = session_state.max_right_entities
     elif "Max right entities" in session_state.journey:
-        del( session_state.journey[ "Max right entities" ] )
+        del ( session_state.journey[ "Max right entities" ] )
         st.rerun()
 
     session_state.min_right_entities = extremum_assignments(
@@ -47,7 +47,7 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
     if session_state.min_right_entities is not None:
         session_state.journey[ "Min right entities" ] = session_state.min_right_entities
     elif "Min right entities" in session_state.journey:
-        del( session_state.journey[ "Min right entities" ] )
+        del ( session_state.journey[ "Min right entities" ] )
         st.rerun()
 
     session_state.max_left_entities = extremum_assignments(
@@ -63,7 +63,7 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
     if session_state.max_left_entities is not None:
         session_state.journey[ "Max left entities" ] = session_state.max_left_entities
     elif "Max left entities" in session_state.journey:
-        del( session_state.journey[ "Max left entities" ] )
+        del ( session_state.journey[ "Max left entities" ] )
         st.rerun()
 
     session_state.min_left_entities = extremum_assignments(
@@ -79,7 +79,7 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
     if session_state.min_left_entities is not None:
         session_state.journey[ "Min left entities" ] = session_state.min_left_entities
     elif "Min left entities" in session_state.journey:
-        del( session_state.journey[ "Min left entities" ] )
+        del ( session_state.journey[ "Min left entities" ] )
         st.rerun()
 
     # -----------------------------
@@ -94,10 +94,16 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
                                                        ...] ] = ( session_state.left_cols, session_state.right_cols )
 
         session_state.max_same_assignments = extremum_same_assignments(
-            extremum="maximum", entities_types=entities_types, entities_cols=entities_cols, lock_constraints=session_state.lock_constraints
+            extremum="maximum",
+            entities_types=entities_types,
+            entities_cols=entities_cols,
+            lock_constraints=session_state.lock_constraints
         )
         session_state.min_same_assignments = extremum_same_assignments(
-            extremum="minimum", entities_types=entities_types, entities_cols=entities_cols, lock_constraints=session_state.lock_constraints
+            extremum="minimum",
+            entities_types=entities_types,
+            entities_cols=entities_cols,
+            lock_constraints=session_state.lock_constraints
         )
 
         # -----------------------------
@@ -154,37 +160,40 @@ def quantities_constraints( session_state: SessionStateProxy ) -> None:
     if session_state.max_same_assignments is not None:
         session_state.journey[ "Max same assignments" ] = session_state.max_same_assignments
     elif "Max same assignments" in session_state.journey:
-        del( session_state.journey[ "Max same assignments" ] )
+        del ( session_state.journey[ "Max same assignments" ] )
         st.rerun()
     if session_state.min_same_assignments is not None:
         session_state.journey[ "Min same assignments" ] = session_state.min_same_assignments
     elif "Min same assignments" in session_state.journey:
-        del( session_state.journey[ "Min same assignments" ] )
+        del ( session_state.journey[ "Min same assignments" ] )
         st.rerun()
     if session_state.max_right_assignments is not None:
         session_state.journey[ "Max right assignments" ] = session_state.max_right_assignments
     elif "Max right assignments" in session_state.journey:
-        del( session_state.journey[ "Max right assignments" ] )
+        del ( session_state.journey[ "Max right assignments" ] )
         st.rerun()
     if session_state.min_right_assignments is not None:
         session_state.journey[ "Min right assignments" ] = session_state.min_right_assignments
     elif "Min right assignments" in session_state.journey:
-        del( session_state.journey[ "Min right assignments" ] )
+        del ( session_state.journey[ "Min right assignments" ] )
         st.rerun()
     if session_state.max_left_assignments is not None:
         session_state.journey[ "Max left assignments" ] = session_state.max_left_assignments
     elif "Max left assignments" in session_state.journey:
-        del( session_state.journey[ "Max left assignments" ] )
+        del ( session_state.journey[ "Max left assignments" ] )
         st.rerun()
     if session_state.min_left_assignments is not None:
         session_state.journey[ "Min left assignments" ] = session_state.min_left_assignments
     elif "Min left assignments" in session_state.journey:
-        del( session_state.journey[ "Min left assignments" ] )
+        del ( session_state.journey[ "Min left assignments" ] )
         st.rerun()
 
 
 def extremum_same_assignments(
-    extremum: str, entities_types: tuple[ str, str ], entities_cols: tuple[ tuple[ str, ...], tuple[ str, ...] ], lock_constraints: bool
+    extremum: str,
+    entities_types: tuple[ str, str ],
+    entities_cols: tuple[ tuple[ str, ...], tuple[ str, ...] ],
+    lock_constraints: bool
 ) -> dict[ tuple[ str, str ], float ] | None:
     """Build the extremum same assignment constraints of the problem.
 
@@ -204,7 +213,9 @@ def extremum_same_assignments(
     if use_extremum_same_assignments:
         constraints: dict[ tuple[ str, str ], float ] = {}
         left_labels_constrainted: list[ str ] = st.multiselect(
-            f"Select all the { entities_types[ 0 ] } with a constraint", entities_cols[ 0 ], disabled=lock_constraints
+            f"Select all the { entities_types[ 0 ] } with a constraint",
+            entities_cols[ 0 ],
+            disabled=lock_constraints
         )
         for left_label_constrainted in left_labels_constrainted:
             right_labels_constrainted: list[ str ] = st.multiselect(
@@ -257,7 +268,8 @@ def extremum_assignments(
     """
     extremum_assignments_constraints: dict[ str, float ] | None = None
     use_extremum_assignments: bool = st.checkbox(
-        f"Is there a { extremum } number of assignments allowed per { entities_type } ? Note that { message }", disabled=lock_constraints
+        f"Is there a { extremum } number of assignments allowed per { entities_type } ? Note that { message }",
+        disabled=lock_constraints
     )
     if use_extremum_assignments:
         constraints: dict[ str, float ] = {}

@@ -150,7 +150,7 @@ def _render_guide_panel():
     # Compact journal
     theme.section_label( "Journal" )
     entries = st.session_state.get( "journey", {} )
-    print(st.session_state.journey)
+    print( st.session_state.journey )
     if entries:
         for entry, value in entries.items():
             st.markdown(

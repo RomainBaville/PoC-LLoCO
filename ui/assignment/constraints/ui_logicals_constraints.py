@@ -32,7 +32,7 @@ def logicals_constraints( session_state: SessionStateProxy ) -> None:
     if session_state.left_mutual_exclusions is not None:
         session_state.journey[ "Left mutual exclusions" ] = session_state.left_mutual_exclusions
     elif "Left mutual exclusions" in session_state.journey:
-        del( session_state.journey[ "Left mutual exclusions" ] )
+        del ( session_state.journey[ "Left mutual exclusions" ] )
         st.rerun()
 
     session_state.right_mutual_exclusions = mutual_exclusions(
@@ -45,17 +45,19 @@ def logicals_constraints( session_state: SessionStateProxy ) -> None:
     if session_state.right_mutual_exclusions is not None:
         session_state.journey[ "Right mutual exclusions" ] = session_state.right_mutual_exclusions
     elif "Right mutual exclusions" in session_state.journey:
-        del( session_state.journey[ "Right mutual exclusions" ] )
+        del ( session_state.journey[ "Right mutual exclusions" ] )
         st.rerun()
 
     labels: tuple[ tuple[ str, ...], tuple[ str, ...] ] = ( session_state.left_labels, session_state.right_labels )
     entities_types: tuple[ str, str ] = ( session_state.left_entities_type, session_state.right_entities_type )
 
-    session_state.implications = implications( labels, entities_types, session_state.multiple_same_assignment, session_state.lock_constraints )
+    session_state.implications = implications(
+        labels, entities_types, session_state.multiple_same_assignment, session_state.lock_constraints
+    )
     if session_state.implications is not None:
         session_state.journey[ "Implications" ] = session_state.implications
     elif "Implications" in session_state.journey:
-        del( session_state.journey[ "Implications" ] )
+        del ( session_state.journey[ "Implications" ] )
         st.rerun()
 
 
@@ -86,21 +88,26 @@ def mutual_exclusions(
             f"assigned to the same { entities_type_constraining }", disabled=lock_constraints
         )
         if define_mutual_exclusions:
-            nb_groups: int = st.number_input( f"How many group of { entities_type_constrained } ?", min_value=1, disabled=lock_constraints )
+            nb_groups: int = st.number_input(
+                f"How many group of { entities_type_constrained } ?", min_value=1, disabled=lock_constraints
+            )
 
             constraints: list[ list[ str ] ] = [ [] for _ in range( nb_groups ) ]
             for group in range( nb_groups ):
                 nb_entities: int = st.number_input(
                     f"How many { entities_type_constrained } are conserned for the group { group + 1 } ?",
                     min_value=2,
-                    max_value=len( labels ), disabled=lock_constraints
+                    max_value=len( labels ),
+                    disabled=lock_constraints
                 )
                 constraints[ group ] = [ labels[ entity ] for entity in range( nb_entities ) ]
                 exclusions_cols = st.columns( nb_entities )
                 for id, col in enumerate( exclusions_cols ):
                     with col:
                         constraints[ group ][ id ] = st.selectbox(
-                            f"{ entities_type_constrained } { id + 1 } for the group { group + 1 }", labels, disabled=lock_constraints
+                            f"{ entities_type_constrained } { id + 1 } for the group { group + 1 }",
+                            labels,
+                            disabled=lock_constraints
                         )
 
             mutual_exclusions_constraints = tuple( map( tuple, constraints ) )
@@ -133,7 +140,9 @@ def implications(
     use_implications: bool = st.checkbox( "Is there assignments implie other ?", disabled=lock_constraints )
     if use_implications:
         constraints: dict[ tuple[ str, str ], tuple[ tuple[ str, str, float ], ...] ] = {}
-        nb_assignments_with_implications: int = st.number_input( "How many assignments implies others ?", min_value=1, disabled=lock_constraints )
+        nb_assignments_with_implications: int = st.number_input(
+            "How many assignments implies others ?", min_value=1, disabled=lock_constraints
+        )
         for assignment_with_implications in range( nb_assignments_with_implications ):
             st.subheader( f"Rules for the assignment number { assignment_with_implications }" )
             assignment_with_implications_labels: list[ str ] = [ "", "" ]

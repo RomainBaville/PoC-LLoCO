@@ -30,11 +30,10 @@ def render( session_state: SessionStateProxy ) -> None:
         if session_state.step == 1:
             session_state.lock_naming = False
             if "Score computation" in session_state.journey:
-                del( session_state.journey[ "Score computation" ] )
+                del ( session_state.journey[ "Score computation" ] )
                 st.rerun()
         else:
             session_state.lock_naming = True
-
 
         session_state.left_entities_type = st.text_input(
             "Set the type of the left entity (e.g. Candidates)", "Candidates", disabled=session_state.lock_naming
@@ -60,7 +59,7 @@ def render( session_state: SessionStateProxy ) -> None:
         if session_state.step == 2:
             session_state.lock_score_parameters = False
             if "Data source" in session_state.journey:
-                del( session_state.journey[ "Data source" ] )
+                del ( session_state.journey[ "Data source" ] )
                 st.rerun()
         else:
             session_state.lock_score_parameters = True
@@ -99,16 +98,16 @@ def render( session_state: SessionStateProxy ) -> None:
         if session_state.step == 3:
             session_state.lock_data_source = False
             if "Left labels" in session_state.journey:
-                del( session_state.journey[ "Left labels" ] )
+                del ( session_state.journey[ "Left labels" ] )
                 st.rerun()
             if "Right labels" in session_state.journey:
-                del( session_state.journey[ "Right labels" ] )
+                del ( session_state.journey[ "Right labels" ] )
                 st.rerun()
             if "Matching variables" in session_state.journey:
-                del( session_state.journey[ "Matching variables" ] )
+                del ( session_state.journey[ "Matching variables" ] )
                 st.rerun()
             if "Ressources variables" in session_state.journey:
-                del( session_state.journey[ "Ressources variables" ] )
+                del ( session_state.journey[ "Ressources variables" ] )
                 st.rerun()
         else:
             session_state.lock_data_source = True
@@ -117,7 +116,12 @@ def render( session_state: SessionStateProxy ) -> None:
             session_state.data_source = None
 
         for ds in DATA_SOURCE_REGISTRY.values():
-            st.button( ds.label, on_click=select_data_source, args=( session_state, ds.key ), disabled=session_state.lock_data_source )
+            st.button(
+                ds.label,
+                on_click=select_data_source,
+                args=( session_state, ds.key ),
+                disabled=session_state.lock_data_source
+            )
             st.caption( ds.description )
 
         if session_state.data_source in ASSIGNMENT_DATA_SOURCE:
@@ -132,22 +136,22 @@ def render( session_state: SessionStateProxy ) -> None:
         if session_state.step == 4:
             session_state.lock_mapping = False
             if "Matching objective" in session_state.journey:
-                del( session_state.journey[ "Matching objective" ] )
+                del ( session_state.journey[ "Matching objective" ] )
                 st.rerun()
             if "Reward function" in session_state.journey:
-                del( session_state.journey[ "Reward function" ] )
+                del ( session_state.journey[ "Reward function" ] )
                 st.rerun()
             if "Penalty function" in session_state.journey:
-                del( session_state.journey[ "Penalty function" ] )
+                del ( session_state.journey[ "Penalty function" ] )
                 st.rerun()
             if "Matching weights" in session_state.journey:
-                del( session_state.journey[ "Matching weights" ] )
+                del ( session_state.journey[ "Matching weights" ] )
                 st.rerun()
             if "Ressources objectives" in session_state.journey:
-                del( session_state.journey[ "Ressources objectives" ] )
+                del ( session_state.journey[ "Ressources objectives" ] )
                 st.rerun()
             if "Ressources weights" in session_state.journey:
-                del( session_state.journey[ "Ressources weights" ] )
+                del ( session_state.journey[ "Ressources weights" ] )
                 st.rerun()
         else:
             session_state.lock_mapping = True
@@ -158,11 +162,15 @@ def render( session_state: SessionStateProxy ) -> None:
         st.subheader( "1. Identify entities" )
 
         session_state.left_entities_col_label = st.selectbox(
-            f"Columns identifying { session_state.left_entities_type }", session_state.left_cols, disabled=session_state.lock_mapping
+            f"Columns identifying { session_state.left_entities_type }",
+            session_state.left_cols,
+            disabled=session_state.lock_mapping
         )
 
         session_state.right_entities_col_label = st.selectbox(
-            f"Column identifying { session_state.right_entities_type }", session_state.right_cols, disabled=session_state.lock_mapping
+            f"Column identifying { session_state.right_entities_type }",
+            session_state.right_cols,
+            disabled=session_state.lock_mapping
         )
 
         session_state.left_labels = build_entities_labels(
@@ -196,64 +204,64 @@ def render( session_state: SessionStateProxy ) -> None:
         if session_state.step == 5:
             session_state.lock_strategy = False
             if "Multiple same assignment" in session_state.journey:
-                del( session_state.journey[ "Multiple same assignment" ] )
+                del ( session_state.journey[ "Multiple same assignment" ] )
                 st.rerun()
             if "Max right entities" in session_state.journey:
-                del( session_state.journey[ "Max right entities" ] )
+                del ( session_state.journey[ "Max right entities" ] )
                 st.rerun()
             if "Min right entities" in session_state.journey:
-                del( session_state.journey[ "Min right entities" ] )
+                del ( session_state.journey[ "Min right entities" ] )
                 st.rerun()
             if "Max left entities" in session_state.journey:
-                del( session_state.journey[ "Max left entities" ] )
+                del ( session_state.journey[ "Max left entities" ] )
                 st.rerun()
             if "Min left entities" in session_state.journey:
-                del( session_state.journey[ "Min left entities" ] )
+                del ( session_state.journey[ "Min left entities" ] )
                 st.rerun()
             if "Max same assignments" in session_state.journey:
-                del( session_state.journey[ "Max same assignments" ] )
+                del ( session_state.journey[ "Max same assignments" ] )
                 st.rerun()
             if "Min same assignments" in session_state.journey:
-                del( session_state.journey[ "Min same assignments" ] )
+                del ( session_state.journey[ "Min same assignments" ] )
                 st.rerun()
             if "Max right assignments" in session_state.journey:
-                del( session_state.journey[ "Max right assignments" ] )
+                del ( session_state.journey[ "Max right assignments" ] )
                 st.rerun()
             if "Min right assignments" in session_state.journey:
-                del( session_state.journey[ "Min right assignments" ] )
+                del ( session_state.journey[ "Min right assignments" ] )
                 st.rerun()
             if "Max left assignments" in session_state.journey:
-                del( session_state.journey[ "Max left assignments" ] )
+                del ( session_state.journey[ "Max left assignments" ] )
                 st.rerun()
             if "Min left assignments" in session_state.journey:
-                del( session_state.journey[ "Min left assignments" ] )
+                del ( session_state.journey[ "Min left assignments" ] )
                 st.rerun()
             if "Left mutual exclusions" in session_state.journey:
-                del( session_state.journey[ "Left mutual exclusions" ] )
+                del ( session_state.journey[ "Left mutual exclusions" ] )
                 st.rerun()
             if "Right mutual exclusions" in session_state.journey:
-                del( session_state.journey[ "Right mutual exclusions" ] )
+                del ( session_state.journey[ "Right mutual exclusions" ] )
                 st.rerun()
             if "Implications" in session_state.journey:
-                del( session_state.journey[ "Implications" ] )
+                del ( session_state.journey[ "Implications" ] )
                 st.rerun()
             if "Matching max vals" in session_state.journey:
-                del( session_state.journey[ "Matching max vals" ] )
+                del ( session_state.journey[ "Matching max vals" ] )
                 st.rerun()
             if "Matching min vals" in session_state.journey:
-                del( session_state.journey[ "Matching min vals" ] )
+                del ( session_state.journey[ "Matching min vals" ] )
                 st.rerun()
             if "Constraints max vals" in session_state.journey:
-                del( session_state.journey[ "Constraints max vals" ] )
+                del ( session_state.journey[ "Constraints max vals" ] )
                 st.rerun()
             if "Constraints min vals" in session_state.journey:
-                del( session_state.journey[ "Constraints min vals" ] )
+                del ( session_state.journey[ "Constraints min vals" ] )
                 st.rerun()
             if "Constraints max global vals" in session_state.journey:
-                del( session_state.journey[ "Constraints max global vals" ] )
+                del ( session_state.journey[ "Constraints max global vals" ] )
                 st.rerun()
             if "Constraints min global vals" in session_state.journey:
-                del( session_state.journey[ "Constraints min global vals" ] )
+                del ( session_state.journey[ "Constraints min global vals" ] )
                 st.rerun()
         else:
             session_state.lock_strategy = True
@@ -275,7 +283,7 @@ def render( session_state: SessionStateProxy ) -> None:
         if session_state.step == 6:
             session_state.lock_constraints = False
             if "Solver" in session_state.journey:
-                del( session_state.journey[ "Solver" ] )
+                del ( session_state.journey[ "Solver" ] )
                 st.rerun()
         else:
             session_state.lock_constraints = True
@@ -293,7 +301,8 @@ def render( session_state: SessionStateProxy ) -> None:
         session_state.journey[ "Multiple same assignment" ] = session_state.multiple_same_assignment
 
         session_state.use_quantities_constraints = st.checkbox(
-            "Is there quantities constraints in the problem (e.g. max number of employees per project)", disabled=session_state.lock_constraints
+            "Is there quantities constraints in the problem (e.g. max number of employees per project)",
+            disabled=session_state.lock_constraints
         )
         session_state.use_logicals_constraints = st.checkbox(
             "Is there logicals constraints in the problem " \
@@ -304,47 +313,47 @@ def render( session_state: SessionStateProxy ) -> None:
             quantities_constraints( session_state )
         else:
             if "Max right entities" in session_state.journey:
-                del( session_state.journey[ "Max right entities" ] )
+                del ( session_state.journey[ "Max right entities" ] )
                 st.rerun()
             if "Min right entities" in session_state.journey:
-                del( session_state.journey[ "Min right entities" ] )
+                del ( session_state.journey[ "Min right entities" ] )
                 st.rerun()
             if "Max left entities" in session_state.journey:
-                del( session_state.journey[ "Max left entities" ] )
+                del ( session_state.journey[ "Max left entities" ] )
                 st.rerun()
             if "Min left entities" in session_state.journey:
-                del( session_state.journey[ "Min left entities" ] )
+                del ( session_state.journey[ "Min left entities" ] )
                 st.rerun()
             if "Max same assignments" in session_state.journey:
-                del( session_state.journey[ "Max same assignments" ] )
+                del ( session_state.journey[ "Max same assignments" ] )
                 st.rerun()
             if "Min same assignments" in session_state.journey:
-                del( session_state.journey[ "Min same assignments" ] )
+                del ( session_state.journey[ "Min same assignments" ] )
                 st.rerun()
             if "Max right assignments" in session_state.journey:
-                del( session_state.journey[ "Max right assignments" ] )
+                del ( session_state.journey[ "Max right assignments" ] )
                 st.rerun()
             if "Min right assignments" in session_state.journey:
-                del( session_state.journey[ "Min right assignments" ] )
+                del ( session_state.journey[ "Min right assignments" ] )
                 st.rerun()
             if "Max left assignments" in session_state.journey:
-                del( session_state.journey[ "Max left assignments" ] )
+                del ( session_state.journey[ "Max left assignments" ] )
                 st.rerun()
             if "Min left assignments" in session_state.journey:
-                del( session_state.journey[ "Min left assignments" ] )
+                del ( session_state.journey[ "Min left assignments" ] )
                 st.rerun()
 
         if session_state.use_logicals_constraints:
             logicals_constraints( session_state )
         else:
             if "Left mutual exclusions" in session_state.journey:
-                del( session_state.journey[ "Left mutual exclusions" ] )
+                del ( session_state.journey[ "Left mutual exclusions" ] )
                 st.rerun()
             if "Right mutual exclusions" in session_state.journey:
-                del( session_state.journey[ "Right mutual exclusions" ] )
+                del ( session_state.journey[ "Right mutual exclusions" ] )
                 st.rerun()
             if "Implications" in session_state.journey:
-                del( session_state.journey[ "Implications" ] )
+                del ( session_state.journey[ "Implications" ] )
                 st.rerun()
 
         # -----------------------------
@@ -373,7 +382,12 @@ def render( session_state: SessionStateProxy ) -> None:
         solver_cols = st.columns( len( SOLVERS ) )
         for solver_col, solver in zip( solver_cols, SOLVERS.values(), strict=False ):
             with solver_col:
-                st.button( solver.label, on_click=select_solver, args=( session_state, solver.key ), disabled=session_state.lock_solver )
+                st.button(
+                    solver.label,
+                    on_click=select_solver,
+                    args=( session_state, solver.key ),
+                    disabled=session_state.lock_solver
+                )
 
         if not session_state.lock_solver:
             navigation_buttons( session_state, show_next=False )

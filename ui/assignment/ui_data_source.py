@@ -16,11 +16,17 @@ def two_csv( session_state: SessionStateProxy ):
     show_next: bool = False
 
     left_file: UploadedFile | None = st.file_uploader(
-        f"{ session_state.left_entities_type } dataset", type=[ "csv" ], key="left_csv", disabled=session_state.lock_data_source
+        f"{ session_state.left_entities_type } dataset",
+        type=[ "csv" ],
+        key="left_csv",
+        disabled=session_state.lock_data_source
     )
 
     right_file: UploadedFile | None = st.file_uploader(
-        f"{ session_state.right_entities_type } dataset", type=[ "csv" ], key="right_csv", disabled=session_state.lock_data_source
+        f"{ session_state.right_entities_type } dataset",
+        type=[ "csv" ],
+        key="right_csv",
+        disabled=session_state.lock_data_source
     )
 
     data_source: DataSourceDefinition = DATA_SOURCE_REGISTRY[ session_state.data_source ]
@@ -32,7 +38,6 @@ def two_csv( session_state: SessionStateProxy ):
         show_next = True
     else:
         show_next = False
-
 
     if not session_state.lock_data_source:
         navigation_buttons( session_state, show_next=show_next )
