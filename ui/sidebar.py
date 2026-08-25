@@ -21,7 +21,7 @@ def _render_model_picker():
         selected_key = st.selectbox(
             "Modèle IA",
             options=[ "none" ] + list( model_options.keys() ),
-            format_func=lambda k: "— Aucun —" if k == "none" else model_options[ k ].label,
+            format_func=lambda k: "— None —" if k == "none" else model_options[ k ].label,
             label_visibility="visible",
             key="llm_model_key",
         )
@@ -86,6 +86,7 @@ def _render_config_panel():
     if st.button( "✔  Valider la configuration", type="primary", use_container_width=True, disabled=not can_validate ):
         st.session_state.config_validated = True
         st.session_state.step = 1
+        st.session_state.journey[ "Problem type" ] = st.session_state.problem_key
         st.rerun()
 
     if not can_validate:
@@ -148,11 +149,12 @@ def _render_guide_panel():
 
     # Compact journal
     theme.section_label( "Journal" )
-    entries = st.session_state.get( "journey", [] )
+    entries = st.session_state.get( "journey", {} )
+    print(st.session_state.journey)
     if entries:
-        for entry in entries[ -6: ]:
+        for entry, value in entries.items():
             st.markdown(
-                f'<div class="ui-journal">· {entry}</div>',
+                f'<div class="ui-journal">· { entry }: { value }</div>',
                 unsafe_allow_html=True,
             )
     else:

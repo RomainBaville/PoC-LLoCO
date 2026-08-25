@@ -6,23 +6,16 @@
 import sys
 from pathlib import Path
 
+import streamlit as st
+
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
-import streamlit as st
 
 import ui.theme as theme
 from llm.client import ask_llm_request
 from llm.onboarding_prompt import build_onboarding_prompt
 from ui.sidebar import render as render_sidebar
-
-_DATA_DIR = "data"
-_LOADER_KEY = "csv_two_tables"
-
-# --- make project root importable ---
-ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
-sys.path.append( str( ROOT_DIR ) )
-
 from ui.registry import PROBLEM_REGISTRY
 
 # ── Page setup ──────────────────────────────────────────────────────────────
@@ -36,28 +29,20 @@ theme.inject()
 # ── Session defaults ─────────────────────────────────────────────────────────
 st.session_state.setdefault( "config_validated", False )
 st.session_state.setdefault( "step", 0 )
-st.session_state.setdefault( "solution", None )
 st.session_state.setdefault( "ai_summary", None )
-st.session_state.setdefault( "journey", [] )
+st.session_state.setdefault( "journey", {} )
 st.session_state.setdefault( "onboarding_result", None )
 st.session_state.setdefault( "solve_error", None )
 st.session_state.setdefault( "analysis_done", False )
 st.session_state.setdefault( "analysis_recommendation", None )
-# Config fields start as None — only populated after AI analysis
 st.session_state.setdefault( "problem_key", None )
-st.session_state.setdefault( "assignment_type", None )
-st.session_state.setdefault( "assignment_variant", None )
-# Data-workflow labels (used in results rendering)
-st.session_state.setdefault( "left_label", "Personnes" )
-st.session_state.setdefault( "right_label", "Projets" )
 
 # ── Sidebar + top bar ────────────────────────────────────────────────────────
 render_sidebar()
 theme.render_topbar( st.session_state.get( "llm_model_name" ) )
 
+
 # ── Problem configuration inference ─────────────────────────────────────────
-
-
 def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) -> dict:
     """Deterministic keyword-based recommendation — no extra LLM call."""
     text = f"{user_desc}\n{ai_text or ''}".lower()
@@ -101,13 +86,7 @@ def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) ->
     }
 
 
-st.session_state.setdefault( "step", 0 )
-st.session_state.setdefault( "problem_type", None )
-st.session_state.setdefault( "data_source", None )
-
 # ── Helpers ──────────────────────────────────────────────────────────────────
-
-
 def _llm_ask( prompt: str ) -> str:
     source = st.session_state.get( "llm_source", "ollama" )
     model_name = st.session_state.llm_model_name
@@ -122,8 +101,6 @@ def _llm_ask( prompt: str ) -> str:
 
 
 # ── Main area renderers ───────────────────────────────────────────────────────
-
-
 def _render_onboarding():
     theme.hero(
         "Optimization Playground",
@@ -157,8 +134,6 @@ def _render_onboarding():
                 st.session_state.analysis_recommendation = rec
                 if rec:
                     st.session_state[ "problem_key" ] = rec[ "problem_key" ]
-                    st.session_state[ "assignment_type" ] = rec[ "assignment_type" ]
-                    st.session_state[ "assignment_variant" ] = rec[ "assignment_variant" ]
 
                 # Reset any prior validation so user re-confirms the new config
                 st.session_state.config_validated = False
@@ -191,19 +166,13 @@ def _render_onboarding():
 
 
 def _render_data_workflow():
-
     theme.hero( "Saisie des données" )
-
-    if st.session_state.get( "solve_error" ):
-        st.error( st.session_state.solve_error )
-
     if st.session_state.problem_key in PROBLEM_REGISTRY:
         PROBLEM_REGISTRY[ st.session_state.problem_key ].render_fn( st.session_state )
 
 
 # ── Main routing ──────────────────────────────────────────────────────────────
-
 if not st.session_state.get( "config_validated" ):
     _render_onboarding()
-elif st.session_state.solution is None:
+else:
     _render_data_workflow()

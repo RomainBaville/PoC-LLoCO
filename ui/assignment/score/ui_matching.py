@@ -22,8 +22,11 @@ def map_matching( session_state: SessionStateProxy ) -> None:
             f"Select columns identifying variables to match between { session_state.left_entities_type } " \
             f"and { session_state.right_entities_type }",
             set( session_state.left_cols ).intersection( set( session_state.right_cols ) ),
+            disabled=session_state.lock_mapping
         )
     )
+    session_state.journey[ "Matching variables" ] = session_state.matching_labels
+
     session_state.matching_left_vals = build_vals(
         session_state.left_entities_col_label, session_state.matching_labels, session_state.left_rows
     )
@@ -38,30 +41,38 @@ def matching_strategy( session_state: SessionStateProxy ) -> None:
     Args:
         session_state (SessionStateProxy): The session state.
     """
-    session_state.matching_objective = st.selectbox( " Set the objective for the matching", Objective )
+    session_state.matching_objective = st.selectbox( " Set the objective for the matching", Objective, disabled=session_state.lock_strategy )
+    session_state.journey[ "Matching objective" ] = session_state.matching_objective
 
     session_state.reward_function = st.selectbox(
         "Set the reward function used in the computation of the score matching",
-        RewardFunctions,
+        RewardFunctions, disabled=session_state.lock_strategy
     )
+    session_state.journey[ "Reward function" ] = session_state.reward_function
 
     session_state.penalty_function = st.selectbox(
         "Set the penalty function used in the computation of the score matching",
-        PenaltyFunctions,
+        PenaltyFunctions, disabled=session_state.lock_strategy
     )
+    session_state.journey[ "Penalty function" ] = session_state.penalty_function
 
     session_state.matching_weights = dict.fromkeys( session_state.matching_labels, 1.0 )
-    use_matching_weights: bool = st.checkbox( "Is there varibales to match with weights" )
+    use_matching_weights: bool = st.checkbox( "Is there varibales to match with weights", disabled=session_state.lock_strategy )
     if use_matching_weights:
         matching_labels: tuple[ str, ...] = tuple(
-            st.multiselect( "Select the variables with a weight", session_state.matching_labels )
+            st.multiselect( "Select the variables with a weight", session_state.matching_labels, disabled=session_state.lock_strategy )
         )
         if len( matching_labels ) > 0:
             for matching_label in matching_labels:
                 session_state.matching_weights[ matching_label ] = st.number_input(
                     f"Weight for { matching_label }",
-                    value=1.,
+                    value=1., disabled=session_state.lock_strategy
                 )
+            session_state.journey[ "Matching weights" ] = session_state.matching_weights
+    else:
+        if "Matching weights" in session_state.journey:
+            del( session_state.journey[ "Matching weights" ] )
+            st.rerun()
 
 
 def matching_constraints( session_state: SessionStateProxy ) -> None:
@@ -76,12 +87,12 @@ def matching_constraints( session_state: SessionStateProxy ) -> None:
     for id, matching_extrema_col in enumerate( matching_extrema_cols ):
         with matching_extrema_col:
             use_matching_extrema_vals: bool = st.checkbox(
-                f"Is there variables constrained by a { extrema[ id ] } value ?"
+                f"Is there variables constrained by a { extrema[ id ] } value ?", disabled=session_state.lock_constraints
             )
             if use_matching_extrema_vals:
                 variables_labels: tuple[ str, ...] = tuple(
                     st.multiselect(
-                        f"Select variables constrained by a { extrema[ id ] } value", session_state.matching_labels
+                        f"Select variables constrained by a { extrema[ id ] } value", session_state.matching_labels, disabled=session_state.lock_constraints
                     )
                 )
                 if len( variables_labels ) > 0:
@@ -90,7 +101,7 @@ def matching_constraints( session_state: SessionStateProxy ) -> None:
                         matching_extrema_variables_labels[ variable_label ] = st.selectbox(
                             f"Select the column identifying the constrainning variable with the { extrema[ id ] } " \
                             f"values of the { variable_label }",
-                            session_state.right_cols,
+                            session_state.right_cols, disabled=session_state.lock_constraints
                         )
 
                     matching_extrema_vals[ id ] = build_vals(
@@ -104,4 +115,15 @@ def matching_constraints( session_state: SessionStateProxy ) -> None:
                 matching_extrema_vals[ id ] = None
 
     session_state.matching_max_vals = matching_extrema_vals[ 0 ]
+    if session_state.matching_max_vals is not None:
+        session_state.journey[ "Matching max vals" ] = session_state.matching_max_vals
+    elif "Matching max vals" in session_state.journey:
+        del( session_state.journey[ "Matching max vals" ] )
+        st.rerun()
+
     session_state.matching_min_vals = matching_extrema_vals[ 1 ]
+    if session_state.matching_min_vals is not None:
+        session_state.journey[ "Matching min vals" ] = session_state.matching_min_vals
+    elif "Matching min vals" in session_state.journey:
+        del( session_state.journey[ "Matching min vals" ] )
+        st.rerun()

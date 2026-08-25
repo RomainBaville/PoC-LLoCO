@@ -26,6 +26,16 @@ def generate_ai_summary( session: OptimizationSession ) -> str:
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 
+def select_data_source( session_state: SessionStateProxy, data_source_key: str ) -> None:
+    """Set the data source key in the session state.
+
+    Args:
+        session_state (SessionStateProxy): The session state.
+        data_source_key (str): The data source key.
+    """
+    session_state.data_source = data_source_key
+
+
 def select_problem( session_state: SessionStateProxy, problem_key: str ) -> None:
     """Set the problem key in the session state and go to the next step.
 
@@ -45,6 +55,7 @@ def select_solver( session_state: SessionStateProxy, solver_key: str ) -> None:
         solver_key (str): The solver key.
     """
     session_state.solver_key = solver_key
+    session_state.journey[ "Solver" ] = solver_key
     session_state.step += 1
 
 
