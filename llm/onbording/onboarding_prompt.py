@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from llm.onboarding_context import build_onboarding_context
+from llm.onbording.onboarding_context import build_onboarding_context
 
 
 def build_onboarding_prompt( user_description: str ) -> str:

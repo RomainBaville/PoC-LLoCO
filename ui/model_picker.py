@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
+# SPDX-FileContributor: Romain Baville
 """Detects locally available LLM models and returns connection metadata.
 Currently supports:
   - Ollama  (http://localhost:11434)
@@ -8,13 +9,22 @@ Currently supports:
 
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 import requests
+from llm.client.akkodis_client import find_api_key
 
+AKKODIS_URL = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
+LLAMA_SERVER_URL = "http://localhost:8080"
 _OLLAMA_URL = "http://localhost:11434"
-_LLAMA_SERVER_URL = "http://localhost:8080"
-_MODELS_DIR = "models"
+
+AKKODIS_MODELS = [
+    ( "gpt-4o-mini", "GPT-4o mini  [AKKODIS]" ),
+    ( "gpt-4o", "GPT-4o  [AKKODIS]" ),
+    ( "gpt-5", "GPT-5  [AKKODIS]" ),
+    ( "o4-mini", "o4-mini  [AKKODIS]" )
+]
+LLAMA_MODELS_DIR = "models"
+
 _TIMEOUT = 1.5
 
 
@@ -52,53 +62,39 @@ def _discover_ollama() -> list[ ModelInfo ]:
         return []
 
 
-def _discover_llama_server() -> list[ ModelInfo ]:
+def get_llama_models() -> list[ ModelInfo ]:
     gguf_files = []
-    if os.path.isdir( _MODELS_DIR ):
-        gguf_files = [ f for f in os.listdir( _MODELS_DIR ) if f.endswith( ".gguf" ) ]
+    if os.path.isdir( LLAMA_MODELS_DIR ):
+        gguf_files = [ f for f in os.listdir( LLAMA_MODELS_DIR ) if f.endswith( ".gguf" ) ]
 
     if not gguf_files:
         return []
 
-    # Check if llama-server is reachable
-    try:
-        requests.get( f"{_LLAMA_SERVER_URL}/health", timeout=_TIMEOUT )
-    except Exception:
-        return []
-
     return [
         ModelInfo(
-            key=f"llama::{f}",
-            label=f"{f}  [llama-server]",
-            api_url=f"{_LLAMA_SERVER_URL}/v1/chat/completions",
+            key=f"llama::{ f }",
+            label=f"{ f }  [llama-server]",
+            api_url=f"{ LLAMA_SERVER_URL }",
             model_name=f.replace( ".gguf", "" ),
             source="llama-server",
         ) for f in gguf_files
     ]
 
 
-def _discover_akkodis() -> list[ ModelInfo ]:
-    from ui.akkodis_client import _BASE_URL, AKKODIS_MODELS, find_api_key
+def get_akkodis_models() -> list[ ModelInfo ]:
     if not find_api_key():
         return []
     return [
         ModelInfo(
             key=f"akkodis::{model_id}",
             label=label,
-            api_url=_BASE_URL.format( model=model_id ),
+            api_url=AKKODIS_URL.format( model=model_id ),
             model_name=model_id,
             source="akkodis",
         ) for model_id, label in AKKODIS_MODELS
     ]
 
 
-def discover() -> list[ ModelInfo ]:
+def get_models() -> list[ ModelInfo ]:
     """Return all available models across all backends."""
-    return _discover_akkodis() + _discover_ollama() + _discover_llama_server()
-
-
-def get_by_key( key: str ) -> Optional[ ModelInfo ]:
-    for m in discover():
-        if m.key == key:
-            return m
-    return None
+    return get_akkodis_models() + _discover_ollama() + get_llama_models()

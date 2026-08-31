@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from llm.session_model import OptimizationSession
+from llm.summary.session_model import OptimizationSession
 
 
 def build_session_summary_prompt( session: OptimizationSession ) -> str:

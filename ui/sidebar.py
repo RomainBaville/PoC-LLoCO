@@ -4,14 +4,14 @@
 import streamlit as st
 
 import ui.theme as theme
-from ui.model_picker import discover as discover_models
+from ui.model_picker import get_models
 from ui.registry import PROBLEM_REGISTRY
+from llm.client.llama_client import start_llama_server, close_llama_server
 
 # ── Model picker (always at top) ────────────────────────────────────────────
-
-
 def _render_model_picker():
-    available_models = discover_models()
+    st.session_state.setdefault( "llama_server", None )
+    available_models = get_models()
     model_options = {
         m.key: m
         for m in available_models
@@ -40,6 +40,14 @@ def _render_model_picker():
         st.session_state.llm_url = None
         st.session_state.llm_model_name = None
         active_label = None
+
+    if st.session_state.llm_source == "llama-server":
+        if st.session_state.llama_server is None:
+            st.session_state.llama_server = start_llama_server( st.session_state.llm_url, st.session_state.llm_model_name )
+    else:
+        if st.session_state.llama_server is not None:
+            close_llama_server( st.session_state.llama_server )
+            st.session_state.llama_server = None
 
     if active_label:
         st.markdown(
@@ -117,12 +125,10 @@ def _render_guide_panel():
     if st.button( "✏  Modifier", use_container_width=True ):
         for k in [
             "config_validated",
-            "data_step",
+            "step",
             "solution",
             "ai_summary",
-            "solve_error",
-            "_prev_left_csv",
-            "_prev_right_csv",
+            "solve_error"
         ]:
             st.session_state.pop( k, None )
         st.rerun()
@@ -170,8 +176,6 @@ def _render_guide_panel():
 
 
 # ── Public entry point ───────────────────────────────────────────────────────
-
-
 def render():
     with st.sidebar:
         _render_model_picker()

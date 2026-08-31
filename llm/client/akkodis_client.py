@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
+# SPDX-FileContributor: Romain Baville
 """Client for the AKKODIS Azure OpenAI endpoint.
 Mirrors the logic from LLoCO/llm_utils.py — same URL pattern, same auth header.
 """
@@ -10,22 +11,12 @@ from typing import Optional
 
 import requests
 
-_BASE_URL = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
 
 _API_KEY_SEARCH_PATHS = [
     os.path.join( os.getcwd(), ".api_key.txt" ),
-    os.path.join( os.getcwd(), "api_key.txt" ),
-    # sibling LLoCO project — both live under AKKODIS/
-    os.path.join( os.path.dirname( os.getcwd() ), "LLoCO", ".api_key.txt" ),
+    os.path.join( os.getcwd(), "api_key.txt" )
 ]
 
-# Models available on the AKKODIS endpoint
-AKKODIS_MODELS = [
-    ( "gpt-4o-mini", "GPT-4o mini  [AKKODIS]" ),
-    ( "gpt-4o", "GPT-4o  [AKKODIS]" ),
-    ( "gpt-5", "GPT-5  [AKKODIS]" ),
-    ( "o4-mini", "o4-mini  [AKKODIS]" ),
-]
 
 
 def find_api_key() -> Optional[ str ]:
@@ -39,7 +30,7 @@ def find_api_key() -> Optional[ str ]:
     return None
 
 
-def ask( prompt: str, model_name: str, max_tokens: int = 800, max_retries: int = 3 ) -> str:
+def ask_akkodis_client( prompt: str, url: str, model_name: str = "", max_tokens: int = 800, max_retries: int = 3 ) -> str:
     api_key = find_api_key()
     if not api_key:
         raise RuntimeError(
@@ -48,7 +39,6 @@ def ask( prompt: str, model_name: str, max_tokens: int = 800, max_retries: int =
             "ou définissez OPENAI_API_KEY."
         )
 
-    url = _BASE_URL.format( model=model_name )
     headers = {
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",

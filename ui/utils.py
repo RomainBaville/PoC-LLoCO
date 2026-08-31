@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
+# SPDX-FileContributor: Romain Baville
 
 import io
 import zipfile
@@ -7,9 +8,9 @@ from collections.abc import Callable
 
 import streamlit as st
 
-from llm.client import ask_llm_request
-from llm.session_model import OptimizationSession
-from llm.session_prompt import build_session_summary_prompt
+from llm.client.llama_client import ask_llama_client
+from llm.summary.session_model import OptimizationSession
+from llm.summary.session_prompt import build_session_summary_prompt
 
 
 def log_step( message: str ):
@@ -20,7 +21,7 @@ def log_step( message: str ):
 
 def generate_ai_summary( session: OptimizationSession ) -> str:
     prompt = build_session_summary_prompt( session )
-    return ask_llm_request( prompt )
+    return ask_llama_client( prompt )
 
 
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy

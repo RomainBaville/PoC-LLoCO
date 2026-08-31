@@ -12,10 +12,10 @@ ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
 import ui.theme as theme
-from llm.client import ask_llm_request
-from llm.onboarding_prompt import build_onboarding_prompt
 from ui.sidebar import render as render_sidebar
 from ui.registry import PROBLEM_REGISTRY
+from llm.onbording.onboarding_prompt import build_onboarding_prompt
+from llm.registry import CLIENTS
 
 # ── Page setup ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -64,39 +64,10 @@ def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) ->
         return {}
 
     problem_key = "assignment"
-    assignment_type = "skills"
-
-    if any( w in text for w in [ "coverage", "required", "requirement", "besoin", "couverture", "requis" ] ):
-        variant_local = "coverage"
-    elif any( w in text for w in [ "best fit", "best_fit", "matching", "compatibility", "score", "compatibilité" ] ):
-        variant_local = "best_fit"
-    elif any( w in text for w in [ "team", "équipe", "group", "groupe" ] ):
-        variant_local = "team"
-    elif any( w in text for w in [ "portfolio", "selection", "budget", "sélection" ] ):
-        variant_local = "portfolio"
-    else:
-        variant_local = "coverage"
 
     return {
-        "problem_key": problem_key,
-        "assignment_type": assignment_type,
-        "variant_local": variant_local,
-        "assignment_variant": f"{assignment_type}_{variant_local}",
+        "problem_key": problem_key
     }
-
-
-# ── Helpers ──────────────────────────────────────────────────────────────────
-def _llm_ask( prompt: str ) -> str:
-    source = st.session_state.get( "llm_source", "ollama" )
-    model_name = st.session_state.llm_model_name
-    if source == "akkodis":
-        from ui.akkodis_client import ask as akkodis_ask
-        return akkodis_ask( prompt, model_name )
-    else:
-        import llm.client as _llm
-        _llm.LLM_SERVER_URL = st.session_state.llm_url
-        _llm.LLM_MODEL_NAME = model_name
-        return ask_llm_request( prompt )
 
 
 # ── Main area renderers ───────────────────────────────────────────────────────
@@ -123,7 +94,8 @@ def _render_onboarding():
         else:
             try:
                 with st.spinner( "Analyse en cours…" ):
-                    result = _llm_ask( build_onboarding_prompt( user_desc ) )
+                    prompt: str = build_onboarding_prompt( user_desc )
+                    result = CLIENTS[ st.session_state.llm_source ].ask_fn( prompt, st.session_state.llm_url, st.session_state.llm_model_name )
 
                 st.session_state.onboarding_result = result
                 st.session_state.analysis_done = True
