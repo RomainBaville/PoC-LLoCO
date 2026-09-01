@@ -6,7 +6,10 @@ import streamlit as st
 _CSS = """
 <style>
 /* ── Top bar ─────────────────────────────────────── */
-[data-testid="stHeader"] { display: none !important; }
+[data-testid="stHeader"] {
+    background: transparent !important;
+    top: 52px !important;
+}
 
 .ui-topbar {
     position: fixed;
@@ -70,17 +73,12 @@ _CSS = """
     flex-shrink: 0;
 }
 
-/* compensate for fixed topbar height */
-.main .block-container { padding-top: 4.5rem !important; }
-
 /* ── Sidebar ─────────────────────────────────────── */
 [data-testid="stSidebar"] {
+    top: 52px !important;
+    height: calc(100vh - 52px) !important;
     background-color: #F8FAFC;
     border-right: 1px solid #E2E8F0;
-}
-[data-testid="stSidebar"] section[data-testid="stSidebarContent"] {
-    padding-top: 4.5rem !important;
-    padding-bottom: 1.5rem;
 }
 [data-testid="stSidebar"] h2 {
     font-size: 1rem;

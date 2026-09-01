@@ -44,7 +44,7 @@ theme.render_topbar( st.session_state.get( "llm_model_name" ) )
 # ── Problem configuration inference ─────────────────────────────────────────
 def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) -> dict:
     """Deterministic keyword-based recommendation — no extra LLM call."""
-    text = f"{user_desc}\n{ai_text or ''}".lower()
+    text = f"{ user_desc }\n{ ai_text or '' }".lower()
 
     assignment_keywords = [
         "assign",
