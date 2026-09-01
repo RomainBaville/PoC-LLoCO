@@ -24,11 +24,11 @@ def start_llama_server( url: str, model_name: str ):
         raise ValueError( "A llama server is already open." )
 
     if os.path.isdir( LLAMA_SERVER_DIR ):
-        llama_exe_path =  str( ROOT_DIR / "llama_cpp/llama-server.exe" )
+        llama_exe_path =  ROOT_DIR / "llama_cpp/llama-server.exe"
     else:
         raise ImportError( "The folder llama_cpp is not in the root directory." )
 
-    model_path = str( ROOT_DIR / f"models/{ model_name }.gguf" )
+    model_path = ROOT_DIR / f"models/{ model_name }.gguf"
 
     llama_server = subprocess.Popen(
         [
