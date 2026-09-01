@@ -4,8 +4,8 @@
 import streamlit as st
 
 import ui.theme as theme
-from ui.model_picker import get_models
 from ui.registry import PROBLEM_REGISTRY
+from llm.model_picker import get_models
 from llm.client.llama_client import start_llama_server, close_llama_server
 
 # ── Model picker (always at top) ────────────────────────────────────────────
