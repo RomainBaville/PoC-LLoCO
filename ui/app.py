@@ -38,7 +38,7 @@ st.session_state.setdefault( "problem_key", None )
 
 # ── Sidebar + top bar ────────────────────────────────────────────────────────
 render_sidebar()
-theme.render_topbar( st.session_state.get( "llm_model_name" ) )
+theme.render_topbar( st.session_state.get( "llm_model_label" ) )
 
 
 # ── Problem configuration inference ─────────────────────────────────────────

@@ -8,6 +8,7 @@ Currently supports:
 """
 
 import os
+import re
 from dataclasses import dataclass
 
 import requests
@@ -65,7 +66,18 @@ def _discover_ollama() -> list[ ModelInfo ]:
 def get_llama_models() -> list[ ModelInfo ]:
     gguf_files = []
     if os.path.isdir( LLAMA_MODELS_DIR ):
-        gguf_files = [ f for f in os.listdir( LLAMA_MODELS_DIR ) if f.endswith( ".gguf" ) ]
+        for f in os.listdir( LLAMA_MODELS_DIR ) :
+            if not f.endswith(".gguf"):
+                continue
+
+            # Keep non-split models
+            if "-of-" not in f:
+                gguf_files.append( f )
+                continue
+
+            # Keep only the first part of split models
+            if re.search( r"-00001-of-\d+\.gguf$", f ):
+                gguf_files.append( f )
 
     if not gguf_files:
         return []
@@ -73,11 +85,15 @@ def get_llama_models() -> list[ ModelInfo ]:
     return [
         ModelInfo(
             key=f"llama::{ f }",
-            label=f"{ f }  [llama-server]",
-            api_url=f"{ LLAMA_SERVER_URL }",
-            model_name=f.replace( ".gguf", "" ),
-            source="llama-server",
-        ) for f in gguf_files
+            model_name=f"{ f }",
+            api_url=LLAMA_SERVER_URL,
+            label=f"{ re.sub(
+                r"-00001-of-\d+$",
+                "",
+                f.replace(".gguf", "" )
+            ) }  [llama-server]",
+            source="llama-server"
+        ) for f in sorted( gguf_files )
     ]
 
 

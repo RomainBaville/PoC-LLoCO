@@ -30,30 +30,27 @@ def _render_model_picker():
             st.session_state.llm_url = m.api_url
             st.session_state.llm_model_name = m.model_name
             st.session_state.llm_source = m.source
-            active_label = m.label
+            st.session_state.llm_model_label = m.label
         else:
             st.session_state.llm_url = None
             st.session_state.llm_model_name = None
             st.session_state.llm_source = None
-            active_label = None
+            st.session_state.llm_model_label = None
     else:
         st.session_state.llm_url = None
         st.session_state.llm_model_name = None
-        active_label = None
+        st.session_state.llm_model_label = None
 
     if st.session_state.llm_source == "llama-server":
-        if st.session_state.llama_server is None:
-            st.session_state.llama_server = start_llama_server( st.session_state.llm_url, st.session_state.llm_model_name )
-    else:
-        if st.session_state.llama_server is not None:
-            close_llama_server( st.session_state.llama_server )
-            st.session_state.llama_server = None
+        st.session_state.llama_server = start_llama_server( st.session_state.llama_server, st.session_state.llm_url, st.session_state.llm_model_name )
+    elif st.session_state.llama_server is not None:
+        st.session_state.llama_server = close_llama_server( st.session_state.llama_server )
 
-    if active_label:
+    if st.session_state.llm_model_label:
         st.markdown(
             f'<div class="ui-model-banner">'
             f'<span class="ui-model-banner-label">Modèle actif</span>'
-            f'<span class="ui-model-banner-value">⬤ {active_label}</span>'
+            f'<span class="ui-model-banner-value">⬤ { st.session_state.llm_model_label }</span>'
             f'</div>',
             unsafe_allow_html=True,
         )
@@ -156,7 +153,6 @@ def _render_guide_panel():
     # Compact journal
     theme.section_label( "Journal" )
     entries = st.session_state.get( "journey", {} )
-    print( st.session_state.journey )
     if entries:
         for entry, value in entries.items():
             st.markdown(

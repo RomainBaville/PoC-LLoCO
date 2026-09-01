@@ -19,16 +19,19 @@ import requests
 LLAMA_SERVER_DIR = "llama_cpp"
 ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
 
-def start_llama_server( url: str, model_name: str ):
-    if is_open( url ):
-        raise ValueError( "A llama server is already open." )
-
+def start_llama_server( llama_server, url: str, model_name: str ):
     if os.path.isdir( LLAMA_SERVER_DIR ):
         llama_exe_path =  ROOT_DIR / "llama_cpp/llama-server.exe"
     else:
         raise ImportError( "The folder llama_cpp is not in the root directory." )
 
-    model_path = ROOT_DIR / f"models/{ model_name }.gguf"
+    model_path = ROOT_DIR / f"models/{ model_name }"
+
+    if llama_server:
+        if is_open( url, model_path ):
+            return llama_server
+        else:
+            llama_server = close_llama_server( llama_server )
 
     llama_server = subprocess.Popen(
         [
@@ -50,27 +53,40 @@ def start_llama_server( url: str, model_name: str ):
         raise TimeoutError( "The llama sevrer was to long to open." )
     else:
         print( "The llama server is open." )
-        return llama_server
+
+    return llama_server
 
 
 def close_llama_server( llama_server ):
-    llama_server.send_signal(signal.CTRL_BREAK_EVENT)
+    llama_server.send_signal( signal.CTRL_BREAK_EVENT )
     print( "The llama server is close.")
+    return None
 
 
-def is_open( url ):
+def is_open(url: str, expected_model: str | None = None) -> bool:
     try:
-        response = requests.post(
-            f"{ url }/v1/chat/completions",
-            json={
-                "model": "test",
-                "messages": [ { "role": "user", "content": "ping" } ]
-            },
+        # Check server availability
+        response = requests.get(
+            f"{url}/v1/models",
             timeout=5
         )
 
-        if response.status_code == 200:
+        if response.status_code != 200:
+            return False
+
+        if expected_model is None:
             return True
+
+        models = response.json().get("data", [])
+
+        for model in models:
+            model_id = model.get("id", "")
+
+            # Exact match
+            if str( model_id ) == str( expected_model ):
+                return True
+
+        return False
 
     except requests.exceptions.RequestException:
         return False
