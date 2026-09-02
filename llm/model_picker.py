@@ -12,6 +12,7 @@ import re
 from dataclasses import dataclass
 
 import requests
+
 from llm.client.akkodis_client import find_api_key
 
 AKKODIS_URL = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
@@ -19,9 +20,7 @@ LLAMA_SERVER_URL = "http://localhost:8080"
 _OLLAMA_URL = "http://localhost:11434"
 
 AKKODIS_MODELS = [
-    ( "gpt-4o-mini", "GPT-4o mini  [AKKODIS]" ),
-    ( "gpt-4o", "GPT-4o  [AKKODIS]" ),
-    ( "gpt-5", "GPT-5  [AKKODIS]" ),
+    ( "gpt-4o-mini", "GPT-4o mini  [AKKODIS]" ), ( "gpt-4o", "GPT-4o  [AKKODIS]" ), ( "gpt-5", "GPT-5  [AKKODIS]" ),
     ( "o4-mini", "o4-mini  [AKKODIS]" )
 ]
 LLAMA_MODELS_DIR = "models"
@@ -66,8 +65,8 @@ def _discover_ollama() -> list[ ModelInfo ]:
 def get_llama_models() -> list[ ModelInfo ]:
     gguf_files = []
     if os.path.isdir( LLAMA_MODELS_DIR ):
-        for f in os.listdir( LLAMA_MODELS_DIR ) :
-            if not f.endswith(".gguf"):
+        for f in os.listdir( LLAMA_MODELS_DIR ):
+            if not f.endswith( ".gguf" ):
                 continue
 
             # Keep non-split models
@@ -87,11 +86,7 @@ def get_llama_models() -> list[ ModelInfo ]:
             key=f"llama::{ f }",
             model_name=f"{ f }",
             api_url=LLAMA_SERVER_URL,
-            label=f"{ re.sub(
-                r"-00001-of-\d+$",
-                "",
-                f.replace(".gguf", "" )
-            ) }  [llama-server]",
+            label=f'{ re.sub( r"-00001-of-\d+$", "", f.replace(".gguf", "" ) ) } [llama-server]',
             source="llama-server"
         ) for f in sorted( gguf_files )
     ]

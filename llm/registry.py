@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from llm.client.akkodis_client import ask_akkodis_client
 from llm.client.llama_client import ask_llama_client
 
+
 @dataclass
 class LLMClient:
     """The class with all the llm client that can be used.
@@ -23,14 +24,7 @@ class LLMClient:
 
 
 CLIENTS = {
-    "akkodis": LLMClient(
-        key="akkodis",
-        description="LLM client from akkodis servers.",
-        ask_fn=ask_akkodis_client
-    ),
-    "llama-server": LLMClient(
-        key="llama-server",
-        description="LLM client from llama servers.",
-        ask_fn=ask_llama_client
-    )
+    "akkodis": LLMClient( key="akkodis", description="LLM client from akkodis servers.", ask_fn=ask_akkodis_client ),
+    "llama-server":
+    LLMClient( key="llama-server", description="LLM client from llama servers.", ask_fn=ask_llama_client )
 }

@@ -11,12 +11,7 @@ from typing import Optional
 
 import requests
 
-
-_API_KEY_SEARCH_PATHS = [
-    os.path.join( os.getcwd(), ".api_key.txt" ),
-    os.path.join( os.getcwd(), "api_key.txt" )
-]
-
+_API_KEY_SEARCH_PATHS = [ os.path.join( os.getcwd(), ".api_key.txt" ), os.path.join( os.getcwd(), "api_key.txt" ) ]
 
 
 def find_api_key() -> Optional[ str ]:
@@ -30,7 +25,9 @@ def find_api_key() -> Optional[ str ]:
     return None
 
 
-def ask_akkodis_client( prompt: str, url: str, model_name: str = "", max_tokens: int = 800, max_retries: int = 3 ) -> str:
+def ask_akkodis_client(
+    prompt: str, url: str, model_name: str = "", max_tokens: int = 800, max_retries: int = 3
+) -> str:
     api_key = find_api_key()
     if not api_key:
         raise RuntimeError(

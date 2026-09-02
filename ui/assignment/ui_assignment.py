@@ -12,8 +12,8 @@ from ui.assignment.constraints.ui_logicals_constraints import logicals_constrain
 from ui.assignment.constraints.ui_quantities_constraints import quantities_constraints
 from ui.assignment.score.ui_matching import map_matching, matching_constraints, matching_strategy
 from ui.assignment.score.ui_ressources import map_ressources, ressources_constraints, ressources_strategy
-from ui.utils import navigation_buttons, select_solver, select_data_source
 from ui.assignment.ui_data_source import ASSIGNMENT_DATA_SOURCE
+from ui.utils import navigation_buttons, select_data_source, select_solver
 
 
 def render( session_state: SessionStateProxy ) -> None:

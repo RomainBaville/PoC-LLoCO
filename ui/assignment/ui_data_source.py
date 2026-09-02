@@ -2,8 +2,9 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-import streamlit as st
 from collections.abc import Callable
+
+import streamlit as st
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 

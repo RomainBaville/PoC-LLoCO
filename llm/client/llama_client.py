@@ -2,26 +2,22 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from typing import Any
-
-import signal
-import requests
 import os
+import signal
 import subprocess
-import requests
 import time
 from pathlib import Path
-import subprocess
-import time
-import requests
+from typing import Any
 
+import requests
 
 LLAMA_SERVER_DIR = "llama_cpp"
 ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
 
+
 def start_llama_server( llama_server, url: str, model_name: str ):
     if os.path.isdir( LLAMA_SERVER_DIR ):
-        llama_exe_path =  ROOT_DIR / "llama_cpp/llama-server.exe"
+        llama_exe_path = ROOT_DIR / "llama_cpp/llama-server.exe"
     else:
         raise ImportError( "The folder llama_cpp is not in the root directory." )
 
@@ -34,12 +30,7 @@ def start_llama_server( llama_server, url: str, model_name: str ):
             llama_server = close_llama_server( llama_server )
 
     llama_server = subprocess.Popen(
-        [
-            llama_exe_path,
-            "-m", model_path,
-            "--port", url[ -4: ],
-            "--ctx-size", "32768"
-        ],
+        [ llama_exe_path, "-m", model_path, "--port", url[ -4: ], "--ctx-size", "32768" ],
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
     )
     llama_server_open: bool = False
@@ -59,17 +50,14 @@ def start_llama_server( llama_server, url: str, model_name: str ):
 
 def close_llama_server( llama_server ):
     llama_server.send_signal( signal.CTRL_BREAK_EVENT )
-    print( "The llama server is close.")
+    print( "The llama server is close." )
     return None
 
 
-def is_open(url: str, expected_model: str | None = None) -> bool:
+def is_open( url: str, expected_model: str | None = None ) -> bool:
     try:
         # Check server availability
-        response = requests.get(
-            f"{url}/v1/models",
-            timeout=5
-        )
+        response = requests.get( f"{url}/v1/models", timeout=5 )
 
         if response.status_code != 200:
             return False
@@ -77,10 +65,10 @@ def is_open(url: str, expected_model: str | None = None) -> bool:
         if expected_model is None:
             return True
 
-        models = response.json().get("data", [])
+        models = response.json().get( "data", [] )
 
         for model in models:
-            model_id = model.get("id", "")
+            model_id = model.get( "id", "" )
 
             # Exact match
             if str( model_id ) == str( expected_model ):
@@ -102,7 +90,8 @@ def ask_llama_client( prompt: str, url: str, model_name: str, max_tokens: int = 
         str: The llm response.
     """
     payload: dict[ str, Any ] = {
-        "model": model_name,
+        "model":
+        model_name,
         "messages": [
             {
                 "role": "system",
@@ -115,17 +104,17 @@ def ask_llama_client( prompt: str, url: str, model_name: str, max_tokens: int = 
                 "content": prompt,
             },
         ],
-        "temperature": 0.2,
-        "top_p": 0.9,
-        "max_tokens": max_tokens,
-        "stream": False
+        "temperature":
+        0.2,
+        "top_p":
+        0.9,
+        "max_tokens":
+        max_tokens,
+        "stream":
+        False
     }
 
-    response = requests.post(
-        url=f"{ url }/v1/chat/completions",
-        json=payload,
-        timeout=3600
-    )
+    response = requests.post( url=f"{ url }/v1/chat/completions", json=payload, timeout=3600 )
 
     if response.status_code != 200:
         raise RuntimeError( f"LLM request failed "

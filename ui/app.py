@@ -12,10 +12,10 @@ ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
 import ui.theme as theme
-from ui.sidebar import render as render_sidebar
-from ui.registry import PROBLEM_REGISTRY
 from llm.onbording.onboarding_prompt import build_onboarding_prompt
 from llm.registry import CLIENTS
+from ui.registry import PROBLEM_REGISTRY
+from ui.sidebar import render as render_sidebar
 
 # ── Page setup ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -95,7 +95,8 @@ def _render_onboarding():
             try:
                 with st.spinner( "Analyse en cours…" ):
                     prompt: str = build_onboarding_prompt( user_desc )
-                    result = CLIENTS[ st.session_state.llm_source ].ask_fn( prompt, st.session_state.llm_url, st.session_state.llm_model_name )
+                    result = CLIENTS[ st.session_state.llm_source
+                                     ].ask_fn( prompt, st.session_state.llm_url, st.session_state.llm_model_name )
 
                 st.session_state.onboarding_result = result
                 st.session_state.analysis_done = True

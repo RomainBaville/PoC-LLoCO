@@ -4,9 +4,10 @@
 import streamlit as st
 
 import ui.theme as theme
-from ui.registry import PROBLEM_REGISTRY
+from llm.client.llama_client import close_llama_server, start_llama_server
 from llm.model_picker import get_models
-from llm.client.llama_client import start_llama_server, close_llama_server
+from ui.registry import PROBLEM_REGISTRY
+
 
 # ── Model picker (always at top) ────────────────────────────────────────────
 def _render_model_picker():
@@ -42,7 +43,9 @@ def _render_model_picker():
         st.session_state.llm_model_label = None
 
     if st.session_state.llm_source == "llama-server":
-        st.session_state.llama_server = start_llama_server( st.session_state.llama_server, st.session_state.llm_url, st.session_state.llm_model_name )
+        st.session_state.llama_server = start_llama_server(
+            st.session_state.llama_server, st.session_state.llm_url, st.session_state.llm_model_name
+        )
     elif st.session_state.llama_server is not None:
         st.session_state.llama_server = close_llama_server( st.session_state.llama_server )
 
@@ -120,13 +123,7 @@ def _render_guide_panel():
 
     st.markdown( "" )
     if st.button( "✏  Modifier", use_container_width=True ):
-        for k in [
-            "config_validated",
-            "step",
-            "solution",
-            "ai_summary",
-            "solve_error"
-        ]:
+        for k in [ "config_validated", "step", "solution", "ai_summary", "solve_error" ]:
             st.session_state.pop( k, None )
         st.rerun()
 
