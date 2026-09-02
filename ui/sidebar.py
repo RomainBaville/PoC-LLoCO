@@ -11,7 +11,7 @@ from ui.registry import PROBLEM_REGISTRY
 
 # ── Model picker (always at top) ────────────────────────────────────────────
 def _render_model_picker():
-    st.session_state.setdefault( "llama_server", None )
+    st.session_state.setdefault( "llama_server_pid", 0 )
     available_models = get_models()
     model_options = {
         m.key: m
@@ -43,11 +43,14 @@ def _render_model_picker():
         st.session_state.llm_model_label = None
 
     if st.session_state.llm_source == "llama-server":
-        st.session_state.llama_server = start_llama_server(
-            st.session_state.llama_server, st.session_state.llm_url, st.session_state.llm_model_name
+        st.session_state.llama_server_pid = start_llama_server(
+            st.session_state.llm_url,
+            st.session_state.llm_model_name,
+            llama_server_pid=st.session_state.llama_server_pid
         )
-    elif st.session_state.llama_server is not None:
-        st.session_state.llama_server = close_llama_server( st.session_state.llama_server )
+    elif st.session_state.llama_server_pid != 0:
+        close_llama_server( st.session_state.llama_server_pid )
+        st.session_state.llama_server_pid = 0
 
     if st.session_state.llm_model_label:
         st.markdown(

@@ -10,7 +10,7 @@ STREAMLIT_APP = Path( "ui/app.py" )
 print( "Starting Streamlit..." )
 
 process = subprocess.Popen(
-    [ "streamlit", "run", STREAMLIT_APP ],
+    [ "cmd.exe", "/k", f"title Streamlit App && streamlit run { STREAMLIT_APP }" ],
     creationflags=subprocess.CREATE_NEW_CONSOLE,
 )
 

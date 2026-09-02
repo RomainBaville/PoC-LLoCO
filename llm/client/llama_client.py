@@ -2,62 +2,105 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-import os
-import signal
 import subprocess
 import time
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import requests
 
-LLAMA_SERVER_DIR = "llama_cpp"
 ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
+LLAMA_SERVER_DIR = "llama_cpp"
+LLAMA_SERVER_EXE = "llama-server.exe"
+LLAMA_MODELS_DIR = "models"
 
 
-def start_llama_server( llama_server, url: str, model_name: str ):
-    if os.path.isdir( LLAMA_SERVER_DIR ):
-        llama_exe_path = ROOT_DIR / "llama_cpp/llama-server.exe"
-    else:
-        raise ImportError( "The folder llama_cpp is not in the root directory." )
+def start_llama_server( url: str, model_name: str, timeout: int = 300, llama_server_pid: int = 0 ) -> int:
+    """Open a llama server with the wanted model if it is not.
 
-    model_path = ROOT_DIR / f"models/{ model_name }"
+    Args:
+        url (str): The url of the server with the llm.
+        model_name (str): The model to use.
+        timeout (int): The maximum time (s) before crash.
+            defaults to 300.
+        llama_server_pid (int): The pid of the Popen subprocess with the llama server open.
+            Defaults to 0 (no subprocess pid).
 
-    if llama_server:
+    Returns:
+        int: The pid of the Popen subprocess with the llama serve open.
+
+    Raises:
+        ImportError: Something went wrong with the url or the model_name.
+        TimeoutError: The llama sevrer was to long to open.
+    """
+    llama_exe_path: Path = ROOT_DIR / LLAMA_SERVER_DIR / LLAMA_SERVER_EXE
+    if not llama_exe_path.is_file():
+        raise ImportError( f"No { LLAMA_SERVER_EXE }, the folder { LLAMA_SERVER_DIR } must be in the root directory." )
+
+    model_path: Path = ROOT_DIR / LLAMA_MODELS_DIR / model_name
+    if not model_path.is_file():
+        raise ImportError( f"The model { model_name } is not in the folder { LLAMA_MODELS_DIR } of the project." )
+
+    if llama_server_pid != 0:
         if is_open( url, model_path ):
-            return llama_server
+            return llama_server_pid
         else:
-            llama_server = close_llama_server( llama_server )
+            close_llama_server( llama_server_pid )
 
-    llama_server = subprocess.Popen(
-        [ llama_exe_path, "-m", model_path, "--port", url[ -4: ], "--ctx-size", "32768" ],
-        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+    port: int = urlparse( url ).port
+
+    process = subprocess.Popen(
+        [
+            "cmd.exe",
+            "/k",
+            f"title LLama-server && { llama_exe_path } -m { model_path } --port { port } --ctx-size 32768"
+        ],
+        creationflags=subprocess.CREATE_NEW_CONSOLE
     )
+    llama_server_pid: int = process.pid
+
     llama_server_open: bool = False
     retry: int = 0
-    while not llama_server_open and retry < 10:
+    while not llama_server_open and retry < timeout:
         llama_server_open = is_open( url )
-        time.sleep( 30 )
-        retry += 1
+        time.sleep( timeout / 60 )
+        retry += timeout / 60
 
     if not llama_server_open:
         raise TimeoutError( "The llama sevrer was to long to open." )
-    else:
-        print( "The llama server is open." )
 
-    return llama_server
+    print( "The llama server is open." )
+    return llama_server_pid
 
 
-def close_llama_server( llama_server ):
-    llama_server.send_signal( signal.CTRL_BREAK_EVENT )
+def close_llama_server( llama_server_pid: int ) -> None:
+    """Close the llama server.
+
+    Args:
+        llama_server_pid (int): The pid of the Popen subprocess with the llama server open.
+    """
+    subprocess.run(
+        [ "taskkill", "/PID", str( llama_server_pid ), "/T", "/F" ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
     print( "The llama server is close." )
-    return None
 
 
 def is_open( url: str, expected_model: str | None = None ) -> bool:
+    """Check if a llama server is open ant its model if needed.
+
+    Args:
+        url (str): The url of the server with the llm.
+        expected_model (str | None): The model expected to be used.
+            Defaults to None (the model is not check).
+
+    Returns:
+        bool: True if the server is open, False otherwise.
+    """
     try:
-        # Check server availability
-        response = requests.get( f"{url}/v1/models", timeout=5 )
+        response = requests.get( f"{ url }/v1/models", timeout=5 )
 
         if response.status_code != 200:
             return False
@@ -80,14 +123,22 @@ def is_open( url: str, expected_model: str | None = None ) -> bool:
         return False
 
 
-def ask_llama_client( prompt: str, url: str, model_name: str, max_tokens: int = 800, max_retries: int = 3 ) -> str:
-    """Send a prompt to the local LLM and return the response text.
+def ask_llama_client( prompt: str, url: str, model_name: str, max_tokens: int = 800, timeout: int = 3600 ) -> str:
+    """Sends a prompt to the llama-server for the llm wanted.
 
     Args:
         prompt (str): The prompt to give to the llm.
+        url (str): The url of the server with the llm.
+        model_name (str): The model to use.
+        max_tokens (int): The maximum number of tokens to used.
+        timeout (int): The maximum time (s) before crash.
 
     Returns:
         str: The llm response.
+
+    Raises:
+        RuntimeError: LLama-server request failed.
+        TimeoutError: LLama-server request reacht timeout.
     """
     payload: dict[ str, Any ] = {
         "model":
@@ -114,16 +165,13 @@ def ask_llama_client( prompt: str, url: str, model_name: str, max_tokens: int = 
         False
     }
 
-    response = requests.post( url=f"{ url }/v1/chat/completions", json=payload, timeout=3600 )
-
-    if response.status_code != 200:
-        raise RuntimeError( f"LLM request failed "
-                            f"({response.status_code}): {response.text}" )
-
-    data = response.json()
-
     try:
-        content: str = str( data[ "choices" ][ 0 ][ "message" ][ "content" ].strip() )
-        return content
-    except ( KeyError, IndexError ) as e:
-        raise RuntimeError( f"Unexpected LLM response format: {data}" ) from e
+        resp: requests.Response = requests.post( url=f"{ url }/v1/chat/completions", json=payload, timeout=timeout )
+        if resp.status_code != 200:
+            raise RuntimeError(
+                f"LLama-server for the model { model_name } request failed { resp.status_code }: { resp.text[ :200 ] }"
+            )
+
+        return resp.json()[ "choices" ][ 0 ][ "message" ][ "content" ].strip()
+    except requests.exceptions.Timeout as t:
+        raise RuntimeError( f"LLama-server for the model { model_name } request reacht timeout." ) from t

@@ -1,47 +1,57 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-"""Client for the AKKODIS Azure OpenAI endpoint.
-Mirrors the logic from LLoCO/llm_utils.py — same URL pattern, same auth header.
-"""
 
-import os
-import time
-from typing import Optional
+from pathlib import Path
 
 import requests
 
-_API_KEY_SEARCH_PATHS = [ os.path.join( os.getcwd(), ".api_key.txt" ), os.path.join( os.getcwd(), "api_key.txt" ) ]
+ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
+AKKODIS_OPENAI_API_KEY = "akkodis_openAI_api_key.txt"
 
 
-def find_api_key() -> Optional[ str ]:
-    key = os.environ.get( "OPENAI_API_KEY" )
-    if key:
-        return key
-    for path in _API_KEY_SEARCH_PATHS:
-        if os.path.isfile( path ):
-            with open( path, "r", encoding="utf-8" ) as f:
-                return f.read().strip()
-    return None
+def get_akkodis_openai_key() -> str:
+    """Get the AKKODIS openAI API key.
+
+    Returns:
+        str: The AKKODIS openAI API key.
+
+    Raises:
+        ImportError: "No key fund, the "akkodis_openAI_api_key.txt" file must be in the root directory."
+    """
+    api_key_path: Path = ROOT_DIR / AKKODIS_OPENAI_API_KEY
+    if api_key_path.is_file():
+        with open( api_key_path, "r", encoding="utf-8" ) as f:
+            return f.read().strip()
+
+    raise ImportError( f"No key, the { AKKODIS_OPENAI_API_KEY } file must be in the root folder of the project." )
 
 
-def ask_akkodis_client(
-    prompt: str, url: str, model_name: str = "", max_tokens: int = 800, max_retries: int = 3
-) -> str:
-    api_key = find_api_key()
-    if not api_key:
-        raise RuntimeError(
-            "Clé API AKKODIS introuvable. "
-            "Placez un fichier .api_key.txt à la racine du projet "
-            "ou définissez OPENAI_API_KEY."
-        )
+def ask_akkodis_client( prompt: str, url: str, model_name: str, max_tokens: int = 800, timeout: int = 90 ) -> str:
+    """Sends a prompt to the AKKODIS server for the llm wanted.
 
-    headers = {
+    Args:
+        prompt (str): The prompt to give to the llm.
+        url (str): The url of the server with the llm.
+        model_name (str): The model to use.
+        max_tokens (int): The maximum number of tokens to used.
+        timeout (int): The maximum time (s) before crash.
+
+    Returns:
+        str: The llm response.
+
+    Raises:
+        RuntimeError: AKKODIS API request failed.
+        TimeoutError: AKKODIS API request reacht timeout.
+    """
+    api_key: str = get_akkodis_openai_key()
+
+    headers: dict[ str, str ] = {
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
         "api-key": api_key,
     }
-    payload = {
+    payload: dict[ str, int | dict[ str, str ] ] = {
         "max_tokens":
         max_tokens,
         "messages": [
@@ -58,18 +68,13 @@ def ask_akkodis_client(
         ],
     }
 
-    for attempt in range( max_retries ):
-        try:
-            resp = requests.post( url, json=payload, headers=headers, timeout=90 )
-            if resp.status_code == 429 or resp.status_code >= 500:
-                time.sleep( 2**attempt )
-                continue
-            if resp.status_code != 200:
-                raise RuntimeError( f"AKKODIS API error {resp.status_code}: {resp.text[:200]}" )
-            return resp.json()[ "choices" ][ 0 ][ "message" ][ "content" ].strip()
-        except requests.exceptions.Timeout:
-            if attempt == max_retries - 1:
-                raise RuntimeError( "AKKODIS API timeout." )
-            time.sleep( 2**attempt )
+    try:
+        resp: requests.Response = requests.post( url, json=payload, headers=headers, timeout=timeout )
+        if resp.status_code != 200:
+            raise RuntimeError(
+                f"AKKODIS API for the model { model_name } request failed { resp.status_code }: { resp.text[ :200 ] }"
+            )
 
-    raise RuntimeError( "AKKODIS API : nombre maximum de tentatives atteint." )
+        return resp.json()[ "choices" ][ 0 ][ "message" ][ "content" ].strip()
+    except requests.exceptions.Timeout as t:
+        raise TimeoutError( f"AKKODIS API for the model { model_name } request reacht timeout." ) from t

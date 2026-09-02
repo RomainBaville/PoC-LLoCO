@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 import requests
 
-from llm.client.akkodis_client import find_api_key
+from llm.client.akkodis_client import get_akkodis_openai_key
 
 AKKODIS_URL = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
 LLAMA_SERVER_URL = "http://localhost:8080"
@@ -93,17 +93,21 @@ def get_llama_models() -> list[ ModelInfo ]:
 
 
 def get_akkodis_models() -> list[ ModelInfo ]:
-    if not find_api_key():
+    try:
+        get_akkodis_openai_key()
+
+        return [
+            ModelInfo(
+                key=f"akkodis::{model_id}",
+                label=label,
+                api_url=AKKODIS_URL.format( model=model_id ),
+                model_name=model_id,
+                source="akkodis",
+            ) for model_id, label in AKKODIS_MODELS
+        ]
+
+    except ImportError:
         return []
-    return [
-        ModelInfo(
-            key=f"akkodis::{model_id}",
-            label=label,
-            api_url=AKKODIS_URL.format( model=model_id ),
-            model_name=model_id,
-            source="akkodis",
-        ) for model_id, label in AKKODIS_MODELS
-    ]
 
 
 def get_models() -> list[ ModelInfo ]:
