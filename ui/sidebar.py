@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
+# SPDX-FileContributor: Romain Baville, Fidel Monteiro
 
 import streamlit as st
 

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-# SPDX-License-Identifier: Apache-2.0
 
 from infrastructure.registry import DATA_SOURCE_REGISTRY
 from solvers.registry import PROBLEM_SOLVER_GROUPS
