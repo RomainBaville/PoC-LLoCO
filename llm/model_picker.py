@@ -1,82 +1,54 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-"""Detects locally available LLM models and returns connection metadata.
-Currently supports:
-  - Ollama  (http://localhost:11434)
-  - llama-server GGUF  (models/ directory)
-"""
 
-import os
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
-import requests
+from llm.client.akkodis_client import AKKODIS_MODELS, get_akkodis_openai_key
+from llm.client.llama_client import LLAMA_MODELS_DIR
 
-from llm.client.akkodis_client import get_akkodis_openai_key
-
-AKKODIS_URL = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
-LLAMA_SERVER_URL = "http://localhost:8080"
-_OLLAMA_URL = "http://localhost:11434"
-
-AKKODIS_MODELS = [
-    ( "gpt-4o-mini", "GPT-4o mini  [AKKODIS]" ), ( "gpt-4o", "GPT-4o  [AKKODIS]" ), ( "gpt-5", "GPT-5  [AKKODIS]" ),
-    ( "o4-mini", "o4-mini  [AKKODIS]" )
-]
-LLAMA_MODELS_DIR = "models"
-
-_TIMEOUT = 1.5
+ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 
 
 @dataclass
 class ModelInfo:
-    key: str  # unique identifier used in session state
-    label: str  # displayed in the selectbox
-    api_url: str  # OpenAI-compatible completions endpoint
-    model_name: str  # model name sent in the API payload
-    source: str  # "ollama" | "llama-server" | "akkodis"
+    """Dataclass with all the infos of the available LLM.
 
-
-def _discover_ollama() -> list[ ModelInfo ]:
-    try:
-        resp = requests.get( f"{_OLLAMA_URL}/api/tags", timeout=_TIMEOUT )
-        if resp.status_code != 200:
-            return []
-        models = resp.json().get( "models", [] )
-        result = []
-        for m in models:
-            name = m.get( "name", "" )
-            if not name:
-                continue
-            result.append(
-                ModelInfo(
-                    key=f"ollama::{name}",
-                    label=f"{name}  [Ollama]",
-                    api_url=f"{_OLLAMA_URL}/v1/chat/completions",
-                    model_name=name,
-                    source="ollama",
-                )
-            )
-        return result
-    except Exception:
-        return []
+    Args:
+        key (str): Unique identifier.
+        label (str):  Label to use for the user.
+        model_name (str): Model name sent in the API payload
+        source (str): The source of the model.
+    """
+    key: str
+    label: str
+    model_name: str
+    source: str
 
 
 def get_llama_models() -> list[ ModelInfo ]:
+    """Get all the llama models with the gguf format available.
+
+    Returns:
+        list[ModelInfo]: The list with all the models and they infos.
+    """
     gguf_files = []
-    if os.path.isdir( LLAMA_MODELS_DIR ):
-        for f in os.listdir( LLAMA_MODELS_DIR ):
-            if not f.endswith( ".gguf" ):
+    llama_models_path: Path = ROOT_DIR / LLAMA_MODELS_DIR
+    if llama_models_path.is_dir():
+        for f in llama_models_path.iterdir():
+            if f.suffix != ".gguf":
                 continue
 
             # Keep non-split models
-            if "-of-" not in f:
-                gguf_files.append( f )
+            if "-of-" not in f.name:
+                gguf_files.append( f.name )
                 continue
 
             # Keep only the first part of split models
-            if re.search( r"-00001-of-\d+\.gguf$", f ):
-                gguf_files.append( f )
+            if re.search( r"-00001-of-\d+\.gguf$", f.name ):
+                gguf_files.append( f.name )
 
     if not gguf_files:
         return []
@@ -85,7 +57,6 @@ def get_llama_models() -> list[ ModelInfo ]:
         ModelInfo(
             key=f"llama::{ f }",
             model_name=f"{ f }",
-            api_url=LLAMA_SERVER_URL,
             label=f'{ re.sub( r"-00001-of-\d+$", "", f.replace(".gguf", "" ) ) } [llama-server]',
             source="llama-server"
         ) for f in sorted( gguf_files )
@@ -93,14 +64,18 @@ def get_llama_models() -> list[ ModelInfo ]:
 
 
 def get_akkodis_models() -> list[ ModelInfo ]:
+    """Get all the models available with AKKODIS acces.
+
+    Returns:
+        list[ModelInfo]: The list with all the models and they infos.
+    """
     try:
         get_akkodis_openai_key()
 
         return [
             ModelInfo(
-                key=f"akkodis::{model_id}",
+                key=f"akkodis::{ model_id }",
                 label=label,
-                api_url=AKKODIS_URL.format( model=model_id ),
                 model_name=model_id,
                 source="akkodis",
             ) for model_id, label in AKKODIS_MODELS
@@ -111,5 +86,9 @@ def get_akkodis_models() -> list[ ModelInfo ]:
 
 
 def get_models() -> list[ ModelInfo ]:
-    """Return all available models across all backends."""
-    return get_akkodis_models() + _discover_ollama() + get_llama_models()
+    """Return all available models across all backends.
+
+    Returns:
+        list[ModelInfo]: The list with all the models and they infos.
+    """
+    return get_akkodis_models() + get_llama_models()

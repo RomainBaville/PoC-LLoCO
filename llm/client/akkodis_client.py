@@ -9,6 +9,12 @@ import requests
 ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
 AKKODIS_OPENAI_API_KEY = "akkodis_openAI_api_key.txt"
 
+AKKODIS_URL = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
+AKKODIS_MODELS = [
+    ( "gpt-4o-mini", "GPT-4o mini  [AKKODIS]" ), ( "gpt-4o", "GPT-4o  [AKKODIS]" ), ( "gpt-5", "GPT-5  [AKKODIS]" ),
+    ( "o4-mini", "o4-mini  [AKKODIS]" )
+]
+
 
 def get_akkodis_openai_key() -> str:
     """Get the AKKODIS openAI API key.
@@ -27,12 +33,11 @@ def get_akkodis_openai_key() -> str:
     raise ImportError( f"No key, the { AKKODIS_OPENAI_API_KEY } file must be in the root folder of the project." )
 
 
-def ask_akkodis_client( prompt: str, url: str, model_name: str, max_tokens: int = 800, timeout: int = 90 ) -> str:
+def ask_akkodis_client( prompt: str, model_name: str, max_tokens: int = 800, timeout: int = 90 ) -> str:
     """Sends a prompt to the AKKODIS server for the llm wanted.
 
     Args:
         prompt (str): The prompt to give to the llm.
-        url (str): The url of the server with the llm.
         model_name (str): The model to use.
         max_tokens (int): The maximum number of tokens to used.
         timeout (int): The maximum time (s) before crash.
@@ -67,9 +72,10 @@ def ask_akkodis_client( prompt: str, url: str, model_name: str, max_tokens: int 
             },
         ],
     }
+    url: str = AKKODIS_URL.format( model=model_name )
 
     try:
-        resp: requests.Response = requests.post( url, json=payload, headers=headers, timeout=timeout )
+        resp: requests.Response = requests.post( url=url, json=payload, headers=headers, timeout=timeout )
         if resp.status_code != 200:
             raise RuntimeError(
                 f"AKKODIS API for the model { model_name } request failed { resp.status_code }: { resp.text[ :200 ] }"

@@ -17,7 +17,7 @@ class AssignmentSolvers:
         key (str): The name of the solver use for the code.
         label (str): The label of the solver use for the user.
         description (str): The description of the solver capabilities.
-        solver_fn (Callable[[AssignmentProblem], dict[str, list[tuple[str, int]]]]): The function to use to solve the problem.
+        solver_fn (Callable[[AssignmentProblem], dict[str, list[tuple[str, int]]]]): The function to solve the problem.
     """
     key: str
     label: str

@@ -28,25 +28,20 @@ def _render_model_picker():
         )
         if selected_key != "none":
             m = model_options[ selected_key ]
-            st.session_state.llm_url = m.api_url
             st.session_state.llm_model_name = m.model_name
             st.session_state.llm_source = m.source
             st.session_state.llm_model_label = m.label
         else:
-            st.session_state.llm_url = None
             st.session_state.llm_model_name = None
             st.session_state.llm_source = None
             st.session_state.llm_model_label = None
     else:
-        st.session_state.llm_url = None
         st.session_state.llm_model_name = None
         st.session_state.llm_model_label = None
 
     if st.session_state.llm_source == "llama-server":
         st.session_state.llama_server_pid = start_llama_server(
-            st.session_state.llm_url,
-            st.session_state.llm_model_name,
-            llama_server_pid=st.session_state.llama_server_pid
+            st.session_state.llm_model_name, llama_server_pid=st.session_state.llama_server_pid
         )
     elif st.session_state.llama_server_pid != 0:
         close_llama_server( st.session_state.llama_server_pid )

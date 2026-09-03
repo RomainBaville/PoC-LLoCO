@@ -11,16 +11,17 @@ from urllib.parse import urlparse
 import requests
 
 ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
+
+LLAMA_MODELS_DIR = "models"
 LLAMA_SERVER_DIR = "llama_cpp"
 LLAMA_SERVER_EXE = "llama-server.exe"
-LLAMA_MODELS_DIR = "models"
+LLAMA_SERVER_URL = "http://localhost:8080"
 
 
-def start_llama_server( url: str, model_name: str, timeout: int = 300, llama_server_pid: int = 0 ) -> int:
+def start_llama_server( model_name: str, timeout: int = 300, llama_server_pid: int = 0 ) -> int:
     """Open a llama server with the wanted model if it is not.
 
     Args:
-        url (str): The url of the server with the llm.
         model_name (str): The model to use.
         timeout (int): The maximum time (s) before crash.
             defaults to 300.
@@ -43,12 +44,12 @@ def start_llama_server( url: str, model_name: str, timeout: int = 300, llama_ser
         raise ImportError( f"The model { model_name } is not in the folder { LLAMA_MODELS_DIR } of the project." )
 
     if llama_server_pid != 0:
-        if is_open( url, model_path ):
+        if is_open( model_path ):
             return llama_server_pid
         else:
             close_llama_server( llama_server_pid )
 
-    port: int = urlparse( url ).port
+    port: int = urlparse( LLAMA_SERVER_URL ).port
 
     process = subprocess.Popen(
         [
@@ -63,7 +64,7 @@ def start_llama_server( url: str, model_name: str, timeout: int = 300, llama_ser
     llama_server_open: bool = False
     retry: int = 0
     while not llama_server_open and retry < timeout:
-        llama_server_open = is_open( url )
+        llama_server_open = is_open()
         time.sleep( timeout / 60 )
         retry += timeout / 60
 
@@ -88,11 +89,10 @@ def close_llama_server( llama_server_pid: int ) -> None:
     print( "The llama server is close." )
 
 
-def is_open( url: str, expected_model: str | None = None ) -> bool:
+def is_open( expected_model: str | None = None ) -> bool:
     """Check if a llama server is open ant its model if needed.
 
     Args:
-        url (str): The url of the server with the llm.
         expected_model (str | None): The model expected to be used.
             Defaults to None (the model is not check).
 
@@ -100,7 +100,7 @@ def is_open( url: str, expected_model: str | None = None ) -> bool:
         bool: True if the server is open, False otherwise.
     """
     try:
-        response = requests.get( f"{ url }/v1/models", timeout=5 )
+        response = requests.get( f"{ LLAMA_SERVER_URL }/v1/models", timeout=5 )
 
         if response.status_code != 200:
             return False
@@ -123,12 +123,11 @@ def is_open( url: str, expected_model: str | None = None ) -> bool:
         return False
 
 
-def ask_llama_client( prompt: str, url: str, model_name: str, max_tokens: int = 800, timeout: int = 3600 ) -> str:
+def ask_llama_client( prompt: str, model_name: str, max_tokens: int = 800, timeout: int = 3600 ) -> str:
     """Sends a prompt to the llama-server for the llm wanted.
 
     Args:
         prompt (str): The prompt to give to the llm.
-        url (str): The url of the server with the llm.
         model_name (str): The model to use.
         max_tokens (int): The maximum number of tokens to used.
         timeout (int): The maximum time (s) before crash.
@@ -164,9 +163,10 @@ def ask_llama_client( prompt: str, url: str, model_name: str, max_tokens: int = 
         "stream":
         False
     }
+    url: str = f"{ LLAMA_SERVER_URL }/v1/chat/completions"
 
     try:
-        resp: requests.Response = requests.post( url=f"{ url }/v1/chat/completions", json=payload, timeout=timeout )
+        resp: requests.Response = requests.post( url=url, json=payload, timeout=timeout )
         if resp.status_code != 200:
             raise RuntimeError(
                 f"LLama-server for the model { model_name } request failed { resp.status_code }: { resp.text[ :200 ] }"

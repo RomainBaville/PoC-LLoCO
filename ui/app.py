@@ -95,8 +95,7 @@ def _render_onboarding():
             try:
                 with st.spinner( "Analyse en cours…" ):
                     prompt: str = build_onboarding_prompt( user_desc )
-                    result = CLIENTS[ st.session_state.llm_source
-                                     ].ask_fn( prompt, st.session_state.llm_url, st.session_state.llm_model_name )
+                    result = CLIENTS[ st.session_state.llm_source ].ask_fn( prompt, st.session_state.llm_model_name )
 
                 st.session_state.onboarding_result = result
                 st.session_state.analysis_done = True
