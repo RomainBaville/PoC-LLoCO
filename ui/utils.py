@@ -91,8 +91,7 @@ def reset_app( session_state: SessionStateProxy ) -> None:
         session_state (SessionStateProxy): The session state.
     """
     session_state.clear()
-    session_state.step = -1
-    session_state.problem_key = None
+    st.rerun()
 
 
 def navigation_buttons(

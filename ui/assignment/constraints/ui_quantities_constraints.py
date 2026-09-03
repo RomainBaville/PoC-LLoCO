@@ -201,6 +201,7 @@ def extremum_same_assignments(
         extremum (str): The extremum.
         entities_types (tuple[str, str]): The left and right entities types.
         entities_cols (tuple[tuple[str, ...], tuple[str, ...]]): The left and right entities columns.
+        lock_constraints (bool): True if the config is validated.
 
     Returns:
         dict[tuple[str, str], float] | None: The extremum same assignment constraints.
@@ -261,7 +262,8 @@ def extremum_assignments(
         entities_rows (tuple[dict[str, str], ...]): The entities rows.
         entities_cols (tuple[str, ...]): The entities columns.
         entities_col_label (str): The entities column label.
-        message (str): The message to make the difference between the two family of constraints
+        message (str): The message to make the difference between the two family of constraints.
+        lock_constraints (bool): True if the config is validated.
 
     Retunrs:
         dict[str, float] | None: The extremum entities constraints of the problem.

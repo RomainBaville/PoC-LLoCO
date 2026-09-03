@@ -12,7 +12,12 @@ from infrastructure.registry import DATA_SOURCE_REGISTRY, DataSourceDefinition
 from ui.utils import navigation_buttons
 
 
-def two_csv( session_state: SessionStateProxy ):
+def two_csv( session_state: SessionStateProxy ) -> None:
+    """Configure the interface to load the two csv file.
+
+    Args:
+        session_state (SessionStateProxy): The session state.
+    """
     st.subheader( "Upload CSV files" )
     show_next: bool = False
 

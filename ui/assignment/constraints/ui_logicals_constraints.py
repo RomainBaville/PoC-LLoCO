@@ -74,6 +74,7 @@ def mutual_exclusions(
         labels (tuple[str, ...]): The entitie labels.
         entities_type_constrained (str): The type of the entities constrained.
         entities_type_constraining (str): The type of the entities constraining.
+        lock_constraints (bool): True if the config is validated.
         max_associations (dict[str, float] | None): The maximum number of association per entity.
 
     Returns:
@@ -130,6 +131,7 @@ def implications(
         labels (tuple[tuple[str, ...], tuple[str, ...]]): The left and right entities labels.
         entities_types (tuple[str, str]): The left and right entities types.
         use_quantities_constraints (bool): True if the problem use quantities constraints.
+        lock_constraints (bool): True if the config is validated.
         multiple_same_assignment (bool): True if one left entity can be assigned several time to the same right entity.
 
     Returns:

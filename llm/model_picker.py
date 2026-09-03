@@ -5,9 +5,10 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Self
 
-from llm.client.akkodis_client import AKKODIS_MODELS, get_akkodis_openai_key
-from llm.client.llama_client import LLAMA_MODELS_DIR
+from llm.client.akkodis_client import AKKODIS_MODELS, get_akkodis_openai_api_key
+from llm.client.llama_client import LLAMA_MODELS_DIR, LLAMA_SERVER_DIR, LLAMA_SERVER_EXE
 
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 
@@ -17,15 +18,21 @@ class ModelInfo:
     """Dataclass with all the infos of the available LLM.
 
     Args:
-        key (str): Unique identifier.
         label (str):  Label to use for the user.
         model_name (str): Model name sent in the API payload
         source (str): The source of the model.
     """
-    key: str
     label: str
-    model_name: str
+    name: str
     source: str
+
+    def __str__( self: Self ) -> str:
+        """Print the label of the model.
+
+        Returns:
+            str: The label of the model.
+        """
+        return self.label
 
 
 def get_llama_models() -> list[ ModelInfo ]:
@@ -34,32 +41,37 @@ def get_llama_models() -> list[ ModelInfo ]:
     Returns:
         list[ModelInfo]: The list with all the models and they infos.
     """
-    gguf_files = []
+    # Check if the file to open the llama server exist
+    llama_exe_path: Path = ROOT_DIR / LLAMA_SERVER_DIR / LLAMA_SERVER_EXE
+    if not llama_exe_path.is_file():
+        return []
+
+    llama_models: list[ str ] = []
     llama_models_path: Path = ROOT_DIR / LLAMA_MODELS_DIR
     if llama_models_path.is_dir():
-        for f in llama_models_path.iterdir():
-            if f.suffix != ".gguf":
+        for model_file in llama_models_path.iterdir():
+            # Get only the gguf files
+            if model_file.suffix != ".gguf":
                 continue
 
             # Keep non-split models
-            if "-of-" not in f.name:
-                gguf_files.append( f.name )
+            if "-of-" not in model_file.name:
+                llama_models.append( model_file.name )
                 continue
 
             # Keep only the first part of split models
-            if re.search( r"-00001-of-\d+\.gguf$", f.name ):
-                gguf_files.append( f.name )
+            if re.search( r"-00001-of-\d+\.gguf$", model_file.name ):
+                llama_models.append( model_file.name )
 
-    if not gguf_files:
+    if llama_models == []:
         return []
 
     return [
         ModelInfo(
-            key=f"llama::{ f }",
-            model_name=f"{ f }",
-            label=f'{ re.sub( r"-00001-of-\d+$", "", f.replace(".gguf", "" ) ) } [llama-server]',
+            label=f'{ re.sub( r"-00001-of-\d+$", "", model_name.replace(".gguf", "" ) ) } [llama-server]',
+            name=model_name,
             source="llama-server"
-        ) for f in sorted( gguf_files )
+        ) for model_name in sorted( llama_models )
     ]
 
 
@@ -70,15 +82,12 @@ def get_akkodis_models() -> list[ ModelInfo ]:
         list[ModelInfo]: The list with all the models and they infos.
     """
     try:
-        get_akkodis_openai_key()
+        # Check if an AKKODIS openAI key exist
+        get_akkodis_openai_api_key()
 
         return [
-            ModelInfo(
-                key=f"akkodis::{ model_id }",
-                label=label,
-                model_name=model_id,
-                source="akkodis",
-            ) for model_id, label in AKKODIS_MODELS
+            ModelInfo( label=f"{ model_name } [AKKODIS]", name=model_name, source="akkodis" )
+            for model_name in AKKODIS_MODELS
         ]
 
     except ImportError:

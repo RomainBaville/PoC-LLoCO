@@ -6,17 +6,14 @@ from pathlib import Path
 
 import requests
 
-ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
-AKKODIS_OPENAI_API_KEY = "akkodis_openAI_api_key.txt"
+ROOT_DIR: Path = Path( __file__ ).resolve().parents[ 2 ]
+AKKODIS_OPENAI_API_KEY: str = "akkodis_openAI_api_key.txt"
 
-AKKODIS_URL = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
-AKKODIS_MODELS = [
-    ( "gpt-4o-mini", "GPT-4o mini  [AKKODIS]" ), ( "gpt-4o", "GPT-4o  [AKKODIS]" ), ( "gpt-5", "GPT-5  [AKKODIS]" ),
-    ( "o4-mini", "o4-mini  [AKKODIS]" )
-]
+AKKODIS_URL: str = "https://cld.akkodis.com/api/openai/deployments/models-{model}/chat/completions?api-version=2024-12-01-preview"
+AKKODIS_MODELS: tuple[ str, str, str, str ] = ( "gpt-4o-mini", "gpt-4o", "gpt-5", "o4-mini" )
 
 
-def get_akkodis_openai_key() -> str:
+def get_akkodis_openai_api_key() -> str:
     """Get the AKKODIS openAI API key.
 
     Returns:
@@ -49,7 +46,7 @@ def ask_akkodis_client( prompt: str, model_name: str, max_tokens: int = 800, tim
         RuntimeError: AKKODIS API request failed.
         TimeoutError: AKKODIS API request reacht timeout.
     """
-    api_key: str = get_akkodis_openai_key()
+    api_key: str = get_akkodis_openai_api_key()
 
     headers: dict[ str, str ] = {
         "Content-Type": "application/json",

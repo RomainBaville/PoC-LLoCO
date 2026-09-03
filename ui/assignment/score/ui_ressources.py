@@ -137,7 +137,8 @@ def ressources_constraints( session_state: SessionStateProxy ) -> None:
             with constraints_extrema_global_col:
                 use_constraints_extrema_global_vals: bool = st.checkbox(
                     f"Is there group of ressources constrained with a " \
-                    f"{ extrema[ id ] } value for all { session_state.right_entities_type }", disabled=session_state.lock_constraints
+                    f"{ extrema[ id ] } value for all { session_state.right_entities_type }",
+                    disabled=session_state.lock_constraints
                 )
                 if use_constraints_extrema_global_vals:
                     curent_constraints_extrema_global_vals: dict[ tuple[ str, ...], float ] = {}

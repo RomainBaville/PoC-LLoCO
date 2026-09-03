@@ -4,6 +4,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Self
 
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
@@ -25,13 +26,20 @@ class ProblemType:
     description: str
     render_fn: Callable[ [ SessionStateProxy ], None ]
 
+    def __str__( self: Self ) -> str:
+        """Print the label of the problem.
 
-PROBLEM_REGISTRY: dict[ str, ProblemType ] = {
-    "assignment":
+        Returns:
+            str: The label of the problem.
+        """
+        return self.label
+
+
+PROBLEM_REGISTRY: list[ ProblemType ] = [
     ProblemType(
         key="assignment",
         label="Assignment problem",
         description="Assignments problem between left and right entities",
         render_fn=render,
-    ),
-}
+    )
+]

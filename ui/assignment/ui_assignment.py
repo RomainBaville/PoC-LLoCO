@@ -306,7 +306,8 @@ def render( session_state: SessionStateProxy ) -> None:
         )
         session_state.use_logicals_constraints = st.checkbox(
             "Is there logicals constraints in the problem " \
-            "(e.g. if employee A is assigned to project I then employee B is assigned to project II)", disabled=session_state.lock_constraints
+            "(e.g. if employee A is assigned to project I then employee B is assigned to project II)",
+            disabled=session_state.lock_constraints
         )
 
         if session_state.use_quantities_constraints:
