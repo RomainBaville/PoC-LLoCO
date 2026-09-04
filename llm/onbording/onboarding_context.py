@@ -14,13 +14,12 @@ def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
         dict[str, list[dict[str, str]]]: The data (name, description) of the tools(domain, solvers...).
 
     """
-    problems: list[ dict[ str, str ] ] = [
-        {
-            "key": p.key,
-            "label": p.label,
-            "description": p.description
-        } for p in PROBLEM_REGISTRY.values()
-    ]
+    problems: list[ dict[ str, str ]
+                   ] = [ {
+                       "key": p.key,
+                       "label": p.label,
+                       "description": p.description
+                   } for p in PROBLEM_REGISTRY ]
 
     solvers: list[ dict[ str, str ]
                   ] = [ {

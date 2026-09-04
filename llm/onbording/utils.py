@@ -39,5 +39,5 @@ def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) ->
         for problem in PROBLEM_REGISTRY:
             if problem.key == "assignment":
                 return problem
-    else:
-        raise ValueError( "Fail to infer the problem configuration." )
+
+    raise ValueError( "Fail to infer the problem configuration." )

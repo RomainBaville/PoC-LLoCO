@@ -53,7 +53,7 @@ def ask_akkodis_client( prompt: str, model_name: str, max_tokens: int = 800, tim
         "Cache-Control": "no-cache",
         "api-key": api_key,
     }
-    payload: dict[ str, int | dict[ str, str ] ] = {
+    payload: dict[ str, int | list[ dict[ str, str ] ] ] = {
         "max_tokens":
         max_tokens,
         "messages": [
@@ -78,6 +78,6 @@ def ask_akkodis_client( prompt: str, model_name: str, max_tokens: int = 800, tim
                 f"AKKODIS API for the model { model_name } request failed { resp.status_code }: { resp.text[ :200 ] }"
             )
 
-        return resp.json()[ "choices" ][ 0 ][ "message" ][ "content" ].strip()
+        return str( resp.json()[ "choices" ][ 0 ][ "message" ][ "content" ].strip() )
     except requests.exceptions.Timeout as t:
         raise TimeoutError( f"AKKODIS API for the model { model_name } request reacht timeout." ) from t

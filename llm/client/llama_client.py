@@ -10,12 +10,12 @@ from urllib.parse import urlparse
 
 import requests
 
-ROOT_DIR = Path( __file__ ).resolve().parents[ 2 ]
+ROOT_DIR: Path = Path( __file__ ).resolve().parents[ 2 ]
 
-LLAMA_MODELS_DIR = "models"
-LLAMA_SERVER_DIR = "llama_cpp"
-LLAMA_SERVER_EXE = "llama-server.exe"
-LLAMA_SERVER_URL = "http://localhost:8080"
+LLAMA_MODELS_DIR: str = "models"
+LLAMA_SERVER_DIR: str = "llama_cpp"
+LLAMA_SERVER_EXE: str = "llama-server.exe"
+LLAMA_SERVER_URL: str = "http://localhost:8080"
 
 
 def start_llama_server( model_name: str, timeout: int = 300, llama_server_pid: int = 0 ) -> int:
@@ -49,7 +49,9 @@ def start_llama_server( model_name: str, timeout: int = 300, llama_server_pid: i
         else:
             close_llama_server( llama_server_pid )
 
-    port: int = urlparse( LLAMA_SERVER_URL ).port
+    port: int | None = urlparse( LLAMA_SERVER_URL ).port
+    if port is None:
+        raise ImportError( "fail to get the port in the llama server url." )
 
     process = subprocess.Popen(
         [
@@ -59,14 +61,14 @@ def start_llama_server( model_name: str, timeout: int = 300, llama_server_pid: i
         ],
         creationflags=subprocess.CREATE_NEW_CONSOLE
     )
-    llama_server_pid: int = process.pid
+    llama_server_pid = process.pid
 
     llama_server_open: bool = False
     retry: int = 0
     while not llama_server_open and retry < timeout:
         llama_server_open = is_open()
-        time.sleep( timeout / 60 )
-        retry += timeout / 60
+        time.sleep( int( timeout / 60 ) )
+        retry += int( timeout / 60 )
 
     if not llama_server_open:
         raise TimeoutError( "The llama sevrer was to long to open." )
@@ -89,11 +91,11 @@ def close_llama_server( llama_server_pid: int ) -> None:
     print( "The llama server is close." )
 
 
-def is_open( expected_model: str | None = None ) -> bool:
+def is_open( expected_model: Path | None = None ) -> bool:
     """Check if a llama server is open ant its model if needed.
 
     Args:
-        expected_model (str | None): The model expected to be used.
+        expected_model (Path | None): The path to the model expected to be used.
             Defaults to None (the model is not check).
 
     Returns:
@@ -172,6 +174,6 @@ def ask_llama_client( prompt: str, model_name: str, max_tokens: int = 800, timeo
                 f"LLama-server for the model { model_name } request failed { resp.status_code }: { resp.text[ :200 ] }"
             )
 
-        return resp.json()[ "choices" ][ 0 ][ "message" ][ "content" ].strip()
+        return str( resp.json()[ "choices" ][ 0 ][ "message" ][ "content" ].strip() )
     except requests.exceptions.Timeout as t:
         raise RuntimeError( f"LLama-server for the model { model_name } request reacht timeout." ) from t

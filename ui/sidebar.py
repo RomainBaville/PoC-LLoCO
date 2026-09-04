@@ -12,7 +12,6 @@ from ui.registry import PROBLEM_REGISTRY, ProblemType
 
 def ai_models() -> None:
     """Configure the ui to chose the AI model to use."""
-    st.markdown( "## AI models" )
     # Default configuration
     st.session_state.setdefault( "llama_server_pid", 0 )
 
@@ -26,13 +25,15 @@ def ai_models() -> None:
             unsafe_allow_html=True
         )
     else:
-        model: ModelInfo = st.selectbox(
-            "AI model", options=[ "-None-" ] + available_models,
-            label_visibility="collapsed",
+        model: ModelInfo | None = st.selectbox(
+            "**AI models**",
+            options=available_models,
+            placeholder="Chose your AI model",
+            index=None,
             disabled=st.session_state.step
         )
-        if model != "-None-":
-            st.session_state.model_info = model
+        st.session_state.model_info = model
+        if st.session_state.model_info is not None:
             st.markdown(
                 f'<div class="ui-model-banner">'
                 f'<span class="ui-model-banner-label">AI Model</span>'
@@ -40,8 +41,6 @@ def ai_models() -> None:
                 f'</div>',
                 unsafe_allow_html=True
             )
-        else:
-            st.session_state.model_info = None
 
         # Open or close the llama server
         if st.session_state.get( "model_info" ) and st.session_state.model_info.source == "llama-server":
@@ -55,16 +54,15 @@ def ai_models() -> None:
 
 def problems_configuration() -> None:
     """Configure the ui to chose the problem configuration."""
-    st.markdown( "## Problems configuration" )
     # Default configuration
     st.session_state.setdefault( "problem_type", None )
     st.session_state.setdefault( "config_validated", False )
     st.session_state.setdefault( "journey", {} )
 
-    problem: ProblemType = st.selectbox(
-        "Problem", options=[ "Chose your problem" ] + PROBLEM_REGISTRY, label_visibility="collapsed"
+    problem: ProblemType | None = st.selectbox(
+        "**Problems configuration**", options=PROBLEM_REGISTRY, placeholder="Chose your problem", index=None
     )
-    st.session_state.problem_type = None if problem == "Chose your problem" else problem
+    st.session_state.problem_type = problem
 
     can_validate = ( st.session_state.get( "problem_type" ) )
     if st.button( "Validate configuration", type="primary", use_container_width=True, disabled=not can_validate ):
@@ -74,17 +72,16 @@ def problems_configuration() -> None:
         st.rerun()
 
     if not can_validate:
-        st.markdown( '<p class="ui-hint">-> Chose a problem type first</p>', unsafe_allow_html=True )
+        st.markdown( '<p class="ui-hint">-> Chose your problem first</p>', unsafe_allow_html=True )
 
 
 def guide_panel() -> None:
     """Configure the guide panel."""
     # Guard: if required keys were lost (hot reload, session reset), fall back to config panel
-    if not st.session_state.get( "problem_type" ):
+    if st.session_state.problem_type is None:
         st.error( "No problem configuration set." )
         st.session_state.config_validated = False
         st.rerun()
-        return
 
     # Configuration summary
     theme.section_label( "Active configuration" )
