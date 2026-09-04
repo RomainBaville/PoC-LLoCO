@@ -63,7 +63,7 @@ def stop_process( process_pid: int ) -> None:
             )
 
         case "Linux":
-            killpg = getattr(os, "killpg")
+            killpg = getattr( os, "killpg" )  # noqa: B009
             killpg( process_pid, signal.SIGTERM )
 
         case _:
