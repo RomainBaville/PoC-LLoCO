@@ -22,9 +22,9 @@ def start_process( command: list[ str ], title: str ) -> int:
 
         case "Windows":
             command_str: str = subprocess.list2cmdline( command )
+            create_new_console: int = getattr( subprocess, "CREATE_NEW_CONSOLE" )  # noqa: B009
             process = subprocess.Popen(
-                [ "cmd.exe", "/k", f"title { title } && { command_str }" ],
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
+                [ "cmd.exe", "/k", f"title { title } && { command_str }" ], creationflags=create_new_console
             )
             return process.pid
 
@@ -32,12 +32,7 @@ def start_process( command: list[ str ], title: str ) -> int:
             terminals: list[ str ] = [ "gnome-terminal", "konsole", "xfce4-terminal", "xterm" ]
             for terminal in terminals:
                 try:
-                    process = subprocess.Popen( [
-                        f"{ terminal }",
-                        f"--title={ title }",
-                        "--",
-                        *command,
-                    ] )
+                    process = subprocess.Popen( [ f"{ terminal }", f"--title={ title }", "--", *command ] )
                     return process.pid
                 except Exception:
                     continue
