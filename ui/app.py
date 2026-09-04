@@ -27,6 +27,7 @@ theme.inject()
 
 # ── Session defaults ─────────────────────────────────────────────────────────
 st.session_state.setdefault( "step", 0 )
+st.session_state.setdefault( "model_info", None )
 st.session_state.setdefault( "problem_type", None )
 st.session_state.setdefault( "onboarding_result", None )
 st.session_state.setdefault( "analysis_done", False )
@@ -34,7 +35,7 @@ st.session_state.setdefault( "analysis_recommendation", None )
 
 # ── Sidebar + top bar ────────────────────────────────────────────────────────
 render_sidebar()
-theme.render_topbar( st.session_state.get( "model_label" ) )
+theme.topbar( st.session_state.model_info )
 
 
 # ── Main area renderers ───────────────────────────────────────────────────────

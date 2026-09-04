@@ -7,26 +7,12 @@ import zipfile
 from collections.abc import Callable
 
 import streamlit as st
-
-from llm.client.llama_client import ask_llama_client
-from llm.summary.session_model import OptimizationSession
-from llm.summary.session_prompt import build_session_summary_prompt
-
-
-def log_step( message: str ):
-    if "journey" not in st.session_state:
-        st.session_state.journey = []
-    st.session_state.journey.append( message )
-
-
-def generate_ai_summary( session: OptimizationSession ) -> str:
-    prompt = build_session_summary_prompt( session )
-    return ask_llama_client( prompt )
-
-
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 
+# --------------------------------------------------
+# Selection functions
+# --------------------------------------------------
 def select_data_source( session_state: SessionStateProxy, data_source_key: str ) -> None:
     """Set the data source key in the session state.
 
@@ -63,8 +49,6 @@ def select_solver( session_state: SessionStateProxy, solver_key: str ) -> None:
 # --------------------------------------------------
 # Navigation functions
 # --------------------------------------------------
-
-
 def next_step( session_state: SessionStateProxy ) -> None:
     """Go to the next step of the state.
 
@@ -91,7 +75,6 @@ def reset_app( session_state: SessionStateProxy ) -> None:
         session_state (SessionStateProxy): The session state.
     """
     session_state.clear()
-    st.rerun()
 
 
 def navigation_buttons(
@@ -126,8 +109,6 @@ def navigation_buttons(
 # --------------------------------------------------
 # Results export functions
 # --------------------------------------------------
-
-
 def build_results_zip(
     solution_rows: list[ dict[ str, str ] ],
     ai_summary: str,

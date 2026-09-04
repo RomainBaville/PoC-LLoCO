@@ -4,6 +4,8 @@
 
 import streamlit as st
 
+from llm.model_picker import ModelInfo
+
 _CSS = """
 <style>
 /* ── Top bar ─────────────────────────────────────── */
@@ -201,35 +203,59 @@ _CSS = """
 """
 
 
-def inject():
+def inject() -> None:
+    """Inject the CSS format implemented to control the ui."""
     st.markdown( _CSS, unsafe_allow_html=True )
 
 
-def section_label( text: str ):
-    st.markdown( f'<span class="ui-label">{text}</span>', unsafe_allow_html=True )
+def section_label( text: str ) -> None:
+    """Format the label.
+
+    Args:
+        text (str): The text to format.
+    """
+    st.markdown( f'<span class="ui-label">{ text }</span>', unsafe_allow_html=True )
 
 
-def divider():
+def divider() -> None:
+    """Create a divider line."""
     st.markdown( '<hr class="ui-hr">', unsafe_allow_html=True )
 
 
-def ai_block( content: str ):
-    st.markdown( f'<div class="ui-ai">{content}</div>', unsafe_allow_html=True )
+def ai_block( content: str ) -> None:
+    """Control the theme for content.
+
+    Args:
+        content (str): The text to format.
+    """
+    st.markdown( f'<div class="ui-ai">{ content }</div>', unsafe_allow_html=True )
 
 
-def hero( title: str, subtitle: str = "" ):
-    html = f'<p class="ui-hero-title">{title}</p>'
-    if subtitle:
-        html += f'<p class="ui-hero-sub">{subtitle}</p>'
+def hero( title: str, subtitle: str | None = None ) -> None:
+    """Control the theme for title and subtitle.
+
+    Args:
+        title (str): The title to format.
+        subtitle (str | None): The subtitle to format.
+            Defaults to None.
+    """
+    html = f'<p class="ui-hero-title">{ title }</p>'
+    if subtitle is not None:
+        html += f'<p class="ui-hero-sub">{ subtitle }</p>'
     st.markdown( html, unsafe_allow_html=True )
 
 
-def render_topbar( active_model: str | None = None ):
-    if active_model:
+def topbar( active_model: ModelInfo | None ) -> None:
+    """Format the topbar.
+
+    Args:
+        active_model (ModelInfo | None): The info of the active AI model if it exist.
+    """
+    if active_model is not None:
         right_html = (
             '<div class="ui-topbar-model">'
             '<span class="ui-topbar-model-dot"></span>'
-            f'<span>{active_model}</span>'
+            f'<span>{ active_model.label }</span>'
             '</div>'
         )
     else:
@@ -242,7 +268,7 @@ def render_topbar( active_model: str | None = None ):
         '    <span class="ui-topbar-sep"></span>'
         '    <span class="ui-topbar-sub">Optimization Playground</span>'
         '  </div>'
-        f'  <div>{right_html}</div>'
+        f'  <div>{ right_html }</div>'
         '</div>',
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )

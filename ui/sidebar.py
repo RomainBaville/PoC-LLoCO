@@ -14,7 +14,6 @@ def ai_models() -> None:
     """Configure the ui to chose the AI model to use."""
     st.markdown( "## AI models" )
     # Default configuration
-    st.session_state.setdefault( "model_info", None )
     st.session_state.setdefault( "llama_server_pid", 0 )
 
     available_models: list[ ModelInfo ] = get_models()
@@ -27,9 +26,10 @@ def ai_models() -> None:
             unsafe_allow_html=True
         )
     else:
-        lock_model: bool = False if st.session_state.step == 0 else True
         model: ModelInfo = st.selectbox(
-            "AI model", options=[ "-None-" ] + available_models, label_visibility="collapsed", disabled=lock_model
+            "AI model", options=[ "-None-" ] + available_models,
+            label_visibility="collapsed",
+            disabled=st.session_state.step
         )
         if model != "-None-":
             st.session_state.model_info = model
