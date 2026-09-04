@@ -605,7 +605,7 @@ Do NOT run install without `--frozen`
 uv sync --extra dev --frozen
 
 uv run pytest
-uv run yapf -r -i domain solvers infrastructure ui tests llm
+uv run yapf -r -i domain solvers infrastructure ui tests llm launcher
 uv run ruff check .
 uv run mypy .
 

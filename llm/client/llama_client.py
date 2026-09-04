@@ -2,13 +2,14 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-import subprocess
 import time
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
 import requests
+
+from launcher.utils import start_process, stop_process
 
 ROOT_DIR: Path = Path( __file__ ).resolve().parents[ 2 ]
 
@@ -47,21 +48,16 @@ def start_llama_server( model_name: str, timeout: int = 300, llama_server_pid: i
         if is_open( model_path ):
             return llama_server_pid
         else:
-            close_llama_server( llama_server_pid )
+            stop_process( llama_server_pid )
 
     port: int | None = urlparse( LLAMA_SERVER_URL ).port
     if port is None:
         raise ImportError( "fail to get the port in the llama server url." )
 
-    process = subprocess.Popen(
-        [
-            "cmd.exe",
-            "/k",
-            f"title LLama-server && { llama_exe_path } -m { model_path } --port { port } --ctx-size 32768"
-        ],
-        creationflags=subprocess.CREATE_NEW_CONSOLE
-    )
-    llama_server_pid = process.pid
+    command: list[ str ] = [
+        str( llama_exe_path ), "-m", str( model_path ), "--port", str( port ), "--ctx-size", "32768"
+    ]
+    llama_server_pid = start_process( command, "LLama server" )
 
     llama_server_open: bool = False
     retry: int = 0
@@ -75,20 +71,6 @@ def start_llama_server( model_name: str, timeout: int = 300, llama_server_pid: i
 
     print( "The llama server is open." )
     return llama_server_pid
-
-
-def close_llama_server( llama_server_pid: int ) -> None:
-    """Close the llama server.
-
-    Args:
-        llama_server_pid (int): The pid of the Popen subprocess with the llama server open.
-    """
-    subprocess.run(
-        [ "taskkill", "/PID", str( llama_server_pid ), "/T", "/F" ],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    print( "The llama server is close." )
 
 
 def is_open( expected_model: Path | None = None ) -> bool:

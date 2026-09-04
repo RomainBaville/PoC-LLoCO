@@ -5,7 +5,8 @@
 import streamlit as st
 
 import ui.theme as theme
-from llm.client.llama_client import close_llama_server, start_llama_server
+from launcher.utils import stop_process
+from llm.client.llama_client import start_llama_server
 from llm.model_picker import ModelInfo, get_models
 from ui.registry import PROBLEM_REGISTRY, ProblemType
 
@@ -48,7 +49,7 @@ def ai_models() -> None:
                 st.session_state.model_info.name, llama_server_pid=st.session_state.llama_server_pid
             )
         elif st.session_state.llama_server_pid != 0:
-            close_llama_server( st.session_state.llama_server_pid )
+            stop_process( st.session_state.llama_server_pid )
             st.session_state.llama_server_pid = 0
 
 
