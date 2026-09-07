@@ -29,9 +29,9 @@ theme.inject()
 st.session_state.setdefault( "step", 0 )
 st.session_state.setdefault( "model_info", None )
 st.session_state.setdefault( "problem_type", None )
-st.session_state.setdefault( "onboarding_result", None )
+st.session_state.setdefault( "user_description", None )
+st.session_state.setdefault( "onboarding", None )
 st.session_state.setdefault( "analysis_done", False )
-st.session_state.setdefault( "analysis_recommendation", None )
 
 # ── Sidebar + top bar ────────────────────────────────────────────────────────
 render_sidebar()
@@ -47,7 +47,7 @@ def ai_onboarding() -> None:
     )
 
     st.markdown( "### Analyse your problem with AI" )
-    user_desc = st.text_area(
+    st.session_state.user_desc = st.text_area(
         "Description",
         height=110,
         placeholder=( "Example : I want to affect employees and projects from the employees skills." ),
@@ -55,39 +55,39 @@ def ai_onboarding() -> None:
     )
 
     if st.button( "Analyse", type="primary" ):
-        if not user_desc.strip():
+        if not st.session_state.user_desc.strip():
             st.warning( "Set your problem description first." )
         elif not st.session_state.get( "model_info" ):
             st.warning( "Select an AI model first." )
         else:
             try:
                 with st.spinner( "Analysing ..." ):
-                    prompt: str = build_onboarding_prompt( user_desc )
-                    result: str = CLIENTS[ st.session_state.model_info.source
-                                          ].ask_fn( prompt, st.session_state.model_info.name )
+                    prompt = build_onboarding_prompt( st.session_state.user_desc )
+                    st.session_state.onboarding = CLIENTS[ st.session_state.model_info.source
+                                                          ].ask_fn( prompt, st.session_state.model_info.name )
 
-                st.session_state.onboarding_result = result
                 st.session_state.analysis_done = True
 
                 # Infer and immediately apply configuration recommendation
                 try:
-                    st.session_state.problem_type = infer_problem_configuration( user_desc, result )
+                    st.session_state.problem_type = infer_problem_configuration(
+                        st.session_state.user_desc, st.session_state.onboarding
+                    )
                 except ValueError as e:
                     st.warning( f"{ e } Chose your problem manualy." )
 
                 # Reset any prior validation so user re-confirms the new config
                 st.session_state.config_validated = False
                 st.session_state.data_step = 1
-                print( st.session_state.problem_type )
 
                 st.rerun()
 
             except Exception as exc:
                 st.error( f"Erreor while using AI: { exc }" )
 
-    if st.session_state.get( "onboarding_result" ):
+    if st.session_state.get( "onboarding" ):
         st.markdown( "**AI guide**" )
-        theme.ai_block( st.session_state.onboarding_result )
+        theme.ai_block( st.session_state.onboarding )
         st.markdown( "" )
         st.markdown(
             '<p class="ui-hint">The configuration has been set, check and modify it if needed then click on the buton'

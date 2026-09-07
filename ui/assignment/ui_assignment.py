@@ -6,6 +6,10 @@ import streamlit as st
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from infrastructure.registry import DATA_SOURCE_REGISTRY
+from llm.client.registry import CLIENTS
+from llm.summary.session_model import OptimizationSession
+from llm.summary.session_prompt import build_session_summary_prompt
+from llm.summary.utils import build_results_zip
 from solvers.assignment.registry import SOLVERS
 from ui.assignment.builder import build_entities_labels, build_problem
 from ui.assignment.constraints.ui_logicals_constraints import logicals_constraints
@@ -437,39 +441,33 @@ def render( session_state: SessionStateProxy ) -> None:
                 navigation_buttons( session_state, show_next=False )
                 st.stop()
 
-        # TODO in a futur PR
-        """
-        ---------------------------------
-        AI explanation
-        ---------------------------------
-        st.divider()
-        st.subheader( "AI explanation" )
-        if st.button( "Generate explanation by AI" ):
-            session = OptimizationSession(
-                problem_family="Assignment",
-                problem_type=st.session_state.assignment_type,
-                problem_variant="generic",
-                steps=st.session_state.journey,
-                data_description=describe_data_source(
-                    state.data_source
-                ),
-                solver_name=st.session_state.solver.label,
-                result_summary=f"{ len( solution ) } assignments",
-                config_summary=f"Objective: maximize",
-            )
-            state.ai_summary = generate_ai_summary( session )
-            st.markdown( state.ai_summary )
-        if "ai_summary" in state:
-            zip_bytes = build_results_zip(
-                solution_rows=st.session_state.solution_rows,
-                ai_summary=st.session_state.ai_summary,
-            )
-            st.download_button(
-                "Download results (ZIP)",
-                data=zip_bytes,
-                file_name="assignment_results.zip",
-                mime="application/zip",
-            )
-        """
+        # ---------------------------------
+        # AI explanation
+        # ---------------------------------
+        if session_state.model_info is not None:
+            st.divider()
+            st.subheader( "AI explanation" )
+            session_state.summary = None
+            if st.button( "Generate explanation by AI" ):
+                session = OptimizationSession(
+                    journey=session_state.journey,
+                    user_desc=session_state.user_desc,
+                    onboarding=session_state.onboarding,
+                    result=solution
+                )
+                summary_prompt = build_session_summary_prompt( session )
+                with st.spinner( "Summerize" ):
+                    session_state.summary = CLIENTS[ session_state.model_info.source
+                                                    ].ask_fn( summary_prompt, session_state.model_info.name )
+                st.markdown( session_state.summary )
 
-        navigation_buttons( session_state, show_next=False )
+            if session_state.summary is not None:
+                zip_bytes = build_results_zip( summary=session_state.summary )
+                st.download_button(
+                    "Download results (ZIP)",
+                    data=zip_bytes,
+                    file_name="assignment_results.zip",
+                    mime="application/zip"
+                )
+
+            navigation_buttons( session_state, show_next=False )

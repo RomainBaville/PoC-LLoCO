@@ -94,8 +94,8 @@ def guide_panel() -> None:
 
     # AI guide
     theme.section_label( "AI guide" )
-    if st.session_state.get( "onboarding_result" ):
-        theme.ai_block( st.session_state.onboarding_result )
+    if st.session_state.get( "onboarding" ):
+        theme.ai_block( st.session_state.onboarding )
     elif st.session_state.get( "model_info" ):
         st.markdown(
             '<p class="ui-hint">Describe your problem and analyse it to get an AI guide.</p>', unsafe_allow_html=True

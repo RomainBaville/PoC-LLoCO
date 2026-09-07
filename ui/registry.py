@@ -38,7 +38,7 @@ class ProblemType:
 PROBLEM_REGISTRY: list[ ProblemType ] = [
     ProblemType(
         key="assignment",
-        label="Assignment problem",
+        label="Assignment Problem",
         description="Assignments problem between left and right entities",
         render_fn=render,
     )

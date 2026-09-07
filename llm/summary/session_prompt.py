@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from domain.registry import DOMAIN_REGISTRY
 from llm.summary.session_model import OptimizationSession
 
 
@@ -14,40 +15,43 @@ def build_session_summary_prompt( session: OptimizationSession ) -> str:
     Retruns:
         str: The prompt for the llm to summeryze the session.
     """
-    steps_text = "\n".join( f"{ i + 1 }. { step }" for i, step in enumerate( session.steps ) )
+    user_desc: str
+    if session.user_desc is None:
+        user_desc = "No description was given."
+    else:
+        user_desc = session.user_desc
 
-    details_text = ""
-    if session.result_details:
-        details_text = "\n\nAdditional details:\n" + "\n".join(
-            f"- { k }: { v }" for k, v in session.result_details.items()
-        )
+    onboarding: str
+    if session.onboarding is None:
+        onboarding = "No onbording was used."
+    else:
+        onboarding = session.onboarding
 
-    config_text = ""
-    if session.config_summary:
-        config_text = f"\n\nConfiguration:\n{ session.config_summary }"
+    domain = ""
+    for d in DOMAIN_REGISTRY:
+        if d.label == session.journey[ "Problem type" ]:
+            domain = d.get_schema()
 
     return f"""
 You are an expert optimization analyst.
 
 Explain the result of the following optimization session in a clear,
-professional, and neutral tone.
+professional, and neutral tone from the given data.
 
-Problem type:
-{ session.problem_type }
+The user description of its problem is:
+{ user_desc }
 
-Workflow:
-{ steps_text }
+The AI onboarding is:
+{ onboarding }
 
-Data used:
-{ session.data_description }
+The porblem use the domain:
+{ domain }
 
-Solver:
-{ session.solver_name + session.solver_description }
+The data set by the user are stock in the journey:
+{ session.journey }
 
-Result summary:
-{ session.result_summary }
-{ config_text }
-{ details_text }
+The result of the optimization is:
+{ session.result }
 
 Guidelines:
 - Be factual and precise
