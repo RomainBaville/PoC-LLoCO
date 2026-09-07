@@ -8,7 +8,7 @@ import ui.theme as theme
 from launcher.utils import stop_process
 from llm.client.llama_client import start_llama_server
 from llm.model_picker import ModelInfo, get_models
-from ui.registry import PROBLEM_REGISTRY, ProblemType
+from ui.registry import PROBLEM_REGISTRY
 
 
 def ai_models() -> None:
@@ -26,14 +26,13 @@ def ai_models() -> None:
             unsafe_allow_html=True
         )
     else:
-        model: ModelInfo | None = st.selectbox(
+        st.session_state.model_info = st.selectbox(
             "**AI models**",
             options=available_models,
             placeholder="Chose your AI model",
             index=None,
             disabled=st.session_state.step
         )
-        st.session_state.model_info = model
         if st.session_state.model_info is not None:
             st.markdown(
                 f'<div class="ui-model-banner">'
@@ -60,10 +59,13 @@ def problems_configuration() -> None:
     st.session_state.setdefault( "config_validated", False )
     st.session_state.setdefault( "journey", {} )
 
-    problem: ProblemType | None = st.selectbox(
-        "**Problems configuration**", options=PROBLEM_REGISTRY, placeholder="Chose your problem", index=None
+    index: int | None = None
+    if st.session_state.problem_type is not None:
+        index = PROBLEM_REGISTRY.index( st.session_state.problem_type )
+
+    st.session_state.problem_type = st.selectbox(
+        "**Problems configuration**", options=PROBLEM_REGISTRY, placeholder="Chose your problem", index=index
     )
-    st.session_state.problem_type = problem
 
     can_validate = ( st.session_state.get( "problem_type" ) )
     if st.button( "Validate configuration", type="primary", use_container_width=True, disabled=not can_validate ):

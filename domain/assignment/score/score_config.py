@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from domain.assignment.score.matching_config import MatchingConfig
 from domain.assignment.score.ressources_config import RessourcesConfig
@@ -10,19 +10,26 @@ from domain.assignment.score.ressources_config import RessourcesConfig
 
 @dataclass
 class ScoreConfig:
-    """Dataclass to configure the score evaluation of the assignment problem.
+    """Configure score computation for the assignment problem."""
 
-    Args:
-        use_matching (bool): True if the problem optimization score uses left and right entities matching.
-            Defaults to False.
-        matching_config (Optional[MatchingConfig]): The configuration of the matching to make.
-        use_ressources (bool): True if the problem optimisation score uses left entities ressources.
-            Defaults to False.
-        ressources_config (Optional[RessourcesConfig]): The configuration of the ressources to use.
+    use_matching: bool = field( default=False, metadata={
+        "description": "Enable matching-based score computation."
+    } )
 
-    """
-    use_matching: bool = False
-    matching_config: MatchingConfig | None = None
+    matching_config: MatchingConfig | None = field(
+        default=None, metadata={
+            "description": "Matching score configuration."
+        }
+    )
 
-    use_ressources: bool = False
-    ressources_config: RessourcesConfig | None = None
+    use_ressources: bool = field(
+        default=False, metadata={
+            "description": "Enable resource-based score computation."
+        }
+    )
+
+    ressources_config: RessourcesConfig | None = field(
+        default=None, metadata={
+            "description": "Resource score configuration."
+        }
+    )

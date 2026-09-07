@@ -71,13 +71,14 @@ def ai_onboarding() -> None:
 
                 # Infer and immediately apply configuration recommendation
                 try:
-                    st.session_state[ "problem_type" ] = infer_problem_configuration( user_desc, result )
+                    st.session_state.problem_type = infer_problem_configuration( user_desc, result )
                 except ValueError as e:
                     st.warning( f"{ e } Chose your problem manualy." )
 
                 # Reset any prior validation so user re-confirms the new config
                 st.session_state.config_validated = False
-                st.session_state.data_step = 0
+                st.session_state.data_step = 1
+                print( st.session_state.problem_type )
 
                 st.rerun()
 

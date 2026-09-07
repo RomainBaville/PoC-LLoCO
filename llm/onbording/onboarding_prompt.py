@@ -23,13 +23,13 @@ an optimization platform.
 The user describes their problem as follows:
 
 \"\"\"
-{user_description}
+{ user_description }
 \"\"\"
 
 The platform supports structured optimization problems
 
-Problem types:
-{ context[ "problems" ] }
+Available domain:
+{ context[ "domain" ] }
 
 Available solvers:
 { context[ "solvers" ] }
@@ -46,7 +46,6 @@ Explain clearly:
   3. data
   4. configuration
   5. solver
-- why configuration and scoring choices impact the result
 
 Guidelines:
 - Do NOT invent capabilities

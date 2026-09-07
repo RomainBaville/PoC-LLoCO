@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
+from domain.registry import DOMAIN_REGISTRY
 from infrastructure.registry import DATA_SOURCE_REGISTRY
 from solvers.registry import PROBLEM_SOLVER_GROUPS
 from ui.registry import PROBLEM_REGISTRY
@@ -14,6 +15,15 @@ def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
         dict[str, list[dict[str, str]]]: The data (name, description) of the tools(domain, solvers...).
 
     """
+    domains: list[ dict[ str, str ] ] = [
+        {
+            "key": d.key,
+            "label": d.label,
+            "description": d.description,
+            "attributes": d.get_schema()
+        } for d in DOMAIN_REGISTRY
+    ]
+
     problems: list[ dict[ str, str ]
                    ] = [ {
                        "key": p.key,
@@ -36,7 +46,8 @@ def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
     ]
 
     return {
-        "problems": problems,
+        "domain": domains,
+        "problem": problems,
         "solvers": solvers,
         "input data": input_data
     }

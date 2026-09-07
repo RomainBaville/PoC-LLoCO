@@ -2,24 +2,30 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class LogicalsConstraints:
-    """Dataclass to configure the logicals constraints of the assignment problem.
+    """Configure logical assignment constraints."""
 
-    Args:
-        left_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]):
-            Groups of left entity labels that can't be associated together.
-        right_mutual_exclusions (Optional[tuple[tuple[str, ...], ...]]):
-            Groups of right entity labels that can't be assigned together.
-        implications (Optional[dict[tuple[str, str], tuple[tuple[str, str, Optional[float]], ...]]]):
-            The dictionary with the implication of an association:
-            - keys (tuple[str, str]): The left and right entity labels of the association with an implication.
-            - values (tuple[tuple[str, str, float], ...]]): The left and rigth labels of the implicated association
-                with the number of forced associations (1. if multiple_same_assignment is False).
-    """
-    left_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = None
-    right_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = None
-    implications: dict[ tuple[ str, str ], tuple[ tuple[ str, str, float ], ...] ] | None = None
+    left_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = field(
+        default=None, metadata={
+            "description": "Groups of left entities that cannot be assigned together."
+        }
+    )
+
+    right_mutual_exclusions: tuple[ tuple[ str, ...], ...] | None = field(
+        default=None, metadata={
+            "description": "Groups of right entities that cannot be assigned together."
+        }
+    )
+
+    implications: ( dict[
+        tuple[ str, str ],
+        tuple[ tuple[ str, str, float ], ...],
+    ] | None ) = field(
+        default=None, metadata={
+            "description": "Assignment implications triggered by another assignment."
+        }
+    )

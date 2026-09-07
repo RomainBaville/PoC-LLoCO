@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
-
+from dataclasses import dataclass, field
 from typing import Self
 
 from domain.assignment.constraints.constraints_config import ConstraintsConfig
@@ -10,34 +10,33 @@ from domain.assignment.score.ressources_config import RessourcesConfig
 from domain.assignment.score.score_config import ScoreConfig
 
 
+@dataclass( slots=True )
 class AssignmentProblem:
-    """Class to deals with assignment problem."""
+    """Represent an assignment problem."""
 
-    def __init__(
-        self: Self,
-        left_labels: tuple[ str, ...],
-        right_labels: tuple[ str, ...],
-        score_config: ScoreConfig,
-        constraints_config: ConstraintsConfig,
-    ) -> None:
-        """Initialisation of the class.
+    left_labels: tuple[ str, ...] = field( metadata={
+        "description": "Labels of the left entities to assign."
+    } )
 
-        Args:
-            left_labels (tuple[str, ...]): The left entities labels to associate.
-            right_labels (tuple[str, ...]): The right entities labels to associate.
-            score_config (ScoreConfig): The configuration of the score evaluation of the assignment problem.
-            constraints_config (ConstraintsConfig): The configuration of the constraints of the assignment problem.
-        """
-        self.left_labels: tuple[ str, ...] = left_labels
-        self.right_labels: tuple[ str, ...] = right_labels
-        self.score_config: ScoreConfig = score_config
-        self.constraints_config: ConstraintsConfig = constraints_config
+    right_labels: tuple[ str, ...] = field(
+        metadata={
+            "description": "Labels of the right entities receiving assignments."
+        }
+    )
 
-    def compute_matching_score(
-        self: Self,
-        left_label: str,
-        right_label: str,
-    ) -> float:
+    score_config: ScoreConfig = field(
+        metadata={
+            "description": "Configuration used to compute optimization scores."
+        }
+    )
+
+    constraints_config: ConstraintsConfig = field(
+        metadata={
+            "description": "Configuration of assignment constraints."
+        }
+    )
+
+    def compute_matching_score( self: Self, left_label: str, right_label: str ) -> float:
         """Compute the matching score for the problem for one left entity to one right entity.
 
         Args:
@@ -62,10 +61,7 @@ class AssignmentProblem:
 
         return matching_score
 
-    def compute_ressources_score(
-        self: Self,
-        left_label: str,
-    ) -> float:
+    def compute_ressources_score( self: Self, left_label: str ) -> float:
         """Compute the ressources score for one left entity of the problem.
 
         Args:
