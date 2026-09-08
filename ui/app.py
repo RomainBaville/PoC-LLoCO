@@ -21,7 +21,7 @@ from ui.sidebar import render as render_sidebar
 st.set_page_config(
     page_title="Optimization Playground",
     page_icon="⚙️",
-    layout="wide",
+    layout="wide"
 )
 theme.inject()
 

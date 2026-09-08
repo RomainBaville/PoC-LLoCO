@@ -22,7 +22,7 @@ from tests.assignment.problem_84.problem_84_description import problem_84_domain
 )
 def test_assignments_problem_unique(
     problem: AssignmentProblem,
-    expected_solution: dict[ str, list[ tuple[ str, int ] ] ],
+    expected_solution: dict[ str, list[ tuple[ str, int ] ] ]
 ) -> None:
     """Test the resolution of assignments problems of the IndustryOR.json file.
 
@@ -39,7 +39,7 @@ def test_assignments_problem_unique(
 @pytest.mark.parametrize( "problem, expected_solutions", [ ( problem_08_domain, solutions_08 ) ] )
 def test_assignments_problem_few(
     problem: AssignmentProblem,
-    expected_solutions: list[ dict[ str, list[ tuple[ str, int ] ] ] ],
+    expected_solutions: list[ dict[ str, list[ tuple[ str, int ] ] ] ]
 ) -> None:
     """Test the resolution of assignments problems of the IndustryOR.json file.
 

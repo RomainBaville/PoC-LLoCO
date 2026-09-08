@@ -31,6 +31,6 @@ DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
         key="csv_two_tables",
         label="Two CSV files",
         description="You have two CSV files, one with the data and the other with the constraints.",
-        loader_fn=load_csv,
-    ),
+        loader_fn=load_csv
+    )
 }

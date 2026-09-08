@@ -79,7 +79,7 @@ def navigation_buttons(
     session_state: SessionStateProxy,
     show_back: bool = True,
     show_next: bool = True,
-    show_close: bool = True,
+    show_close: bool = True
 ) -> None:
     """Create the navigation buttons on the session state.
 

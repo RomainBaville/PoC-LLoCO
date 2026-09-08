@@ -24,6 +24,6 @@ PROBLEM_SOLVER_GROUPS: dict[ str, ProblemsSolverGroup ] = {
     ProblemsSolverGroup(
         key="assignments",
         description="Solvers for assignment problems",
-        registry_module="solvers.assignment.registry",
-    ),
+        registry_module="solvers.assignment.registry"
+    )
 }

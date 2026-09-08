@@ -316,18 +316,6 @@ Notes:
 
 ---
 
-### Using the Application
-
-1. **Sidebar** — configure your problem step by step:
-   - Select a problem type and formulation
-   - Choose your CSV files and map the columns
-   - Select a solver
-   - *(Optional)* Select a local LLM model for AI features
-2. Click **▶ Résoudre** to run the optimizer
-3. **Results** appear in the main area: metrics, assignment table, AI summary, and ZIP export
-
----
-
 ## Lint
 
 ```bash

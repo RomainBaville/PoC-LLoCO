@@ -5,7 +5,7 @@
 from domain.registry import DOMAIN_REGISTRY
 from infrastructure.registry import DATA_SOURCE_REGISTRY
 from solvers.registry import PROBLEM_SOLVER_GROUPS
-from ui.registry import PROBLEM_REGISTRY
+from ui.registry import UI_DOMAIN_REGISTRY
 
 
 def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
@@ -29,7 +29,7 @@ def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
                        "key": p.key,
                        "label": p.label,
                        "description": p.description
-                   } for p in PROBLEM_REGISTRY ]
+                   } for p in UI_DOMAIN_REGISTRY ]
 
     solvers: list[ dict[ str, str ]
                   ] = [ {

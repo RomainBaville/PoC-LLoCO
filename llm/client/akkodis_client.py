@@ -51,7 +51,7 @@ def ask_akkodis_client( prompt: str, model_name: str, max_tokens: int = 800, tim
     headers: dict[ str, str ] = {
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
-        "api-key": api_key,
+        "api-key": api_key
     }
     payload: dict[ str, int | list[ dict[ str, str ] ] ] = {
         "max_tokens":
@@ -66,8 +66,8 @@ def ask_akkodis_client( prompt: str, model_name: str, max_tokens: int = 800, tim
             {
                 "role": "user",
                 "content": prompt
-            },
-        ],
+            }
+        ]
     }
     url: str = AKKODIS_URL.format( model=model_name )
 

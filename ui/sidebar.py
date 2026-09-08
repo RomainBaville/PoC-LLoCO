@@ -8,7 +8,7 @@ import ui.theme as theme
 from launcher.utils import stop_process
 from llm.client.llama_client import start_llama_server
 from llm.utils import ModelInfo, get_models
-from ui.registry import PROBLEM_REGISTRY
+from ui.registry import UI_DOMAIN_REGISTRY
 
 
 def ai_models() -> None:
@@ -61,10 +61,10 @@ def problems_configuration() -> None:
 
     index: int | None = None
     if st.session_state.problem_type is not None:
-        index = PROBLEM_REGISTRY.index( st.session_state.problem_type )
+        index = UI_DOMAIN_REGISTRY.index( st.session_state.problem_type )
 
     st.session_state.problem_type = st.selectbox(
-        "**Problems configuration**", options=PROBLEM_REGISTRY, placeholder="Chose your problem", index=index
+        "**Problems configuration**", options=UI_DOMAIN_REGISTRY, placeholder="Chose your problem", index=index
     )
 
     can_validate = ( st.session_state.get( "problem_type" ) )

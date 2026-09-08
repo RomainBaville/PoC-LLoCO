@@ -39,7 +39,7 @@ def start_process( command: list[ str ], title: str ) -> int:
             raise LookupError( "No Linux terminals fund." )
 
         case _:
-            raise NotImplementedError( f"Unsupported operating system: {platform.system()}" )
+            raise NotImplementedError( f"Unsupported operating system: { platform.system() }" )
 
 
 def stop_process( process_pid: int ) -> None:

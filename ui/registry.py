@@ -12,8 +12,8 @@ from ui.assignment.ui_assignment import render
 
 
 @dataclass
-class ProblemType:
-    """Dataclass to acces to all the type of problems the user interface can deals with.
+class UiDomainType:
+    """Dataclass to acces to all the domain types implemented in the interface.
 
     Args:
         key (str): The key of the problem.
@@ -35,11 +35,11 @@ class ProblemType:
         return self.label
 
 
-PROBLEM_REGISTRY: list[ ProblemType ] = [
-    ProblemType(
+UI_DOMAIN_REGISTRY: list[ UiDomainType ] = [
+    UiDomainType(
         key="assignment",
         label="Assignment Problem",
         description="Assignments problem between left and right entities",
-        render_fn=render,
+        render_fn=render
     )
 ]

@@ -31,6 +31,6 @@ SOLVERS = {
         key="ortools_cp_sat",
         label="OR-Tools CP-SAT",
         description=( "Constraint Programming solver suitable for assignment problems with configurable behavior." ),
-        solver_fn=solve_assignment_problem,
-    ),
+        solver_fn=solve_assignment_problem
+    )
 }

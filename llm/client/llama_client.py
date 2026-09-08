@@ -136,7 +136,7 @@ def ask_llama_client( prompt: str, model_name: str, max_tokens: int = 800, timeo
             {
                 "role": "user",
                 "content": prompt,
-            },
+            }
         ],
         "temperature":
         0.2,

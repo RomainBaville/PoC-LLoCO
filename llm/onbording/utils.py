@@ -2,10 +2,10 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville, Fidel Monteiro
 
-from ui.registry import PROBLEM_REGISTRY, ProblemType
+from ui.registry import UI_DOMAIN_REGISTRY, UiDomainType
 
 
-def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) -> ProblemType:
+def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) -> UiDomainType:
     """Deterministic keyword-based recommendation — no extra LLM call.
 
     Args:
@@ -33,10 +33,10 @@ def infer_problem_configuration( user_desc: str, ai_text: str | None = None ) ->
         "projet",
         "skill",
         "compétence",
-        "competence",
+        "competence"
     ]
     if any( w in text for w in assignment_keywords ):
-        for problem in PROBLEM_REGISTRY:
+        for problem in UI_DOMAIN_REGISTRY:
             if problem.key == "assignment":
                 return problem
 
