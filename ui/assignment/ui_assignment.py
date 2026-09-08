@@ -7,8 +7,8 @@ from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from infrastructure.registry import DATA_SOURCE_REGISTRY
 from llm.client.registry import CLIENTS
-from llm.summary.session_model import OptimizationSession
-from llm.summary.session_prompt import build_session_summary_prompt
+from llm.summary.summary_context import OptimizationSession
+from llm.summary.summary_prompt import build_session_summary_prompt
 from llm.summary.utils import build_results_zip
 from solvers.assignment.registry import SOLVERS
 from ui.assignment.builder import build_entities_labels, build_problem

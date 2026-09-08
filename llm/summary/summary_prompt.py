@@ -3,7 +3,7 @@
 # SPDX-FileContributor: Romain Baville
 
 from domain.registry import DOMAIN_REGISTRY
-from llm.summary.session_model import OptimizationSession
+from llm.summary.summary_context import OptimizationSession
 
 
 def build_session_summary_prompt( session: OptimizationSession ) -> str:
