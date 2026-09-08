@@ -62,8 +62,7 @@ def ask_akkodis_client( prompt: str, model_name: str, max_tokens: int = 800, tim
                 "content":
                 ( "You are a professional optimization analyst. "
                   "You explain results clearly and concisely." ),
-            },
-            {
+            }, {
                 "role": "user",
                 "content": prompt
             }

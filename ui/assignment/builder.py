@@ -9,10 +9,7 @@ from ui.assignment.constraints.builder import build_constraints_config
 from ui.assignment.score.builder import build_score_config
 
 
-def build_entities_labels(
-    entity_col_label: str,
-    entity_rows: tuple[ dict[ str, str ], ...]
-) -> tuple[ str, ...]:
+def build_entities_labels( entity_col_label: str, entity_rows: tuple[ dict[ str, str ], ...] ) -> tuple[ str, ...]:
     """Build the entities labels from csv col label and rows.
 
     Args:

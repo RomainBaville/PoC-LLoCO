@@ -3,9 +3,10 @@
 # SPDX-FileContributor: Romain Baville
 
 from dataclasses import dataclass
-from solvers.assignment.registry import ASSIGNEMENT_SOLVERS
 
 from typing_extensions import Any
+
+from solvers.assignment.registry import ASSIGNEMENT_SOLVERS
 
 
 @dataclass
@@ -23,9 +24,5 @@ class DomainsSolverGroup:
 
 
 DOMAINS_SOLVER_GROUP: list[ DomainsSolverGroup ] = [
-    DomainsSolverGroup(
-        key="assignments",
-        description="Solvers for assignment problems",
-        solvers=ASSIGNEMENT_SOLVERS
-    )
+    DomainsSolverGroup( key="assignments", description="Solvers for assignment problems", solvers=ASSIGNEMENT_SOLVERS )
 ]

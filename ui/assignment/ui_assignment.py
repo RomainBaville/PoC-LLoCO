@@ -26,7 +26,7 @@ def render( session_state: SessionStateProxy ) -> None:
         session_state (SessionStateProxy): The session state.
     """
     # Assignment session defaults
-    session_state.setdefault( "data_source", None)
+    session_state.setdefault( "data_source", None )
     session_state.setdefault( "solver", None )
 
     # ==================================================
@@ -455,7 +455,9 @@ def render( session_state: SessionStateProxy ) -> None:
                 )
                 summary_prompt = build_session_summary_prompt( session )
                 with st.spinner( "Summerize" ):
-                    session_state.summary = session_state.model_info.ask_client( summary_prompt, session_state.model_info.name )
+                    session_state.summary = session_state.model_info.ask_client(
+                        summary_prompt, session_state.model_info.name
+                    )
                 st.markdown( session_state.summary )
 
             if session_state.summary is not None:

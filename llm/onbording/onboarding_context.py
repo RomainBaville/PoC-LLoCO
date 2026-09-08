@@ -20,21 +20,23 @@ def build_onboarding_context() -> dict[ str, list[ dict[ str, str ] ] ]:
     for ui_domain in UI_DOMAIN_REGISTRY:
         for domain in DOMAIN_REGISTRY:
             if ui_domain.key == domain.key:
-                domains.append[ {
-                    "key": domain.key,
-                    "label": domain.label,
-                    "description": domain.description,
-                    "attributes": domain.get_schema()
-                } ]
+                domains.append(
+                    {
+                        "key": domain.key,
+                        "label": domain.label,
+                        "description": domain.description,
+                        "attributes": domain.get_schema()
+                    }
+                )
 
         for domain_solvers in DOMAINS_SOLVER_GROUP:
             if ui_domain.key == domain_solvers.key:
-                for solver in domain_solvers:
-                    solvers.append[ {
+                for solver in domain_solvers.solvers:
+                    solvers.append( {
                         "key": solver.key,
                         "label": solver.label,
                         "description": solver.description
-                    } ]
+                    } )
 
     input_data: list[ dict[ str, str ] ] = [
         {

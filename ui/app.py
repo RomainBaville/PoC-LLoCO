@@ -17,11 +17,7 @@ from llm.onbording.utils import infer_problem_configuration
 from ui.sidebar import render as render_sidebar
 
 # ── Page setup ──────────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Optimization Playground",
-    page_icon="⚙️",
-    layout="wide"
-)
+st.set_page_config( page_title="Optimization Playground", page_icon="⚙️", layout="wide" )
 theme.inject()
 
 # ── Session defaults ─────────────────────────────────────────────────────────
@@ -62,7 +58,9 @@ def ai_onboarding() -> None:
             try:
                 with st.spinner( "Analysing ..." ):
                     prompt = build_onboarding_prompt( st.session_state.user_desc )
-                    st.session_state.onboarding = st.session_state.model_info.ask_client( prompt, st.session_state.model_info.name )
+                    st.session_state.onboarding = st.session_state.model_info.ask_client(
+                        prompt, st.session_state.model_info.name
+                    )
 
                 st.session_state.analysis_done = True
 
