@@ -8,7 +8,6 @@ import streamlit as st
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
-from infrastructure.registry import DATA_SOURCE_REGISTRY, DataSourceDefinition
 from ui.utils import navigation_buttons
 
 
@@ -35,12 +34,9 @@ def two_csv( session_state: SessionStateProxy ) -> None:
         disabled=session_state.lock_data_source
     )
 
-    data_source: DataSourceDefinition = DATA_SOURCE_REGISTRY[ session_state.data_source ]
-    loader_fn = data_source.loader_fn
-
     if isinstance( left_file, UploadedFile ) and isinstance( right_file, UploadedFile ):
-        session_state.left_cols, session_state.left_rows = loader_fn( left_file )
-        session_state.right_cols, session_state.right_rows = loader_fn( right_file )
+        session_state.left_cols, session_state.left_rows = session_state.data_source.loader_fn( left_file )
+        session_state.right_cols, session_state.right_rows = session_state.data_source.loader_fn( right_file )
         show_next = True
     else:
         show_next = False
@@ -49,6 +45,6 @@ def two_csv( session_state: SessionStateProxy ) -> None:
         navigation_buttons( session_state, show_next=show_next )
 
 
-ASSIGNMENT_DATA_SOURCE: dict[ str, Callable[ [ SessionStateProxy ], None ] ] = {
+UI_ASSIGNMENT_DATA_SOURCE_LOADER: dict[ str, Callable[ [ SessionStateProxy ], None ] ] = {
     "csv_two_tables": two_csv
 }

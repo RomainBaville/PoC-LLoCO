@@ -25,12 +25,11 @@ class DataSourceDefinition:
     loader_fn: Callable[ [ Any ], tuple[ tuple[ str, ...], tuple[ dict[ str, str ], ...] ] ]
 
 
-DATA_SOURCE_REGISTRY: dict[ str, DataSourceDefinition ] = {
-    "csv_two_tables":
+DATA_SOURCE_REGISTRY: list[ DataSourceDefinition ] = [
     DataSourceDefinition(
         key="csv_two_tables",
         label="Two CSV files",
         description="You have two CSV files, one with the data and the other with the constraints.",
         loader_fn=load_csv
     )
-}
+]

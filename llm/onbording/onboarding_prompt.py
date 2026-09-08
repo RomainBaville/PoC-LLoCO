@@ -28,8 +28,8 @@ The user describes their problem as follows:
 
 The platform supports structured optimization problems
 
-Available domain:
-{ context[ "domain" ] }
+Available domains:
+{ context[ "domains" ] }
 
 Available solvers:
 { context[ "solvers" ] }

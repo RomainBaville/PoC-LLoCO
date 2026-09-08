@@ -3,12 +3,13 @@
 # SPDX-FileContributor: Romain Baville, Fidel Monteiro
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
-from llm.client.akkodis_client import AKKODIS_MODELS, get_akkodis_openai_api_key
-from llm.client.llama_client import LLAMA_MODELS_DIR, LLAMA_SERVER_DIR, LLAMA_SERVER_EXE
+from llm.client.akkodis_client import AKKODIS_MODELS, get_akkodis_openai_api_key, ask_akkodis_client
+from llm.client.llama_client import LLAMA_MODELS_DIR, LLAMA_SERVER_DIR, LLAMA_SERVER_EXE, ask_llama_client
 
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 
@@ -25,6 +26,8 @@ class ModelInfo:
     label: str
     name: str
     source: str
+    ask_client: Callable[ [ str, str ], str ]
+
 
     def __str__( self: Self ) -> str:
         """Print the label of the model.
@@ -70,7 +73,8 @@ def get_llama_models() -> list[ ModelInfo ]:
         ModelInfo(
             label=f'{ re.sub( r"-00001-of-\d+$", "", model_name.replace(".gguf", "" ) ) } [llama-server]',
             name=model_name,
-            source="llama-server"
+            source="llama-server",
+            ask_client=ask_llama_client
         ) for model_name in sorted( llama_models )
     ]
 
@@ -86,7 +90,7 @@ def get_akkodis_models() -> list[ ModelInfo ]:
         get_akkodis_openai_api_key()
 
         return [
-            ModelInfo( label=f"{ model_name } [AKKODIS]", name=model_name, source="akkodis" )
+            ModelInfo( label=f"{ model_name } [AKKODIS]", name=model_name, source="akkodis", ask_client=ask_akkodis_client )
             for model_name in AKKODIS_MODELS
         ]
 

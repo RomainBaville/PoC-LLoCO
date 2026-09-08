@@ -25,12 +25,11 @@ class AssignmentSolvers:
     solver_fn: Callable[ [ AssignmentProblem ], dict[ str, list[ tuple[ str, int ] ] ] ]
 
 
-SOLVERS = {
-    "ortools_cp_sat":
+ASSIGNEMENT_SOLVERS: list[ AssignmentSolvers ] = [
     AssignmentSolvers(
         key="ortools_cp_sat",
-        label="OR-Tools CP-SAT",
-        description=( "Constraint Programming solver suitable for assignment problems with configurable behavior." ),
+        label="OR-Tools CP-SAT - Assignment",
+        description="Constraint Programming solver suitable for assignment problems with configurable behavior.",
         solver_fn=solve_assignment_problem
     )
-}
+]

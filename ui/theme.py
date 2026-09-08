@@ -4,7 +4,7 @@
 
 import streamlit as st
 
-from llm.utils import ModelInfo
+from llm.registry import ModelInfo
 
 _CSS = """
 <style>

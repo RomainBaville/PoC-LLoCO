@@ -7,7 +7,7 @@ import streamlit as st
 import ui.theme as theme
 from launcher.utils import stop_process
 from llm.client.llama_client import start_llama_server
-from llm.utils import ModelInfo, get_models
+from llm.registry import ModelInfo, get_models
 from ui.registry import UI_DOMAIN_REGISTRY
 
 

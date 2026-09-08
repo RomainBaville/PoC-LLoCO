@@ -12,7 +12,6 @@ ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
 import ui.theme as theme
-from llm.client.registry import CLIENTS
 from llm.onbording.onboarding_prompt import build_onboarding_prompt
 from llm.onbording.utils import infer_problem_configuration
 from ui.sidebar import render as render_sidebar
@@ -63,8 +62,7 @@ def ai_onboarding() -> None:
             try:
                 with st.spinner( "Analysing ..." ):
                     prompt = build_onboarding_prompt( st.session_state.user_desc )
-                    st.session_state.onboarding = CLIENTS[ st.session_state.model_info.source
-                                                          ].ask_fn( prompt, st.session_state.model_info.name )
+                    st.session_state.onboarding = st.session_state.model_info.ask_client( prompt, st.session_state.model_info.name )
 
                 st.session_state.analysis_done = True
 

@@ -6,17 +6,16 @@ import streamlit as st
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
 from infrastructure.registry import DATA_SOURCE_REGISTRY
-from llm.client.registry import CLIENTS
 from llm.summary.summary_context import OptimizationSession
 from llm.summary.summary_prompt import build_session_summary_prompt
 from llm.summary.utils import build_results_zip
-from solvers.assignment.registry import SOLVERS
+from solvers.assignment.registry import ASSIGNEMENT_SOLVERS
 from ui.assignment.builder import build_entities_labels, build_problem
 from ui.assignment.constraints.ui_logicals_constraints import logicals_constraints
 from ui.assignment.constraints.ui_quantities_constraints import quantities_constraints
 from ui.assignment.score.ui_matching import map_matching, matching_constraints, matching_strategy
 from ui.assignment.score.ui_ressources import map_ressources, ressources_constraints, ressources_strategy
-from ui.assignment.ui_data_source import ASSIGNMENT_DATA_SOURCE
+from ui.assignment.ui_data_source import UI_ASSIGNMENT_DATA_SOURCE_LOADER
 from ui.utils import navigation_buttons, select_data_source, select_solver
 
 
@@ -26,6 +25,10 @@ def render( session_state: SessionStateProxy ) -> None:
     Args:
         session_state (SessionStateProxy): The session state.
     """
+    # Assignment session defaults
+    session_state.setdefault( "data_source", None)
+    session_state.setdefault( "solver", None )
+
     # ==================================================
     # STEP 1 — Naming entities types
     # ==================================================
@@ -116,21 +119,17 @@ def render( session_state: SessionStateProxy ) -> None:
         else:
             session_state.lock_data_source = True
 
-        if "data_source" not in session_state:
-            session_state.data_source = None
-
-        for ds in DATA_SOURCE_REGISTRY.values():
+        for ds in DATA_SOURCE_REGISTRY:
             st.button(
                 ds.label,
                 on_click=select_data_source,
-                args=( session_state, ds.key ),
+                args=( session_state, ds ),
                 disabled=session_state.lock_data_source
             )
             st.caption( ds.description )
 
-        if session_state.data_source in ASSIGNMENT_DATA_SOURCE:
-            session_state.journey[ "Data source" ] = session_state.data_source
-            ASSIGNMENT_DATA_SOURCE[ session_state.data_source ]( session_state )
+        if session_state.data_source is not None:
+            UI_ASSIGNMENT_DATA_SOURCE_LOADER[ session_state.data_source.key ]( session_state )
 
     # ==================================================
     # STEP 4 — Mapping
@@ -384,13 +383,13 @@ def render( session_state: SessionStateProxy ) -> None:
         else:
             session_state.lock_solver = True
 
-        solver_cols = st.columns( len( SOLVERS ) )
-        for solver_col, solver in zip( solver_cols, SOLVERS.values(), strict=False ):
+        solver_cols = st.columns( len( ASSIGNEMENT_SOLVERS ) )
+        for solver_col, solver in zip( solver_cols, ASSIGNEMENT_SOLVERS, strict=False ):
             with solver_col:
                 st.button(
                     solver.label,
                     on_click=select_solver,
-                    args=( session_state, solver.key ),
+                    args=( session_state, solver ),
                     disabled=session_state.lock_solver
                 )
 
@@ -406,11 +405,10 @@ def render( session_state: SessionStateProxy ) -> None:
         # ---------------------------------
         # Solve
         # ---------------------------------
-        if session_state.solver_key in SOLVERS:
+        if session_state.solver is not None:
             try:
                 with st.spinner( "Optimizing..." ):
-                    solver_def = SOLVERS[ session_state.solver_key ]
-                    solution: dict[ str, list[ tuple[ str, int ] ] ] = solver_def.solver_fn( problem )
+                    solution: dict[ str, list[ tuple[ str, int ] ] ] = session_state.solver.solver_fn( problem )
 
                 session_state.solution_rows = []
 
@@ -457,8 +455,7 @@ def render( session_state: SessionStateProxy ) -> None:
                 )
                 summary_prompt = build_session_summary_prompt( session )
                 with st.spinner( "Summerize" ):
-                    session_state.summary = CLIENTS[ session_state.model_info.source
-                                                    ].ask_fn( summary_prompt, session_state.model_info.name )
+                    session_state.summary = session_state.model_info.ask_client( summary_prompt, session_state.model_info.name )
                 st.markdown( session_state.summary )
 
             if session_state.summary is not None:
@@ -470,4 +467,4 @@ def render( session_state: SessionStateProxy ) -> None:
                     mime="application/zip"
                 )
 
-            navigation_buttons( session_state, show_next=False )
+        navigation_buttons( session_state, show_next=False )

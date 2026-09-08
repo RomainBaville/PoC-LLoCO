@@ -7,18 +7,22 @@ from collections.abc import Callable
 import streamlit as st
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
+from infrastructure.registry import DataSourceDefinition
+from solvers.assignment.registry import AssignmentSolvers
+
 
 # --------------------------------------------------
 # Selection functions
 # --------------------------------------------------
-def select_data_source( session_state: SessionStateProxy, data_source_key: str ) -> None:
+def select_data_source( session_state: SessionStateProxy, data_source: DataSourceDefinition ) -> None:
     """Set the data source key in the session state.
 
     Args:
         session_state (SessionStateProxy): The session state.
-        data_source_key (str): The data source key.
+        data_source (DataSourceDefinition): The data source.
     """
-    session_state.data_source = data_source_key
+    session_state.data_source = data_source
+    session_state.journey[ "Data source" ] = data_source.label
 
 
 def select_problem( session_state: SessionStateProxy, problem_key: str ) -> None:
@@ -32,15 +36,15 @@ def select_problem( session_state: SessionStateProxy, problem_key: str ) -> None
     session_state.step = 1
 
 
-def select_solver( session_state: SessionStateProxy, solver_key: str ) -> None:
-    """Set the solver key in the session state and go to the next step.
+def select_solver( session_state: SessionStateProxy, solver: AssignmentSolvers ) -> None:
+    """Set the solver in the session state and go to the next step.
 
     Args:
         session_state (SessionStateProxy): The session state.
-        solver_key (str): The solver key.
+        solver (str): The solver key.
     """
-    session_state.solver_key = solver_key
-    session_state.journey[ "Solver" ] = solver_key
+    session_state.solver = solver
+    session_state.journey[ "Solver" ] = solver.label
     session_state.step += 1
 
 
