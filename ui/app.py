@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
-# SPDX-FileContributor: Romain Baville
+# SPDX-FileContributor: Romain Baville, Fidel Monteiro
 # ruff: noqa: E402 # disable Module level import not at top of file
 
 import sys
@@ -8,68 +8,110 @@ from pathlib import Path
 
 import streamlit as st
 
-# --- make project root importable ---
 ROOT_DIR = Path( __file__ ).resolve().parents[ 1 ]
 sys.path.append( str( ROOT_DIR ) )
 
-from llm.client import ask_llm_request
-from llm.onboarding_prompt import build_onboarding_prompt
-from ui.registry import PROBLEM_REGISTRY
-from ui.utils import navigation_buttons, select_problem
+import ui.theme as theme
+from llm.onbording.onboarding_prompt import build_onboarding_prompt
+from llm.onbording.utils import infer_problem_configuration
+from ui.sidebar import render as render_sidebar
 
-# --------------------------------------------------
-# App setup
-# --------------------------------------------------
-st.set_page_config( page_title="Optimization Playground", layout="wide" )
-st.title( "Optimization Playground" )
+# ── Page setup ──────────────────────────────────────────────────────────────
+st.set_page_config( page_title="Optimization Playground", page_icon="⚙️", layout="wide" )
+theme.inject()
 
-st.session_state.setdefault( "step", -1 )
+# ── Session defaults ─────────────────────────────────────────────────────────
+st.session_state.setdefault( "step", 0 )
+st.session_state.setdefault( "model_info", None )
 st.session_state.setdefault( "problem_type", None )
-st.session_state.setdefault( "data_source", None )
+st.session_state.setdefault( "user_description", None )
+st.session_state.setdefault( "onboarding", None )
+st.session_state.setdefault( "analysis_done", False )
 
-# ==================================================
-# STEP -1 — LLM onboarding
-# ==================================================
-if st.session_state.step == -1:
-    st.header( "Describe your problem" )
+# ── Sidebar + top bar ────────────────────────────────────────────────────────
+render_sidebar()
+theme.topbar( st.session_state.model_info )
 
-    user_description: str = st.text_area(
-        "Explain in plain language what you want to optimize",
-        height=150,
-        placeholder="Example: I want to assign employees to projects based on their skills..."
+
+# ── Main area renderers ───────────────────────────────────────────────────────
+def ai_onboarding() -> None:
+    """Configure the ui to get the AI onbording."""
+    theme.hero(
+        "Optimization Playground",
+        "Describe you problem. A configuration will automaticly be set from the AI analyse"
     )
 
-    col1, col2 = st.columns( 2 )
-    with col1:
-        if st.button( "Explain how to use the tool" ):
-            with st.spinner( "Analyzing your problem..." ):
-                prompt: str = build_onboarding_prompt( user_description )
-                explanation: str = ask_llm_request( prompt )
+    st.markdown( "### Analyse your problem with AI" )
+    st.session_state.user_desc = st.text_area(
+        "Description",
+        height=110,
+        placeholder=( "Example : I want to affect employees and projects from the employees skills." ),
+        label_visibility="collapsed"
+    )
 
-            st.subheader( "How the tool will help you" )
-            st.markdown( explanation )
-    with col2:
-        navigation_buttons( st.session_state, show_back=False )
+    if st.button( "Analyse", type="primary" ):
+        if not st.session_state.user_desc.strip():
+            st.warning( "Set your problem description first." )
+        elif not st.session_state.get( "model_info" ):
+            st.warning( "Select an AI model first." )
+        else:
+            try:
+                with st.spinner( "Analysing ..." ):
+                    prompt = build_onboarding_prompt( st.session_state.user_desc )
+                    st.session_state.onboarding = st.session_state.model_info.ask_client(
+                        prompt, st.session_state.model_info.name
+                    )
 
-    st.stop()
+                st.session_state.analysis_done = True
 
-# ==================================================
-# STEP 0 — Problem selection
-# ==================================================
-if st.session_state.step == 0:
-    st.header( "Choose a problem type" )
+                # Infer and immediately apply configuration recommendation
+                try:
+                    st.session_state.problem_type = infer_problem_configuration(
+                        st.session_state.user_desc, st.session_state.onboarding
+                    )
+                except ValueError as e:
+                    st.warning( f"{ e } Chose your problem manualy." )
 
-    cols = st.columns( len( PROBLEM_REGISTRY ) )
+                # Reset any prior validation so user re-confirms the new config
+                st.session_state.config_validated = False
+                st.session_state.data_step = 1
 
-    for col, problem in zip( cols, PROBLEM_REGISTRY.values(), strict=False ):
-        with col:
-            st.button( problem.label, on_click=select_problem, args=( st.session_state, problem.key ) )
+                st.rerun()
 
-    navigation_buttons( st.session_state, show_next=False )
-    st.stop()
+            except Exception as exc:
+                st.error( f"Erreor while using AI: { exc }" )
 
-# ==================================================
-# Delegate to registered problem UI
-# ==================================================
-if st.session_state.problem_key in PROBLEM_REGISTRY:
-    PROBLEM_REGISTRY[ st.session_state.problem_key ].render_fn( st.session_state )
+    if st.session_state.get( "onboarding" ):
+        st.markdown( "**AI guide**" )
+        theme.ai_block( st.session_state.onboarding )
+        st.markdown( "" )
+        st.markdown(
+            '<p class="ui-hint">The configuration has been set, check and modify it if needed then click on the buton'
+            '<strong>Validate configuration</strong>.</p>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown( "" )
+        st.markdown(
+            '<p class="ui-hint">Describe you problem. '
+            'A configuration will automaticly be set from the AI analyse.</p>',
+            unsafe_allow_html=True
+        )
+
+
+def problem_resolution_workflow() -> None:
+    """Delegate to the correct problem ui."""
+    theme.hero( "Problem resolution workflow" )
+    if st.session_state.get( "problem_type" ):
+        st.session_state.problem_type.render_fn( st.session_state )
+    else:
+        st.error( "No problem configuration set." )
+        st.session_state.config_validated = False
+        st.rerun()
+
+
+# ── Main routing ──────────────────────────────────────────────────────────────
+if not st.session_state.get( "config_validated" ):
+    ai_onboarding()
+else:
+    problem_resolution_workflow()

@@ -14,7 +14,7 @@ problem_10_prompt: str = (
     "chain stores should not exceed $800 \\mathrm{~m}$. Table 5-1 shows the new residential areas and the residential "
     "areas within a radius of $800 \\mathrm{~m}$ from each of them. Question: What is the minimum number of chain "
     "stores the supermarket needs to build among the mentioned residential areas, and in which residential areas "
-    "should they be built?\n\n"
+    "should they be built to limite redundancy (each aera have acces to the minimum store possible?\n\n"
     "| Area Code | Residential Areas within $800 \\mathrm{~m}$ Radius |\n"
     "|-----------|---------------------------------------|\n"
     "| A         | A, C, E, G, H, I                      |\n"

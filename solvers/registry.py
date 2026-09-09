@@ -4,26 +4,25 @@
 
 from dataclasses import dataclass
 
+from typing_extensions import Any
+
+from solvers.assignment.registry import ASSIGNEMENT_SOLVERS
+
 
 @dataclass
-class ProblemsSolverGroup:
-    """The class with all the type of problem that can be solve.
+class DomainsSolverGroup:
+    """The class with all the type of domain that can be solve.
 
     Args:
         key (str): The type of problem.
         description (str): The discription of the problem type.
-        registry_module (str): The path to the module with the implementation of the solver.
+        solvers (str): All the solvers available for the domain.
     """
     key: str
     description: str
-    registry_module: str
+    solvers: list[ Any ]
 
 
-PROBLEM_SOLVER_GROUPS: dict[ str, ProblemsSolverGroup ] = {
-    "assignments":
-    ProblemsSolverGroup(
-        key="assignments",
-        description="Solvers for assignment problems",
-        registry_module="solvers.assignment.registry",
-    ),
-}
+DOMAINS_SOLVER_GROUP: list[ DomainsSolverGroup ] = [
+    DomainsSolverGroup( key="assignments", description="Solvers for assignment problems", solvers=ASSIGNEMENT_SOLVERS )
+]

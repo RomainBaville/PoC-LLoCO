@@ -9,10 +9,7 @@ from ui.assignment.constraints.builder import build_constraints_config
 from ui.assignment.score.builder import build_score_config
 
 
-def build_entities_labels(
-    entity_col_label: str,
-    entity_rows: tuple[ dict[ str, str ], ...],
-) -> tuple[ str, ...]:
+def build_entities_labels( entity_col_label: str, entity_rows: tuple[ dict[ str, str ], ...] ) -> tuple[ str, ...]:
     """Build the entities labels from csv col label and rows.
 
     Args:
@@ -32,7 +29,7 @@ def build_entities_labels(
 def build_vals(
     entity_col_label: str,
     variables_labels: tuple[ str, ...] | dict[ str, str ],
-    entity_rows: tuple[ dict[ str, str ], ...],
+    entity_rows: tuple[ dict[ str, str ], ...]
 ) -> dict[ tuple[ str, str ], float ]:
     """Build the dictionary with the value of an entity variable.
 
@@ -72,7 +69,7 @@ def build_problem( session_state: SessionStateProxy ) -> AssignmentProblem:
         left_labels=session_state.left_labels,
         right_labels=session_state.right_labels,
         score_config=build_score_config( session_state ),
-        constraints_config=build_constraints_config( session_state ),
+        constraints_config=build_constraints_config( session_state )
     )
 
     return problem

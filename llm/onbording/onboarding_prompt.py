@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright 2025-2026 AKKODIS.
 # SPDX-FileContributor: Romain Baville
 
-from llm.onboarding_context import build_onboarding_context
+from llm.onbording.onboarding_context import build_onboarding_context
 
 
 def build_onboarding_prompt( user_description: str ) -> str:
@@ -23,13 +23,13 @@ an optimization platform.
 The user describes their problem as follows:
 
 \"\"\"
-{user_description}
+{ user_description }
 \"\"\"
 
 The platform supports structured optimization problems
 
-Problem types:
-{ context[ "problems" ] }
+Available domains:
+{ context[ "domains" ] }
 
 Available solvers:
 { context[ "solvers" ] }
@@ -46,7 +46,6 @@ Explain clearly:
   3. data
   4. configuration
   5. solver
-- why configuration and scoring choices impact the result
 
 Guidelines:
 - Do NOT invent capabilities

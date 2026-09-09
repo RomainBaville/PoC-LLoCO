@@ -29,9 +29,11 @@ At the beginning:
 - The LLM:
   - clarifies the problem type
   - explains how the tool can help
+  - Auto fill the interface
   - guides the user through the modeling process
 
 This lowers the entry barrier for non-experts.
+Note that the user can user the program whitout using any AI.
 
 ---
 
@@ -51,6 +53,7 @@ All computations are done by deterministic solvers.
 
 ## Architectural Principles
 
+- **Launcher**: launch the ui app and any terminal depending of the os
 - **UI defines semantics**: labels, data mapping, user meaning
 - **Domain defines structure**: mathematical modeling
 - **Solvers define math**: constraints and optimization engines
@@ -60,7 +63,8 @@ All computations are done by deterministic solvers.
 Benefits:
 
 - Add new solvers without changing UI
-- Add new problems without changing solvers
+- Add new domain without changing solvers
+- Adapte the interface depending of domain and solver
 - Keep AI decoupled from optimization logic
 
 ---
@@ -77,88 +81,107 @@ PoC-LLoCO/
 │   └── ...
 │
 ├── domain/
-│   ├── objective.py
+│   ├── assignment/
+│   │   │
+│   │   ├── constraints/
+│   │   │   ├── constraints_config.py
+│   │   │   ├── logicals_constraints.py
+│   │   │   └── quantities_constraints.py
+│   │   │
+│   │   ├── score/
+│   │   │   ├── matching_config.py
+│   │   │   ├── matching_penalty_functions.py
+│   │   │   ├── matching_reward_functions.py
+│   │   │   ├── ressources_config.py
+│   │   │   └── score_config.py
+│   │   │
+│   │   └── base.py
 │   │
-│   └── assignment/
-│       ├── base.py
-│       │
-│       ├── constraints/
-│       │   ├── constraints_config.py
-│       │   ├── logicals_constraints.py
-│       │   └── quantities_constraints.py
-│       │
-│       └── score/
-│           ├── score_config.py
-│           ├── ressources_config.py
-│           ├── matching_config.py
-│           ├── matching_penalty_functions.py
-│           └── matching_reward_functions.py
+│   ├── objective.py
+│   └── registry.py
 │
 ├── infrastructure/
 │   ├── csv_loader.py
 │   └── registry.py
 │
+├── launcher/
+│   ├── run_app.py
+│   └── utils.py
+│
 ├── llm/
-│   ├── client.py
-│   ├── session_model.py
-│   ├── session_prompt.py
-│   ├── onboarding_context.py
-│   └── onboarding_prompt.py
+│   ├── client/
+│   │   ├── akkodis_client.py
+│   │   ├── llama_client.py
+│   │   └── registry.py
+│   │
+│   ├── onboarding/
+│   │   ├── onboarding_context.py
+│   │   ├── onboarding_prompt.py
+│   │   └── utils.py
+│   │
+│   ├── summary/
+│   │   ├── summary_context.py
+│   │   ├── summary_prompt.py
+│   │   └── utils.py
+│   │
+│   └── utils.py
 │
 ├── solvers/
-│   ├── registry.py
+│   ├── assignment/
+│   │   ├── cp_model/
+│   │   │   ├── constraints/
+│   │   │   │   ├── logical_constraints.py
+│   │   │   │   ├── matching_constraints.py
+│   │   │   │   ├── quantities_constraints.py
+│   │   │   │   ├── ressources_constraints.py
+│   │   │   │   └── solver_constraints.py
+│   │   │   │
+│   │   │   └── ortools_cp_sat.py
+│   │   │
+│   │   └── registry.py
 │   │
-│   └── assignment/
-│       ├── registry.py
-│       │
-│       └── cp_model/
-│           ├── constraints/
-│           │   └── quantities_constraints.py
-│           │   └── logical_constraints.py
-│           │   └── matching_constraints.py
-│           │   └── ressources_constraints.py
-│           │
-│           └── ortools_cp_sat.py
+│   └── registry.py
 │
 ├── tests/
-│   ├── IndustryOR.json                      # All the problem the project needs to solve at the end
+│   ├── assignment/
+│   │   ├── problem_i/                       # Folder with data for the assignment problem i from the json file
+│   │   │   ├── problem_i_description.py     # Build the AssignmentProblem with the solution
+│   │   │   ├── left_data_i.csv              # The csv file with the left data for the ui
+│   │   │   └── right_data_i.csv             # The csv file with the right data for the ui
+:   :   :
+│   │   │
+│   │   └── test_assignments_problem.py      # The file with all the tests for assignments problem
 │   │
-│   └── assignment/
-│       ├── problem_i/                       # Folder with data for the assignment problem i from the json file
-│       │   ├── problem_i_description.py     # Build the AssignmentProblem with the solution
-│       │   ├── left_data_i.csv              # The csv file with the left data for the ui
-│       │   └── right_data_i.csv             # The csv file with the right data for the ui
-:       :
-│       │
-│       └── test_assignments_problem.py      # The file with all the tests for assignments problem
+│   └── IndustryOR.json                      # All the problem the project needs to solve at the end
 │
 ├── ui/
+│   ├── assignment/
+│   │   ├── constraints/
+│   │   │   ├── builder.py
+│   │   │   ├── ui_logicals_constraints.py
+│   │   │   └── ui_quantities_constraints.py
+│   │   │
+│   │   ├── score/
+│   │   │   ├── builder.py
+│   │   │   ├── ui_matching.py
+│   │   │   └── ui_ressources.py
+│   │   │
+│   │   ├── builder.py
+│   │   ├── ui_assignment.py
+│   │   └── ui_data_sources.py
+│   │
 │   ├── app.py
 │   ├── registry.py
-│   ├── utils.py
-│   │
-│   └── assignment/
-│       ├── constraints/
-│       │   ├── builder.py
-│       │   ├── ui_logicals_constraints.py
-│       │   └── ui_quantities_constraints.py
-│       │
-│       ├── score/
-│       │   ├── builder.py
-│       │   ├── ui_matching.py
-│       │   └── ui_ressources.py
-│       │
-│       ├── builder.py
-│       └── ui_assignment.py
+│   ├── sidebar.py
+│   ├── theme.py
+│   └── utils.py
 │
 ├── .pre-commit-config.yaml
-├── project.toml
-├── uv.lock
-│
+├── LICENSE
+├── pyproject.toml
 ├── README.md
-└── run_app.bat
+└── uv.lock
 ```
-
 
 ---
 
@@ -180,7 +203,7 @@ Guarantees identical environments for all developers and CI
 
 ---
 
-## ▶Running the Application
+## Running the Application
 
 ### 1. Prepare data
 
@@ -206,28 +229,57 @@ Guarantees identical environments for all developers and CI
 
 ### 4. Run application
 
+The application opens automatically at **http://localhost:8501**.
+
+#### Windows
+
 ```bash
-run_app.bat
+# activate venv first
+.venv\Scripts\activate
+
+# launch Streamlit
+python launcher\run_app.py
+```
+
+#### macOS
+
+```bash
+# activate venv first
+source .venv/bin/activate
+
+# launch Streamlit
+python launcher/run_app.py
+```
+
+#### Linux
+
+```bash
+# activate venv first
+source .venv/bin/activate
+
+# launch Streamlit
+python launcher/run_app.py
 ```
 
 This will:
 
-- Start `llama.cpp` server
-- Start Streamlit UI
+- Open a new terminal to start Streamlit UI
 - Open the app in your browser
 
 ---
 
 ### 5. Shutdown
 
-- Close the browser
-- Press `Q` in the terminal
+- Close the window on your browser
+- Press `Q` in the first terminal
 
 ---
 
-## Testing
+## Code Quality & Tooling
 
-Run all tests:
+### Testing
+
+Tests are implemented to check solvers. To run all tests:
 
 ```bash
 uv run pytest
@@ -235,17 +287,32 @@ uv run pytest
 
 ---
 
-## Code Quality & Tooling
+### LLM Backend (optional)
 
-The project enforces strict quality standards:
+The LLM is used for two optional features: problem onboarding guidance and solution summarization.
+**The optimizer works fully without a LLM** — simply leave the model selector set to "Chose your AI model".
 
-| Tool       | Purpose                  |
-|------------|--------------------------|
-| Ruff       | Linting                  |
-| MyPy       | Static typing (strict)   |
-| Yapf       | Formatting (custom)      |
-| Pytest     | Testing                  |
-| Pre-commit | Local validation         |
+Two backends are supported and auto-detected by the application:
+
+#### Option A — AKKODIS Azure OpenAI (recommended for AKKODIS employees)
+
+The application automatically discovers AKKODIS GPT models when an API key is present.
+Available models: `GPT-4o mini`, `GPT-4o`, `GPT-5`, `o4-mini`.
+
+Place your API key in **the root directory** and name it **akkodis_openAI_api_key.txt**
+
+> **Security:** `akkodis_openAI_api_key.txt` is listed in `.gitignore` and must **never** be committed.
+
+No server to start — models appear automatically in the picker when the key is found.
+
+#### Option B — llama-server + GGUF (local)
+
+1. Download a Qwen GGUF model from https://huggingface.co/Qwen and place it in `models/`
+2. Download llama.cpp binaries from https://github.com/ggml-org/llama.cpp/releases and place them in `llama_cpp/`
+
+Notes:
+  - Splited models with several gguf files (00001-of-*) are automaticly detected, do not change names.
+  - The llama server is open on a new terminal if a Qwen model is selected and close at the automaticly.
 
 ---
 
@@ -383,7 +450,7 @@ Do NOT run install without `--frozen`
 uv sync --extra dev --frozen
 
 uv run pytest
-uv run yapf -r -i domain solvers infrastructure ui tests llm
+uv run yapf -r -i domain solvers infrastructure ui tests llm launcher
 uv run ruff check .
 uv run mypy .
 

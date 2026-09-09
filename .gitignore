@@ -1,3 +1,8 @@
 __pycache__/
 models/
 llama_cpp/
+.venv/
+
+# API keys — never commit
+akkodis_openAI_api_key.txt
+.env

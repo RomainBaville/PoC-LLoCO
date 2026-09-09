@@ -4,6 +4,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Self
 
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
@@ -11,8 +12,8 @@ from ui.assignment.ui_assignment import render
 
 
 @dataclass
-class ProblemType:
-    """Dataclass to acces to all the type of problems the user interface can deals with.
+class UiDomainType:
+    """Dataclass to acces to all the domain types implemented in the interface.
 
     Args:
         key (str): The key of the problem.
@@ -25,13 +26,20 @@ class ProblemType:
     description: str
     render_fn: Callable[ [ SessionStateProxy ], None ]
 
+    def __str__( self: Self ) -> str:
+        """Print the label of the problem.
 
-PROBLEM_REGISTRY: dict[ str, ProblemType ] = {
-    "assignment":
-    ProblemType(
+        Returns:
+            str: The label of the problem.
+        """
+        return self.label
+
+
+UI_DOMAIN_REGISTRY: list[ UiDomainType ] = [
+    UiDomainType(
         key="assignment",
-        label="Assignment problem",
+        label="Assignment Problem",
         description="Assignments problem between left and right entities",
-        render_fn=render,
-    ),
-}
+        render_fn=render
+    )
+]
